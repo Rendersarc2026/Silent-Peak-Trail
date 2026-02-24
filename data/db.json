@@ -1,0 +1,432 @@
+{
+  "packages": [
+    {
+      "id": "pangong",
+      "name": "Nubra & Pangong Escape",
+      "tagline": "Where the sky meets turquoise infinity",
+      "duration": "6 Days · 5 Nights",
+      "price": 32000,
+      "badge": "🧭 Holiday Package",
+      "badgeGold": false,
+      "featured": false,
+      "img": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&fit=crop",
+      "features": [
+        "Leh to Nubra Valley",
+        "Diskit Monastery & Hunder dunes camel ride",
+        "Turtuk village & ATV desert adventure",
+        "Pangong Lake & Shyok River Valley",
+        "All accommodation & 2 meals included"
+      ],
+      "itinerary": [
+        {
+          "day": "Day 1",
+          "title": "Arrival / Rest Day"
+        },
+        {
+          "day": "Day 2",
+          "title": "Leh to Nubra Valley — Diskit Monastery, Camel Riding & ATV"
+        },
+        {
+          "day": "Day 3",
+          "title": "Nubra to Turtuk"
+        },
+        {
+          "day": "Day 4",
+          "title": "Nubra to Pangong Lake via Shyok"
+        },
+        {
+          "day": "Day 5",
+          "title": "Pangong to Leh"
+        },
+        {
+          "day": "Day 6",
+          "title": "Departure"
+        }
+      ],
+      "inclusions": [
+        "Accomodation",
+        "Meals - Breakfast and dinner",
+        "Taxi and Tempo Traveller",
+        "Inner line permit"
+      ],
+      "exclusions": [
+        "Personal Expenses",
+        "Lunch",
+        "Entry fees and activities fee",
+        "Airfare"
+      ]
+    },
+    {
+      "id": "golden",
+      "name": "Stargazing Expedition",
+      "tagline": "A journey into the Himalayan night sky",
+      "duration": "9 Days · 8 Nights",
+      "price": 52000,
+      "badge": "⭐ Most Popular",
+      "badgeGold": true,
+      "featured": true,
+      "img": "https://img.avianexperiences.com/attraction/2f71f354-4c67-40e5-b9af-854ba31de733",
+      "features": [
+        "Pangong + Nubra Valley + Tso Moriri",
+        "Resang La to Hanle dark-sky region",
+        "Hanle observatory stargazing experience",
+        "Tso Moriri lake & Changthang plateau",
+        "Remote Himalayan villages & high-altitude landscapes"
+      ],
+      "itinerary": [
+        {
+          "day": "Day 1",
+          "title": "Arrival / Rest Day"
+        },
+        {
+          "day": "Day 2",
+          "title": "Leh to Nubra Valley"
+        },
+        {
+          "day": "Day 3",
+          "title": "Nubra to Turtuk"
+        },
+        {
+          "day": "Day 4",
+          "title": "Nubra to Pangong Lake via Shayok"
+        },
+        {
+          "day": "Day 5",
+          "title": "Pangong to Hanle via Resang La"
+        },
+        {
+          "day": "Day 6",
+          "title": "Hanle to Tsomoriri"
+        },
+        {
+          "day": "Day 7",
+          "title": "Tsomoriri to Leh"
+        },
+        {
+          "day": "Day 8",
+          "title": "Rest day in Leh with local sightseeing"
+        },
+        {
+          "day": "Day 9",
+          "title": "Departure"
+        }
+      ],
+      "inclusions": [
+        "Accomodation",
+        "Meals - Breakfast and dinner",
+        "Taxi and Tempo Traveller",
+        "Inner line permit"
+      ],
+      "exclusions": [
+        "Personal Expenses",
+        "Lunch",
+        "Entry fees and activities fee",
+        "Airfare"
+      ]
+    },
+    {
+      "id": "chadar",
+      "name": "Sham Valley Trek",
+      "tagline": "Ladakh’s timeless monasteries and hidden valleys",
+      "duration": "4 Days · 3 Nights",
+      "price": 28000,
+      "badge": "",
+      "badgeGold": false,
+      "featured": false,
+      "img": "https://images.unsplash.com/photo-1531761535209-180857e963b9?w=800&q=80&fit=crop",
+      "features": [
+        "Likir & Alchi ancient monasteries",
+        "Aryan Valley cultural exploration",
+        "Lamayuru monastery & Moonland landscapes",
+        "Indus–Zanskar river confluence (Sangam)",
+        "Sham Valley heritage & Himalayan villages"
+      ],
+      "itinerary": [
+        {
+          "day": "Day 1",
+          "title": "Likir Monastery"
+        },
+        {
+          "day": "Day 2",
+          "title": "Aryan valley explore"
+        },
+        {
+          "day": "Day 3",
+          "title": "Lamayuru monastery and Moonland"
+        },
+        {
+          "day": "Day 4",
+          "title": "Alchi monastery, sangam- confluence of river indus and zanskar"
+        }
+      ],
+      "inclusions": [
+        "Accomodation",
+        "Meals - Breakfast and dinner",
+        "Taxi and Tempo Traveller",
+        "Inner line permit"
+      ],
+      "exclusions": [
+        "Personal Expenses",
+        "Lunch",
+        "Entry fees and activities fee",
+        "Airfare"
+      ]
+    },
+    {
+      "id": "markha",
+      "name": "Markha Valley Trek",
+      "tagline": "Ancient villages through pristine wilderness",
+      "duration": "7 Days · 6 Nights",
+      "price": 38000,
+      "badge": "",
+      "badgeGold": false,
+      "featured": false,
+      "img": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&q=80&fit=crop",
+      "features": [
+        "Hemis National Park — Snow Leopard habitat",
+        "Traditional village homestay experiences",
+        "Kongmaru La Summit (5,163m)",
+        "Incredible wildlife & bird watching",
+        "Remote Ladakhi culture & monasteries"
+      ],
+      "itinerary": [
+        {
+          "day": "Day 1",
+          "title": "Arrival Leh (Acclimatization)"
+        },
+        {
+          "day": "Day 2",
+          "title": "Leh → Chilling → Trek to Skiu"
+        },
+        {
+          "day": "Day 3",
+          "title": "Skiu → Markha"
+        },
+        {
+          "day": "Day 4",
+          "title": "Markha → Hankar"
+        },
+        {
+          "day": "Day 5",
+          "title": "Hankar → Nimaling"
+        },
+        {
+          "day": "Day 6",
+          "title": "Nimaling → Kongmaru La → Shang → Leh"
+        },
+        {
+          "day": "Day 7",
+          "title": "Departure"
+        }
+      ],
+      "inclusions": [
+        "Accomodation",
+        "Meals - Breakfast and dinner",
+        "Taxi and Tempo Traveller",
+        "Inner line permit"
+      ],
+      "exclusions": [
+        "Personal Expenses",
+        "Lunch",
+        "Entry fees and activities fee",
+        "Airfare"
+      ]
+    },
+    {
+      "id": "moto",
+      "name": "Manali–Leh Moto Expedition",
+      "tagline": "The legendary highway to the sky",
+      "duration": "12 Days · 11 Nights",
+      "price": 68000,
+      "badge": "🏍️ Adventure",
+      "badgeGold": false,
+      "featured": false,
+      "img": "https://mysterioushimachal.wordpress.com/wp-content/uploads/2024/09/ladakh-bike-tour-package-banner.jpg",
+      "features": [
+        "Manali to Leh on Royal Enfield Himalayan",
+        "Rohtang, Baralacha La, Tanglang La Passes",
+        "Sarchu plains camping under stars",
+        "Full support vehicle & mechanic",
+        "Safety gear, all stays & meals included"
+      ],
+      "inclusions": [
+        "Accomodation",
+        "Meals - Breakfast and dinner",
+        "Taxi and Tempo Traveller",
+        "Inner line permit"
+      ],
+      "exclusions": [
+        "Personal Expenses",
+        "Lunch",
+        "Entry fees and activities fee",
+        "Airfare"
+      ]
+    }
+  ],
+  "enquiries": [
+    {
+      "id": "enq-001",
+      "firstName": "Priya",
+      "lastName": "Kapoor",
+      "email": "priya@example.com",
+      "phone": "+91 98765 43210",
+      "package": "Pangong Lake Explorer (7D/6N)",
+      "travellers": "2 People",
+      "month": "June",
+      "budget": "₹30,000 – ₹50,000",
+      "message": "Looking for a honeymoon package.",
+      "status": "new",
+      "createdAt": "2025-05-01T10:30:00Z"
+    },
+    {
+      "id": "enq-002",
+      "firstName": "Arjun",
+      "lastName": "Mehta",
+      "email": "arjun@example.com",
+      "phone": "+91 91234 56789",
+      "package": "Chadar Trek (5D/4N)",
+      "travellers": "3–5 People",
+      "month": "January (Chadar)",
+      "budget": "Under ₹30,000",
+      "message": "Group of 4 friends. Are dates available in Jan?",
+      "status": "replied",
+      "createdAt": "2025-04-28T14:00:00Z"
+    },
+    {
+      "id": "enq-003",
+      "firstName": "Sophie",
+      "lastName": "Laurent",
+      "email": "sophie@example.com",
+      "phone": "+33 6 12 34 56 78",
+      "package": "Manali–Leh Moto Expedition (12D)",
+      "travellers": "1 Person",
+      "month": "August",
+      "budget": "₹50,000 – ₹80,000",
+      "message": "Solo female traveller. Is this safe?",
+      "status": "confirmed",
+      "createdAt": "2025-04-20T09:15:00Z"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "g1",
+      "src": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=900&q=80&fit=crop",
+      "alt": "Ladakh mountains wide",
+      "wide": true,
+      "tall": true
+    },
+    {
+      "id": "g2",
+      "src": "https://www.exploreourindia.com/backend/web/images/post/big/6446_Hunder%20Sand%20Dunes%20Leh%20Ladakh.webp",
+      "alt": "Nubra camels",
+      "wide": false,
+      "tall": false
+    },
+    {
+      "id": "g3",
+      "src": "https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=600&q=80&fit=crop",
+      "alt": "Tso Moriri reflection",
+      "wide": false,
+      "tall": false
+    },
+    {
+      "id": "g4",
+      "src": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600&q=80&fit=crop",
+      "alt": "Ladakh monastery",
+      "wide": false,
+      "tall": false
+    },
+    {
+      "id": "g5",
+      "src": "https://images.unsplash.com/photo-1563492065599-3520f775eeed?w=600&q=80&fit=crop",
+      "alt": "Ladakh mountain road",
+      "wide": false,
+      "tall": false
+    }
+  ],
+  "destinations": [
+    {
+      "id": "pangong-dest",
+      "name": "Pangong Tso",
+      "type": "High-Altitude Lake",
+      "altitude": "4,350m · 134km long · extends into Tibet",
+      "img": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=85&fit=crop",
+      "big": true
+    },
+    {
+      "id": "nubra-dest",
+      "name": "Nubra Valley",
+      "type": "Sand Dunes & Camel Safari",
+      "altitude": "3,048m altitude",
+      "img": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/03/b9/e6/1c/nubra-valley.jpg?w=1200&h=1200&s=1",
+      "big": false
+    },
+    {
+      "id": "leh-dest",
+      "name": "Leh City",
+      "type": "Historic Palace & City",
+      "altitude": "3,524m altitude",
+      "img": "https://t3.ftcdn.net/jpg/05/42/14/96/360_F_542149645_TRXuoftJI0OemvvkplsLL8Hvs4QCgcye.jpg",
+      "big": false
+    },
+    {
+      "id": "tso-moriri",
+      "name": "Tso Moriri",
+      "type": "Remote Wilderness Lake",
+      "altitude": "4,522m altitude",
+      "img": "https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=700&q=80&fit=crop",
+      "big": false
+    },
+    {
+      "id": "zanskar-dest",
+      "name": "Zanskar Valley",
+      "type": "Gorges & Frozen River",
+      "altitude": "3,500m altitude",
+      "img": "https://cdn.pixabay.com/photo/2018/12/06/06/16/zanskar-river-3859214_1280.jpg",
+      "big": false
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "t1",
+      "name": "Rohit Sharma",
+      "place": "Mumbai, India",
+      "package": "Pangong Package",
+      "initial": "R",
+      "text": "Watching the sunrise over Pangong Tso was the most beautiful moment of my life. The shifting colours left me in tears. Silent Peak Trail made every detail effortless.",
+      "stars": 5
+    },
+    {
+      "id": "t2",
+      "name": "Sophie Laurent",
+      "place": "Lyon, France",
+      "package": "Chadar Trek",
+      "initial": "S",
+      "text": "The Chadar Trek was genuinely life-changing. I've travelled 42 countries and nothing compares to walking the frozen Zanskar River under a sky full of stars. Absolutely flawless.",
+      "stars": 5
+    },
+    {
+      "id": "t3",
+      "name": "Arjun Menon",
+      "place": "Bengaluru, India",
+      "package": "Moto Expedition",
+      "initial": "A",
+      "text": "The moto expedition exceeded every expectation. The team handled permits, bikes, and safety so we could focus purely on the incredible ride. Already booked again for next year!",
+      "stars": 5
+    }
+  ],
+  "settings": {
+    "heroTitle": "Discover the Magic of Ladakh",
+    "heroSubtitle": "Journey to the roof of the world - where turquoise lakes mirror snowcapped peaks, ancient monasteries kiss the clouds, and every road leads to wonder.",
+    "heroBadge": "Beautifully Curated Journeys to Ladakh",
+    "statsAltitude": "5,400m",
+    "statsPackages": "24+",
+    "statsTravellers": "8,200+",
+    "statsExperience": "15 Yrs",
+    "statsSatisfaction": "98%",
+    "phone": "+91 94190 55559",
+    "email": "explore@silentpeaktrail.com",
+    "address": "Fort Road, Leh, Ladakh — 194 101",
+    "season": "May–Oct (Summer) · Jan–Feb (Chadar)"
+  }
+}

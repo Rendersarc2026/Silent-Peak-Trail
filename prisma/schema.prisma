@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Enquiry {
+  id         Int      @id @default(autoincrement())
+  firstName  String
+  lastName   String
+  email      String
+  phone      String
+  packageId  Int
+  tourPackage Package @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  travellers String
+  month      String
+  budget     String
+  message    String   @db.Text
+  status     String   @default("new") // "new", "replied", "confirmed", "cancelled"
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  name        String
+  place       String
+  packageId   Int
+  tourPackage Package @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  initial     String
+  rating      Int      @default(5)
+  message     String   @db.Text
+  isApproved  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Package {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  tagline    String
+  duration   String
+  price      Int
+  badge      String
+  badgeGold  Boolean  @default(false)
+  featured   Boolean  @default(false)
+  img        String
+  features   Json // Array of strings
+  itinerary  Json? // Array of objects {day, title}
+  inclusions Json? // Array of strings
+  exclusions Json? // Array of strings
+  enquiries  Enquiry[]
+  reviews    Review[]
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Destination {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  type      String
+  altitude  String
+  img       String
+  big       Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GalleryItem {
+  id        Int      @id @default(autoincrement())
+  src       String   @unique
+  alt       String
+  wide      Boolean  @default(false)
+  tall      Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Homepage {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LehTip {
+  id        Int      @id @default(autoincrement())
+  icon      String   // Lucide icon name, e.g. "Wind", "WifiOff"
+  title     String
+  desc      String   @db.Text
+  color     String   // Tailwind classes, e.g. "bg-blue-50 text-blue-600"
+  border    String   // Tailwind classes, e.g. "border-blue-100"
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
