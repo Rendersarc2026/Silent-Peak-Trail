@@ -1,4 +1,4 @@
-// File: C:\Users\Arya Mahesh\Downloads\ladakh-travel-live\app\page.tsx
+// File: C:\Users\Arya Mahesh\Downloads\silent-peak-trail\ladakh-travel-live\app\page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

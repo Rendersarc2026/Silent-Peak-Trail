@@ -56,7 +56,7 @@ export default function Navbar() {
             <span className="font-medium text-[var(--navy)] mx-1.5">Peak</span>
             <span className={cn(
               "font-medium",
-              scrolled ? "text-amber-600" : "text-slate-500"
+              scrolled ? "text-blue-800" : "text-slate-500"
             )}>Trail</span>
           </span>
         </Link>
@@ -84,8 +84,8 @@ export default function Navbar() {
             className={cn(
               "hidden items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-widest transition-all hover:scale-105 active:scale-95 sm:flex",
               scrolled
-                ? "bg-[var(--gold)] text-[var(--navy)] shadow-lg hover:bg-[var(--blue)] hover:text-white"
-                : "bg-white text-[var(--navy)] hover:bg-[var(--blue)] hover:text-white"
+                ? "bg-[var(--navy)] text-[var(--white)] shadow-lg hover:bg-[var(--gold)] hover:text-white"
+                : "bg-white text-[var(--navy)] hover:bg-[var(--gold)] hover:text-white"
             )}
           >
             Book a Trip
