@@ -15,10 +15,10 @@ const FOOTER_LINKS = [
   {
     title: "Tour Packages",
     links: [
-      { label: "Pangong Lake Explorer", href: "/packages/1" },
-      { label: "Nubra Valley Escape", href: "/packages/3" },
-      { label: "Stargazing Expedition", href: "/packages/2" },
-      { label: "Markha Valley Trek", href: "/packages/4" },
+      { label: "Nubra & Pangong Escape", href: "/packages/nubra-pangong-escape" },
+      { label: "Stargazing Expedition", href: "/packages/stargazing-expedition" },
+      { label: "Sham Valley Trek", href: "/packages/sham-valley-trek" },
+      { label: "Markha Valley Trek", href: "/packages/markha-valley-trek" },
       { label: "Custom / Not Sure", href: "#contact" }
     ]
   },
@@ -69,26 +69,28 @@ export default function Footer({ className }: { className?: string }) {
   };
 
   return (
-    <footer className={cn("bg-[var(--navy)] pt-24 pb-12 text-white overflow-hidden", className)}>
-      <div className="container mx-auto px-5 lg:px-[60px]">
+    <footer className={cn("bg-[var(--navy)] pt-12 pb-12 text-white overflow-hidden", className)}>
+      <div className="container mx-auto  px-5 lg:px-[60px]">
 
-        <div className="grid grid-cols-1 gap-16 lg:grid-cols-5 lg:gap-8">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
 
-          <div className="lg:col-span-2 flex flex-col sm:flex-row items-start gap-8 mt-10">
-            <div className="flex flex-col items-center gap-3 shrink-0">
+          <div className="sm:col-span-2 lg:col-span-2 flex flex-col items-center text-center lg:items-start lg:text-left gap-8 mt-4">
+            <div className="flex flex-col items-center lg:items-start gap-4 shrink-0">
               <a href="/" className="transition-transform hover:scale-105 active:scale-95">
                 <img
                   src="/logo.jpg"
                   alt="Silent Peak Trail"
-                  className="h-36 w-36 rounded-full object-cover shadow-2xl ring-2 ring-white/10"
+                  className="h-28 w-28 rounded-full object-cover shadow-2xl ring-2 ring-white/10"
                 />
               </a>
-
+              <h3 className="text-lg font-black uppercase tracking-[0.2em] text-white">
+                SILENT <span className="text-[var(--gold)]">PEAK</span> TRAIL
+              </h3>
             </div>
 
             {/* Right: Description + socials */}
-            <div className="flex flex-col gap-6 pt-2 mt-1">
-              <p className="text-sm leading-relaxed text-blue-100/60">
+            <div className="flex flex-col items-center lg:items-start gap-6">
+              <p className="text-sm leading-relaxed text-blue-100/60 max-w-sm">
                 Beautifully Curated Journeys to Ladakh. We craft extraordinary journeys into the Himalayas — guided by people who call these mountains home.
               </p>
               <div className="flex items-center gap-4">
@@ -107,31 +109,31 @@ export default function Footer({ className }: { className?: string }) {
             </div>
           </div>
 
-          {/* Tour Packages + Socials */}
-          <div className="lg:col-span-1 space-y-6">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)]">Tour Packages</h4>
-            <ul className="space-y-4">
-              {FOOTER_LINKS[0].links.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    onClick={(e) => handleNavClick(e, link.href)}
-                    className="flex items-center gap-2 text-sm font-medium text-blue-100/60 transition-colors hover:text-white group"
-                  >
-                    <ArrowRight size={12} className="text-[var(--gold)] opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+          {/* Links Sections */}
+          <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-8 sm:col-span-2 lg:col-span-3 lg:grid-cols-3 ">
+            {/* Tour Packages */}
+            <div className="space-y-6">
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)] pl-5 lg:pl-0">Tour Packages</h4>
+              <ul className="space-y-4">
+                {FOOTER_LINKS[0].links.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      onClick={(e) => handleNavClick(e, link.href)}
+                      className="flex items-center text-sm font-medium text-blue-100/60 transition-colors hover:text-white group relative pl-5 lg:pl-0"
+                    >
+                      <ArrowRight size={12} className="absolute left-0 lg:-left-5 top-1/2 -translate-y-1/2 text-[var(--gold)] opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          </div>
-
-          {/* Quick Links + Helpful Info */}
-          <div className="grid grid-cols-2 gap-8 lg:col-span-2">
+            {/* Quick Links & Helpful Info */}
             {FOOTER_LINKS.slice(1).map((column) => (
               <div key={column.title} className="space-y-6">
-                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)]">
+                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)] pl-5 lg:pl-0">
                   {column.title}
                 </h4>
                 <ul className="space-y-4">
@@ -140,9 +142,9 @@ export default function Footer({ className }: { className?: string }) {
                       <a
                         href={link.href}
                         onClick={(e) => handleNavClick(e, link.href)}
-                        className="flex items-center gap-2 text-sm font-medium text-blue-100/60 transition-colors hover:text-white group"
+                        className="flex items-center text-sm font-medium text-blue-100/60 transition-colors hover:text-white group relative pl-5 lg:pl-0"
                       >
-                        <ArrowRight size={12} className="text-[var(--gold)] opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+                        <ArrowRight size={12} className="absolute left-0 lg:-left-5 top-1/2 -translate-y-1/2 text-[var(--gold)] opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
                         {link.label}
                       </a>
                     </li>

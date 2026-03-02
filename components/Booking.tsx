@@ -9,7 +9,8 @@ import {
   Send,
   CheckCircle2,
   Loader2,
-  Sparkles
+  Sparkles,
+  AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -74,6 +75,7 @@ export default function Booking({
 }) {
 
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
   const [country, setCountry] = useState<LibCountryCode>("IN");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
@@ -114,11 +116,13 @@ export default function Booking({
       const data = await res.json();
       if (data.details) {
         setFieldErrors(data.details);
+        setError("Please fill all required fields.");
       } else {
-        alert(data.error || "Failed to submit enquiry.");
+        setError(data.error || "Failed to submit enquiry.");
       }
       return;
     }
+    setError("");
 
     setSent(true);
     // Redirect to Thank You page
@@ -204,6 +208,12 @@ export default function Booking({
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-8">
+                {error && (
+                  <div className="flex items-center gap-3 rounded-2xl bg-red-50 p-5 text-sm font-bold text-red-600 border border-red-100 animate-in slide-in-from-top-2">
+                    <AlertCircle size={20} className="text-red-600 flex-shrink-0" />
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                   <FormInput
                     label="First Name"
@@ -271,7 +281,6 @@ export default function Booking({
                     options={packages.length > 0 ? (
                       [...packages, { id: 6, name: "Custom / Not Sure Yet" }]
                     ) : PACKAGE_OPTIONS}
-                    // defaultValue might need to be resolved from selectedPackage (name)
                     defaultValue={selectedPackage ? (
                       packages.find(p => p.name === selectedPackage)?.id ||
                       PACKAGE_OPTIONS.find(p => p.name === selectedPackage)?.id
@@ -384,14 +393,13 @@ function FormInput({ label, variant, alphaOnly, numericOnly, plusAndNumericOnly,
 }
 
 
-function FormSelect({ label, options, name, defaultValue, variant, required, error }: { label: string, options: (string | { id: string | number, name: string })[], name: string, defaultValue?: string | number, variant?: string, required?: boolean, error?: string }) {
+function FormSelect({ label, options, name, defaultValue, variant, error }: { label: string, options: (string | { id: string | number, name: string })[], name: string, defaultValue?: string | number, variant?: string, error?: string }) {
   return (
     <div className="space-y-1.5 flex flex-col items-start w-full">
       <label className="ml-1 text-[10px] font-bold uppercase tracking-widest text-[var(--text-light)]">{label}</label>
       <select
         name={name}
         defaultValue={defaultValue || ""}
-        required={required}
         suppressHydrationWarning
         className={cn("w-full rounded-2xl border-transparent bg-[var(--bg-subtle)] px-5 py-4 text-sm font-medium text-[var(--navy)] shadow-sm ring-1 ring-slate-200 focus:ring-2 outline-none appearance-none", error ? "focus:ring-red-500/20 focus:border-red-500 ring-red-200" : "focus:ring-[var(--blue)]/20 focus:border-[var(--blue)]")}
       >

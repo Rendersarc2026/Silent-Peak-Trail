@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
-import { X, Send, Mail, Loader2, CheckCircle2 } from "lucide-react";
+import { X, Send, Mail, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAction } from "@/lib/hooks/useAction";
+import { cn, hasError, getErrorMessage } from "@/lib/utils";
+import { sendEmailSchema } from "@/lib/validation";
 
 interface EmailComposerProps {
     to: string;
@@ -13,10 +15,17 @@ export default function EmailComposer({ to, onClose, onSuccess }: EmailComposerP
     const [subject, setSubject] = useState("Regarding your enquiry - Silent Peak Trail");
     const [message, setMessage] = useState("");
     const [sent, setSent] = useState(false);
+    const [error, setError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
     const [handleSend, { loading }] = useAction(async () => {
-        if (!subject.trim() || !message.trim()) {
-            alert("Please fill in both subject and message.");
+        setError("");
+        setFieldErrors({});
+
+        const result = sendEmailSchema.safeParse({ to, subject, message });
+        if (!result.success) {
+            setFieldErrors(result.error.flatten().fieldErrors as any);
+            setError("Please fill all required fields.");
             return;
         }
 
@@ -56,6 +65,12 @@ export default function EmailComposer({ to, onClose, onSuccess }: EmailComposerP
             </div>
 
             <div className="p-4 space-y-4">
+                {error && (
+                    <div className="flex items-center gap-3 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700 border border-red-100 animate-in slide-in-from-top-2">
+                        <AlertCircle size={18} className="text-red-600 flex-shrink-0" />
+                        {error}
+                    </div>
+                )}
                 <div>
                     <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">Recipient</label>
                     <div className="rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600 border border-slate-100 italic">
@@ -64,27 +79,29 @@ export default function EmailComposer({ to, onClose, onSuccess }: EmailComposerP
                 </div>
 
                 <div>
-                    <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">Subject</label>
+                    <label className={cn("mb-1 block text-[10px] font-bold uppercase tracking-wider", hasError(fieldErrors, 'subject') ? 'text-red-500' : 'text-slate-400')}>Subject</label>
                     <input
                         type="text"
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         disabled={sent}
-                        className="w-full rounded-xl border-slate-200 bg-white px-3 py-2 text-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-300"
+                        className={cn("w-full rounded-xl border-slate-200 bg-white px-3 py-2 text-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-300", hasError(fieldErrors, 'subject') && 'border-red-300 ring-4 ring-red-500/10')}
                         placeholder="What's this about?"
                     />
+                    {hasError(fieldErrors, 'subject') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'subject')}</p>}
                 </div>
 
                 <div>
-                    <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">Message</label>
+                    <label className={cn("mb-1 block text-[10px] font-bold uppercase tracking-wider", hasError(fieldErrors, 'message') ? 'text-red-500' : 'text-slate-400')}>Message</label>
                     <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         disabled={sent}
                         rows={6}
-                        className="w-full rounded-xl border-slate-200 bg-white px-3 py-2 text-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 resize-none placeholder:text-slate-300"
+                        className={cn("w-full rounded-xl border-slate-200 bg-white px-3 py-2 text-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 resize-none placeholder:text-slate-300", hasError(fieldErrors, 'message') && 'border-red-300 ring-4 ring-red-500/10')}
                         placeholder="Type your message here..."
                     />
+                    {hasError(fieldErrors, 'message') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'message')}</p>}
                 </div>
 
                 <button

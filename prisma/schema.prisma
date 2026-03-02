@@ -57,6 +57,7 @@ model Review {
 model Package {
   id         Int      @id @default(autoincrement())
   name       String   @unique
+  slug       String   @unique
   tagline    String
   duration   String
   price      Int

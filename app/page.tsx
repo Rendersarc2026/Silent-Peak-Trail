@@ -60,6 +60,7 @@ export default async function Home() {
   const packagesData = packages.map((p) => ({
     id: String(p.id),
     name: p.name,
+    slug: p.slug,
     tagline: p.tagline,
     duration: p.duration,
     price: p.price,

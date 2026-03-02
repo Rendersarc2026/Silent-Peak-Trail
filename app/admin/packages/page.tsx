@@ -16,10 +16,12 @@ import {
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ConfirmModal from "@/components/admin/ConfirmModal";
+import { cn, hasError, getErrorMessage } from "@/lib/utils";
+import { packageSchema, parseItinerary } from "@/lib/validation";
 
 
 interface Pkg {
-  id: string; name: string; tagline: string; duration: string;
+  id: string; name: string; slug: string; tagline: string; duration: string;
   price: number; badge: string; badgeGold: boolean; featured: boolean;
   img: string; features: string[];
   itinerary: { day: string; title: string; activities?: string }[];
@@ -28,7 +30,7 @@ interface Pkg {
 }
 
 const EMPTY: Omit<Pkg, "id"> = {
-  name: "", tagline: "", duration: "", price: 0,
+  name: "", slug: "", tagline: "", duration: "", price: 0,
   badge: "", badgeGold: false, featured: false, img: "", features: [],
   itinerary: [], inclusions: [], exclusions: [],
 };
@@ -37,6 +39,7 @@ import Skeleton from "@/components/admin/Skeleton";
 
 export default function PackagesPage() {
   const [pkgs, setPkgs] = useState<Pkg[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<Pkg | null>(null);
@@ -109,7 +112,7 @@ export default function PackagesPage() {
   function openEdit(p: Pkg) {
     setEditing(p);
     setForm({
-      name: p.name, tagline: p.tagline, duration: p.duration, price: p.price,
+      name: p.name, slug: p.slug, tagline: p.tagline, duration: p.duration, price: p.price,
       badge: p.badge, badgeGold: p.badgeGold, featured: p.featured, img: p.img,
       features: p.features, itinerary: p.itinerary || [],
       inclusions: p.inclusions || [], exclusions: p.exclusions || []
@@ -122,57 +125,61 @@ export default function PackagesPage() {
   }
   function closeModal() { setModal(false); setEditing(null); setError(""); setFieldErrors({}); }
 
-  function validate() {
-    const nameRegex = /^[a-zA-Z0-9\s.,&']*$/;
-    const looseRegex = /^[^<>{}]*$/;
-
-    if (!form.name || !form.tagline || !form.duration || !form.img) return "Please fill all required fields.";
-    if (!nameRegex.test(form.name)) return "Name can only contain letters, numbers, spaces, periods, commas, ampersands and apostrophes.";
-    if (!looseRegex.test(form.tagline)) return "Tagline cannot contain HTML tags or brackets.";
-    if (!looseRegex.test(form.badge)) return "Badge cannot contain HTML tags or brackets.";
-    if (form.price < 0) return "Price cannot be negative.";
-
-    // Duplicate name check
-    const nameNormal = form.name.trim().toLowerCase();
-    const isDuplicate = pkgs.some(p => p.name.trim().toLowerCase() === nameNormal && p.id !== editing?.id);
-    if (isDuplicate) return `A package named "${form.name.trim()}" already exists.`;
-
-    return null;
-  }
 
   async function save() {
-    const err = validate();
-    if (err) { setError(err); return; }
-
-    setSaving(true);
     setError("");
     setFieldErrors({});
 
-    const itinerary = itineraryStr.split("\n").map(line => {
-      const [day, title, activities] = line.split("|").map(s => s.trim());
-      if (!day || !title) return null;
-      return { day, title, activities };
-    }).filter(Boolean);
+    let itineraryData = [];
+    try {
+      itineraryData = parseItinerary(itineraryStr);
+    } catch (e: any) {
+      setError(e.message);
+      setFieldErrors({ itinerary: [e.message] });
+      return;
+    }
 
     const payload = {
       ...form,
       features: featStr.split("\n").map(s => s.trim()).filter(Boolean),
-      itinerary,
+      itinerary: itineraryData,
       inclusions: incStr.split("\n").map(s => s.trim()).filter(Boolean),
       exclusions: excStr.split("\n").map(s => s.trim()).filter(Boolean),
       price: Number(form.price)
     };
+
+    // Client-side validation
+    const result = packageSchema.safeParse(payload);
+    if (!result.success) {
+      setFieldErrors(result.error.flatten().fieldErrors as any);
+      setError("Please fill all required fields.");
+      return;
+    }
+
+    // Duplicate name check
+    const nameNormal = form.name.trim().toLowerCase();
+    const isDuplicate = pkgs.some(p => p.name.trim().toLowerCase() === nameNormal && p.id !== editing?.id);
+    if (isDuplicate) {
+      setError(`A package named "${form.name.trim()}" already exists.`);
+      return;
+    }
+
+    setSaving(true);
     const url = editing ? `/api/packages/${editing.id}` : "/api/packages";
     const method = editing ? "PUT" : "POST";
 
     try {
-      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, itineraryText: itineraryStr })
+      });
       const data = await res.json();
 
       if (!res.ok) {
         if (data.details) {
           setFieldErrors(data.details);
-          setError("Please correct the highlighted fields below.");
+          setError("Please fill all required fields.");
         } else {
           setError(data.error || "Failed to save package.");
         }
@@ -180,7 +187,9 @@ export default function PackagesPage() {
         return;
       }
 
-      setSaving(false); closeModal(); await load();
+      setSaving(false);
+      closeModal();
+      await load();
       showToast(editing ? "Package updated successfully!" : "Package added successfully!");
     } catch (err) {
       setError("Network error. Please try again.");
@@ -204,6 +213,11 @@ export default function PackagesPage() {
     setToast(msg); setTimeout(() => setToast(""), 3000);
   }
 
+  const filteredPkgs = pkgs.filter(p =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.tagline.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <AdminShell title="Packages">
       <DeleteConfirmModal
@@ -221,6 +235,8 @@ export default function PackagesPage() {
           </div>
           <input
             type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search packages..."
             className="block w-full rounded-xl border-slate-200 bg-white pl-10 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10"
           />
@@ -282,17 +298,17 @@ export default function PackagesPage() {
                     </td>
                   </tr>
                 ))
-              ) : pkgs.length === 0 ? (
+              ) : filteredPkgs.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
                     <div className="flex flex-col items-center gap-2">
                       <ImageIcon size={48} className="text-slate-200" />
-                      <p>No packages found. Add your first tour package!</p>
+                      <p>{searchQuery ? `No packages matching "${searchQuery}"` : "No packages found. Add your first tour package!"}</p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                pkgs.map(p => (
+                filteredPkgs.map(p => (
                   <tr key={p.id} className="hover:bg-slate-50/80 transition-colors group">
                     <td className="px-3 sm:px-6 py-3 sm:py-4 min-w-[200px]">
                       <div className="flex items-center gap-3">
@@ -397,19 +413,19 @@ export default function PackagesPage() {
                   </div>
                   <input
                     maxLength={50}
-                    className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.name ? 'border-red-300 bg-red-50/30' : ''}`}
+                    className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'name') && 'border-red-300 ring-2 ring-red-500/10')}
                     placeholder="Pangong Lake Explorer"
                     value={form.name}
                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   />
-                  {fieldErrors.name && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.name[0]}</p>}
+                  {hasError(fieldErrors, 'name') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'name')}</p>}
                 </div>
                 <div>
-                  <label className={`block text-[11px] font-bold uppercase tracking-wider mb-2 ml-1 ${fieldErrors.duration ? 'text-red-500' : 'text-slate-500'}`}>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider mb-2 ml-1 text-slate-500">
                     Duration
                   </label>
                   <select
-                    className={`block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.duration ? 'border-red-300 bg-red-50/30' : ''}`}
+                    className={cn("block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'duration') && 'border-red-300 ring-2 ring-red-500/10')}
                     value={(() => {
                       const m = form.duration.match(/^(\d+)\s*Day/);
                       return m ? m[1] : "";
@@ -425,8 +441,8 @@ export default function PackagesPage() {
                       <option key={d} value={String(d)}>{d} Days · {Math.max(0, d - 1)} Nights</option>
                     ))}
                   </select>
-                  {fieldErrors.duration && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.duration[0]}</p>}
-                  {form.duration && !fieldErrors.duration && (
+                  {hasError(fieldErrors, 'duration') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'duration')}</p>}
+                  {form.duration && !hasError(fieldErrors, 'duration') && (
                     <p className="mt-2 ml-1 text-[10px] font-bold text-blue-600 uppercase tracking-wider">{form.duration}</p>
                   )}
                 </div>
@@ -443,47 +459,47 @@ export default function PackagesPage() {
                 </div>
                 <input
                   maxLength={100}
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.tagline ? 'border-red-300 bg-red-50/30' : ''}`}
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'tagline') && 'border-red-300 ring-2 ring-red-500/10')}
                   placeholder="Where the sky meets turquoise infinity"
                   value={form.tagline}
                   onChange={e => setForm(f => ({ ...f, tagline: e.target.value }))}
                 />
-                {fieldErrors.tagline && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.tagline[0]}</p>}
+                {hasError(fieldErrors, 'tagline') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'tagline')}</p>}
               </div>
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                     Price (₹)
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-4 font-medium text-slate-400">₹</span>
                     <input
                       type="number"
-                      className={`block w-full rounded-xl border-slate-200 bg-slate-50 pl-8 pr-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white tabular-nums ${fieldErrors.price ? 'border-red-300 bg-red-50/30' : ''}`}
+                      className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 pl-8 pr-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white tabular-nums", hasError(fieldErrors, 'price') && 'border-red-300 ring-2 ring-red-500/10')}
                       placeholder="32000"
                       value={form.price}
                       onChange={e => setForm(f => ({ ...f, price: +e.target.value }))}
                     />
                   </div>
-                  {fieldErrors.price && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.price[0]}</p>}
+                  {hasError(fieldErrors, 'price') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'price')}</p>}
                 </div>
                 <div>
-                  <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.badge ? 'text-red-500' : 'text-slate-500'}`}>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                     Badge Text
                   </label>
                   <input
-                    className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.badge ? 'border-red-300 bg-red-50/30' : ''}`}
+                    className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'badge') && 'border-red-300 ring-2 ring-red-500/10')}
                     placeholder="⭐ Most Popular"
                     value={form.badge}
                     onChange={e => setForm(f => ({ ...f, badge: e.target.value }))}
                   />
-                  {fieldErrors.badge && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.badge[0]}</p>}
+                  {hasError(fieldErrors, 'badge') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'badge')}</p>}
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                   Package Image
                 </label>
                 <ImageUpload
@@ -491,60 +507,64 @@ export default function PackagesPage() {
                   onChange={url => setForm(f => ({ ...f, img: url }))}
                   onError={msg => setError(msg)}
                 />
-                {fieldErrors.img && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.img[0]}</p>}
+                {hasError(fieldErrors, 'img') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'img')}</p>}
               </div>
 
               <div>
-                <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.features ? 'text-red-500' : 'text-slate-500'}`}>
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                   Highlights / Features (one per line)
                 </label>
                 <textarea
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none ${fieldErrors.features ? 'border-red-300 bg-red-50/30' : ''}`}
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none", hasError(fieldErrors, 'features') && 'border-red-300 ring-2 ring-red-500/10')}
                   rows={3}
                   placeholder={`Leh to Pangong via Chang La\nSunrise at the lake\nNubra Valley Desert Safari`}
                   value={featStr}
                   onChange={e => setFeatStr(e.target.value)}
                 />
+                {hasError(fieldErrors, 'features') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'features')}</p>}
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
-                  Itinerary (Format: Day | Title | Activities)
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
+                  Itinerary (Format: Day | Title | Activities optional)
                 </label>
                 <textarea
-                  className="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none"
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none", hasError(fieldErrors, 'itinerary') && 'border-red-300 ring-2 ring-red-500/10')}
                   rows={6}
-                  placeholder={`Day 1 | Arrival in Leh | Rest and acclimatization.\nDay 2 | Leh Sightseeing | Visit Shanti Stupa and Leh Palace.`}
+                  placeholder={`Day 1 | Arrival in Leh | Rest and acclimatization.\nDay 2 | Leh Sightseeing\nDay 3 | Trek to Base Camp | 5 hours trek.`}
                   value={itineraryStr}
                   onChange={e => setItineraryStr(e.target.value)}
                 />
-                <p className="mt-1 ml-1 text-[10px] text-slate-400">Use a pipe (|) to separate Day, Title, and optional Activities.</p>
+                {hasError(fieldErrors, 'itinerary') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'itinerary')}</p>}
+                <p className="mt-1 ml-1 text-[10px] text-slate-400">Use a pipe (|) to separate Day and Title. Activities are optional.</p>
               </div>
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                     Inclusions (one per line)
                   </label>
                   <textarea
-                    className="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none"
+                    className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none", hasError(fieldErrors, 'inclusions') && 'border-red-300 ring-2 ring-red-500/10')}
                     rows={4}
                     placeholder={`Accommodation on twin sharing\nBreakfast and Dinner\nInner line permits`}
                     value={incStr}
                     onChange={e => setIncStr(e.target.value)}
                   />
+                  {hasError(fieldErrors, 'inclusions') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'inclusions')}</p>}
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                     Exclusions (one per line)
                   </label>
                   <textarea
-                    className="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none"
+                    className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none", hasError(fieldErrors, 'exclusions') && 'border-red-300 ring-2 ring-red-500/10')}
                     rows={4}
                     placeholder={`Flight tickets\nLunch and snacks\nPersonal travel insurance`}
                     value={excStr}
                     onChange={e => setExcStr(e.target.value)}
                   />
+                  {hasError(fieldErrors, 'exclusions') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'exclusions')}</p>}
                 </div>
               </div>
 

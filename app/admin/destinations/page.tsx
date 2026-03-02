@@ -18,6 +18,8 @@ import {
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ConfirmModal from "@/components/admin/ConfirmModal";
+import { cn, hasError, getErrorMessage } from "@/lib/utils";
+import { destinationSchema } from "@/lib/validation";
 
 
 interface Dest { id: string; name: string; type: string; altitude: string; img: string; big: boolean; }
@@ -72,29 +74,28 @@ export default function DestinationsPage() {
   function openNew() { setEditing(null); setForm(EMPTY); setModal(true); setError(""); setFieldErrors({}); }
   function openEdit(d: Dest) { setEditing(d); setForm({ name: d.name, type: d.type, altitude: d.altitude, img: d.img, big: d.big }); setModal(true); setError(""); setFieldErrors({}); }
 
-  function validate() {
-    const nameRegex = /^[a-zA-Z0-9\s.,&']*$/;
-    const looseRegex = /^[^<>{}]*$/;
-    if (!form.name || !form.type || !form.altitude || !form.img) return "Please fill all required fields.";
-    if (!nameRegex.test(form.name)) return "Name can only contain letters, numbers, spaces, periods, commas, ampersands and apostrophes.";
-    if (!looseRegex.test(form.type)) return "Category cannot contain HTML tags or brackets.";
-    if (!looseRegex.test(form.altitude)) return "Altitude stats cannot contain HTML tags or brackets.";
+
+  async function save() {
+    setError("");
+    setFieldErrors({});
+
+    // Client-side validation
+    const result = destinationSchema.safeParse(form);
+    if (!result.success) {
+      setFieldErrors(result.error.flatten().fieldErrors as any);
+      setError("Please fill all required fields.");
+      return;
+    }
 
     // Duplicate name check
     const nameNormal = form.name.trim().toLowerCase();
     const isDuplicate = items.some(d => d.name.trim().toLowerCase() === nameNormal && d.id !== editing?.id);
-    if (isDuplicate) return `A destination named "${form.name.trim()}" already exists.`;
-
-    return null;
-  }
-
-  async function save() {
-    const err = validate();
-    if (err) { setError(err); return; }
+    if (isDuplicate) {
+      setError(`A destination named "${form.name.trim()}" already exists.`);
+      return;
+    }
 
     setSaving(true);
-    setError("");
-    setFieldErrors({});
     const url = editing ? `/api/destinations/${editing.id}` : "/api/destinations";
     const method = editing ? "PUT" : "POST";
 
@@ -109,7 +110,7 @@ export default function DestinationsPage() {
       if (!res.ok) {
         if (data.details) {
           setFieldErrors(data.details);
-          setError("Please correct the highlighted fields below.");
+          setError("Please fill all required fields.");
         } else {
           setError(data.error || "Failed to save destination.");
         }
@@ -314,16 +315,16 @@ export default function DestinationsPage() {
                   </div>
                   <input
                     maxLength={50}
-                    className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.name ? 'border-red-300 bg-red-50/30' : ''}`}
+                    className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'name') && 'border-red-300 ring-2 ring-red-500/10')}
                     placeholder="e.g. Pangong Tso"
                     value={form.name}
                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   />
-                  {fieldErrors.name && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.name[0]}</p>}
+                  {hasError(fieldErrors, 'name') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'name')}</p>}
                 </div>
                 <div>
                   <div className="flex justify-between items-center mb-1.5 ml-1">
-                    <label className={`block text-[11px] font-bold uppercase tracking-wider ${fieldErrors.type ? 'text-red-500' : 'text-slate-500'}`}>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
                       Category / Type
                     </label>
                     <span className={`text-[10px] font-bold ${form.type.length > 25 ? 'text-red-500' : 'text-slate-400'}`}>
@@ -332,30 +333,30 @@ export default function DestinationsPage() {
                   </div>
                   <input
                     maxLength={30}
-                    className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.type ? 'border-red-300 bg-red-50/30' : ''}`}
+                    className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'type') && 'border-red-300 ring-2 ring-red-500/10')}
                     placeholder="e.g. High-Altitude Lake"
                     value={form.type}
                     onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
                   />
-                  {fieldErrors.type && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.type[0]}</p>}
+                  {hasError(fieldErrors, 'type') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'type')}</p>}
                 </div>
               </div>
 
               <div>
-                <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.altitude ? 'text-red-500' : 'text-slate-500'}`}>
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                   Altitude / Quick Stats
                 </label>
                 <input
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.altitude ? 'border-red-300 bg-red-50/30' : ''}`}
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'altitude') && 'border-red-300 ring-2 ring-red-500/10')}
                   placeholder="e.g. 4,350m · 134km long"
                   value={form.altitude}
                   onChange={e => setForm(f => ({ ...f, altitude: e.target.value }))}
                 />
-                {fieldErrors.altitude && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.altitude[0]}</p>}
+                {hasError(fieldErrors, 'altitude') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'altitude')}</p>}
               </div>
 
               <div>
-                <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.img ? 'text-red-500' : 'text-slate-500'}`}>
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                   Destination Image
                 </label>
                 <ImageUpload
@@ -363,7 +364,7 @@ export default function DestinationsPage() {
                   onChange={url => setForm(f => ({ ...f, img: url }))}
                   onError={msg => setError(msg)}
                 />
-                {fieldErrors.img && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.img[0]}</p>}
+                {hasError(fieldErrors, 'img') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'img')}</p>}
               </div>
 
               <label className="flex items-center gap-3 cursor-pointer group pt-2">

@@ -26,6 +26,8 @@ import {
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ConfirmModal from "@/components/admin/ConfirmModal";
 import Skeleton from "@/components/admin/Skeleton";
+import { hasError, getErrorMessage } from "@/lib/utils";
+import { lehTipSchema } from "@/lib/validation";
 
 // Map of available lucide icon names to components
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -132,21 +134,34 @@ export default function LehTipsPage() {
     };
 
     const handleSave = async () => {
-        setSaving(true);
         setError("");
         setFieldErrors({});
+
+        // Client-side validation
+        const result = lehTipSchema.safeParse(form);
+        if (!result.success) {
+            setFieldErrors(result.error.flatten().fieldErrors as any);
+            setError("Please fill all required fields.");
+            return;
+        }
+
+        setSaving(true);
         try {
             const url = editing ? `/api/leh-tips/${editing.id}` : "/api/leh-tips";
             const method = editing ? "PUT" : "POST";
             const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...form, order: Number(form.order) }),
+                body: JSON.stringify(form),
             });
             const data = await res.json();
             if (!res.ok) {
-                if (data.details) setFieldErrors(data.details);
-                else setError(data.error || "Something went wrong.");
+                if (data.details) {
+                    setFieldErrors(data.details);
+                    setError("Please fill all required fields.");
+                } else {
+                    setError(data.error || "Something went wrong.");
+                }
                 return;
             }
             showToast(editing ? "Tip updated!" : "Tip added!");
@@ -249,101 +264,126 @@ export default function LehTipsPage() {
 
             {/* Add/Edit Modal */}
             {modal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl">
-                        <div className="mb-6 flex items-center justify-between">
-                            <h2 className="text-xl font-black text-slate-900">{editing ? "Edit Tip" : "Add New Tip"}</h2>
-                            <button onClick={handleCloseAttempt} className="rounded-xl p-2 hover:bg-slate-100">
-                                <X size={18} />
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200" onClick={handleCloseAttempt}>
+                    <div
+                        className="relative w-full max-w-lg max-h-[90vh] overflow-hidden rounded-[2.5rem] bg-white shadow-2xl flex flex-col animate-in zoom-in-95 duration-200"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6">
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{editing ? "Edit Tip" : "Add New Tip"}</h2>
+                            <button
+                                onClick={handleCloseAttempt}
+                                className="flex h-10 w-10 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                            >
+                                <X size={20} />
                             </button>
                         </div>
 
-                        {error && (
-                            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-bold text-red-600 ring-1 ring-red-200">
-                                <AlertCircle size={16} /> {error}
-                            </div>
-                        )}
+                        {/* Modal Body */}
+                        <div className="overflow-y-auto flex-1 p-8 space-y-7">
+                            {error && (
+                                <div className="flex items-center gap-3 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-600 border border-red-100 animate-in slide-in-from-top-2">
+                                    <AlertCircle size={18} /> {error}
+                                </div>
+                            )}
 
-                        <div className="space-y-5">
-                            {/* Icon */}
-                            <div>
-                                <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Icon</label>
-                                <select
-                                    value={form.icon}
-                                    onChange={e => setForm(f => ({ ...f, icon: e.target.value }))}
-                                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none"
-                                >
-                                    {Object.keys(ICON_MAP).map(name => (
-                                        <option key={name} value={name}>{name}</option>
-                                    ))}
-                                </select>
-                                {fieldErrors.icon && <p className="mt-1 text-xs text-red-500">{fieldErrors.icon[0]}</p>}
-                            </div>
+                            <div className="space-y-6">
+                                {/* Icon */}
+                                <div>
+                                    <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Icon</label>
+                                    <select
+                                        value={form.icon}
+                                        onChange={e => setForm(f => ({ ...f, icon: e.target.value }))}
+                                        className={`w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none ${hasError(fieldErrors, 'icon') ? 'border-red-300 bg-red-50/30' : ''}`}
+                                    >
+                                        {Object.keys(ICON_MAP).map(name => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))}
+                                    </select>
+                                    {hasError(fieldErrors, 'icon') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'icon')}</p>}
+                                </div>
 
-                            {/* Title */}
-                            <div>
-                                <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Title</label>
-                                <input
-                                    value={form.title}
-                                    onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                                    placeholder="e.g. Mandatory Acclimatization"
-                                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none"
-                                />
-                                {fieldErrors.title && <p className="mt-1 text-xs text-red-500">{fieldErrors.title[0]}</p>}
-                            </div>
+                                {/* Title */}
+                                <div>
+                                    <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Title</label>
+                                    <input
+                                        value={form.title}
+                                        onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                                        placeholder="e.g. Mandatory Acclimatization"
+                                        className={`w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none ${hasError(fieldErrors, 'title') ? 'border-red-300 bg-red-50/30' : ''}`}
+                                    />
+                                    {hasError(fieldErrors, 'title') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'title')}</p>}
+                                </div>
 
-                            {/* Description */}
-                            <div>
-                                <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Description</label>
-                                <textarea
-                                    rows={3}
-                                    value={form.desc}
-                                    onChange={e => setForm(f => ({ ...f, desc: e.target.value }))}
-                                    placeholder="Short tip description..."
-                                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none resize-none"
-                                />
-                                {fieldErrors.desc && <p className="mt-1 text-xs text-red-500">{fieldErrors.desc[0]}</p>}
-                            </div>
+                                {/* Description */}
+                                <div>
+                                    <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Description</label>
+                                    <textarea
+                                        rows={3}
+                                        value={form.desc}
+                                        onChange={e => setForm(f => ({ ...f, desc: e.target.value }))}
+                                        placeholder="Short tip description..."
+                                        className={`w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none resize-none ${hasError(fieldErrors, 'desc') ? 'border-red-300 bg-red-50/30' : ''}`}
+                                    />
+                                    {hasError(fieldErrors, 'desc') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'desc')}</p>}
+                                </div>
 
-                            {/* Colour Theme */}
-                            <div>
-                                <label className="mb-2 block text-xs font-black uppercase tracking-widest text-slate-500">Card Colour</label>
-                                <div className="flex flex-wrap gap-2">
-                                    {COLOR_OPTIONS.map(opt => (
-                                        <button
-                                            key={opt.label}
-                                            onClick={() => handleColorSelect(opt)}
-                                            className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition ${opt.color} ${opt.border} ${form.color === opt.color ? "ring-2 ring-offset-1 ring-slate-900" : "opacity-60 hover:opacity-100"}`}
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    ))}
+                                {/* Colour Theme */}
+                                <div>
+                                    <label className="mb-2 block text-xs font-black uppercase tracking-widest text-slate-500">Card Colour</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {COLOR_OPTIONS.map(opt => (
+                                            <button
+                                                key={opt.label}
+                                                onClick={() => handleColorSelect(opt)}
+                                                className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition ${opt.color} ${opt.border} ${form.color === opt.color ? "ring-2 ring-offset-1 ring-slate-900" : "opacity-60 hover:opacity-100"}`}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Order */}
+                                <div>
+                                    <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Display Order</label>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        value={form.order}
+                                        onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+                                        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none"
+                                    />
                                 </div>
                             </div>
 
-                            {/* Order */}
-                            <div>
-                                <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Display Order</label>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    value={form.order}
-                                    onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))}
-                                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none"
-                                />
-                            </div>
                         </div>
 
-                        <div className="mt-8 flex justify-end gap-3">
-                            <button onClick={handleCloseAttempt} className="rounded-xl border border-slate-200 px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50">
+                        {/* Modal Footer */}
+                        <div className="mt-auto border-t bg-slate-50/50 px-8 py-5 flex justify-end gap-3">
+                            <button
+                                onClick={handleCloseAttempt}
+                                className="rounded-2xl px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-colors"
+                            >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSave}
                                 disabled={saving}
-                                className="flex items-center gap-2 rounded-xl bg-[var(--navy)] px-6 py-3 text-sm font-black text-white hover:bg-[var(--blue)] disabled:opacity-60 active:scale-95"
+                                className="flex items-center justify-center gap-2 min-w-[140px] rounded-2xl bg-[var(--navy)] px-8 py-3 text-sm font-black text-white shadow-lg shadow-blue-900/10 transition-all hover:bg-[var(--blue)] disabled:opacity-60 active:scale-95"
                             >
-                                {saving ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Check size={16} /> {editing ? "Save Changes" : "Add Tip"}</>}
+                                {saving ? (
+                                    <>
+                                        <Loader2 size={18} className="animate-spin" />
+                                        <span>Saving...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Check size={18} />
+                                        <span>{editing ? "Save Changes" : "Add Tip"}</span>
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>

@@ -17,7 +17,8 @@ import {
   AlertCircle,
   ShieldCheck
 } from "lucide-react";
-import { sanitizeInput } from "@/lib/utils";
+import { sanitizeInput, hasError, getErrorMessage, cn } from "@/lib/utils";
+import { homepageContentSchema } from "@/lib/validation";
 import ImageUpload from "@/components/admin/ImageUpload";
 
 interface HomepageContent {
@@ -61,28 +62,17 @@ export default function HomepagePage() {
   async function save() {
     if (!form) return;
 
-    const looseRegex = /^[^<>{}]*$/;
-    const textFields: (keyof HomepageContent)[] = [
-      'heroBgImage', 'heroTitle', 'heroSubtitle', 'heroBadge',
-      'statsAltitude', 'statsPackages', 'statsTravellers',
-      'statsExperience', 'statsSatisfaction',
-      'whyUsTitle', 'whyUsSubtitle', 'whyUsImage',
-      'whyUsStatsValue', 'whyUsStatsLabel',
-      'stargazingTitle', 'stargazingTagline'
-    ];
-
-    const updatedForm = { ...form };
-    for (const field of textFields) {
-      const value = updatedForm[field];
-      if (!value) continue;
-
-      const sanitized = sanitizeInput(String(value));
-
-      if (!looseRegex.test(sanitized)) {
-        setError(`${field} contains unsupported characters (<, >, {, }).`);
-        return;
-      }
-      updatedForm[field] = sanitized;
+    const result = homepageContentSchema.safeParse(form);
+    if (!result.success) {
+      const flattenedErrors: Record<string, string[]> = {};
+      result.error.issues.forEach(issue => {
+        const path = issue.path.join('.');
+        if (!flattenedErrors[path]) flattenedErrors[path] = [];
+        flattenedErrors[path].push(issue.message);
+      });
+      setFieldErrors(flattenedErrors);
+      setError("Please fill all required fields.");
+      return;
     }
 
     setSaving(true);
@@ -92,14 +82,14 @@ export default function HomepagePage() {
       const res = await fetch("/api/homepage", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedForm)
+        body: JSON.stringify(form)
       });
       const data = await res.json();
 
       if (!res.ok) {
         if (data.details) {
           setFieldErrors(data.details);
-          setError("Please correct the highlighted fields below.");
+          setError("Please fill all required fields.");
         } else {
           setError(data.error || "Failed to save homepage content.");
         }
@@ -171,7 +161,7 @@ export default function HomepagePage() {
             </div>
             <div className="p-6 space-y-6">
               <div>
-                <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.heroBgImage ? 'text-red-500' : 'text-slate-500'}`}>
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                   Hero Background Image
                 </label>
                 <ImageUpload
@@ -179,50 +169,54 @@ export default function HomepagePage() {
                   onChange={url => set("heroBgImage", url)}
                   onError={msg => setError(msg)}
                 />
+                {hasError(fieldErrors, 'heroBgImage') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'heroBgImage')}</p>}
                 <p className="mt-1.5 text-[10px] text-slate-400 font-medium leading-relaxed">Leave blank to use the default majestic mountain landscape.</p>
               </div>
               <div>
                 <div className="flex justify-between items-center mb-1.5 ml-1">
-                  <label className={`block text-[11px] font-bold uppercase tracking-wider ${fieldErrors.heroBadge ? 'text-red-500' : 'text-slate-500'}`}>Hero Badge</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Hero Badge</label>
                   <span className={`text-[10px] font-bold ${form.heroBadge.length >= 50 ? 'text-red-500' : 'text-slate-400'}`}>
                     {form.heroBadge.length} / 50
                   </span>
                 </div>
                 <input
                   maxLength={50}
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.heroBadge ? 'border-red-300 bg-red-50/30' : ''}`}
+                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${hasError(fieldErrors, 'heroBadge') ? 'border-red-300 bg-red-50/30' : ''}`}
                   value={form.heroBadge}
                   onChange={e => set("heroBadge", e.target.value)}
                 />
+                {hasError(fieldErrors, 'heroBadge') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'heroBadge')}</p>}
               </div>
               <div>
                 <div className="flex justify-between items-center mb-1.5 ml-1">
-                  <label className={`block text-[11px] font-bold uppercase tracking-wider ${fieldErrors.heroTitle ? 'text-red-500' : 'text-slate-500'}`}>Main Heading</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Main Heading</label>
                   <span className={`text-[10px] font-bold ${form.heroTitle.length > 70 ? 'text-red-500' : 'text-slate-400'}`}>
                     {form.heroTitle.length} / 80
                   </span>
                 </div>
                 <input
                   maxLength={80}
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.heroTitle ? 'border-red-300 bg-red-50/30' : ''}`}
+                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${hasError(fieldErrors, 'heroTitle') ? 'border-red-300 bg-red-50/30' : ''}`}
                   value={form.heroTitle}
                   onChange={e => set("heroTitle", e.target.value)}
                 />
+                {hasError(fieldErrors, 'heroTitle') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'heroTitle')}</p>}
               </div>
               <div>
                 <div className="flex justify-between items-center mb-1.5 ml-1">
-                  <label className={`block text-[11px] font-bold uppercase tracking-wider ${fieldErrors.heroSubtitle ? 'text-red-500' : 'text-slate-500'}`}>Subtitle / Description</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Subtitle / Description</label>
                   <span className={`text-[10px] font-bold ${form.heroSubtitle.length > 250 ? 'text-red-500' : 'text-slate-400'}`}>
                     {form.heroSubtitle.length} / 300
                   </span>
                 </div>
                 <textarea
                   maxLength={300}
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none ${fieldErrors.heroSubtitle ? 'border-red-300 bg-red-50/30' : ''}`}
+                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none ${hasError(fieldErrors, 'heroSubtitle') ? 'border-red-300 bg-red-50/30' : ''}`}
                   rows={4}
                   value={form.heroSubtitle}
                   onChange={e => set("heroSubtitle", e.target.value)}
                 />
+                {hasError(fieldErrors, 'heroSubtitle') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'heroSubtitle')}</p>}
               </div>
             </div>
           </section>
@@ -239,21 +233,23 @@ export default function HomepagePage() {
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Custom Heading</label>
                 <input
-                  className="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white"
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'stargazingTitle') && 'border-red-300 ring-2 ring-red-500/10')}
                   value={form.stargazingTitle}
                   onChange={e => set("stargazingTitle", e.target.value)}
                   placeholder="e.g. The Premium Stargazing Expedition"
                 />
+                {hasError(fieldErrors, 'stargazingTitle') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'stargazingTitle')}</p>}
                 <p className="mt-1.5 text-[10px] text-slate-400 font-medium">Tip: Use the word &quot;Premium&quot; for special italic styling.</p>
               </div>
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Intro Description</label>
                 <textarea
-                  className="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none"
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none", hasError(fieldErrors, 'stargazingTagline') && 'border-red-300 ring-2 ring-red-500/10')}
                   rows={3}
                   value={form.stargazingTagline}
                   onChange={e => set("stargazingTagline", e.target.value)}
                 />
+                {hasError(fieldErrors, 'stargazingTagline') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'stargazingTagline')}</p>}
               </div>
             </div>
           </section>
@@ -275,12 +271,13 @@ export default function HomepagePage() {
                 ["Guest Satisfaction", "statsSatisfaction"],
               ].map(([label, key]) => (
                 <div key={key}>
-                  <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors[key] ? 'text-red-500' : 'text-slate-500'}`}>{label}</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">{label}</label>
                   <input
-                    className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white tabular-nums ${fieldErrors[key] ? 'border-red-300 bg-red-50/30' : ''}`}
+                    className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white tabular-nums ${hasError(fieldErrors, key) ? 'border-red-300 bg-red-50/30' : ''}`}
                     value={form[key as keyof HomepageContent]}
                     onChange={e => set(key as keyof HomepageContent, e.target.value)}
                   />
+                  {hasError(fieldErrors, key) && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, key)}</p>}
                 </div>
               ))}
             </div>
@@ -301,19 +298,21 @@ export default function HomepagePage() {
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Section Title</label>
                 <input
-                  className="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white"
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'whyUsTitle') && 'border-red-300 ring-2 ring-red-500/10')}
                   value={form.whyUsTitle}
                   onChange={e => set("whyUsTitle", e.target.value)}
                 />
+                {hasError(fieldErrors, 'whyUsTitle') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'whyUsTitle')}</p>}
               </div>
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Section Subtitle</label>
                 <textarea
-                  className="block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none"
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none", hasError(fieldErrors, 'whyUsSubtitle') && 'border-red-300 ring-2 ring-red-500/10')}
                   rows={3}
                   value={form.whyUsSubtitle}
                   onChange={e => set("whyUsSubtitle", e.target.value)}
                 />
+                {hasError(fieldErrors, 'whyUsSubtitle') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'whyUsSubtitle')}</p>}
               </div>
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Showcase Image</label>
@@ -322,6 +321,7 @@ export default function HomepagePage() {
                   onChange={url => set("whyUsImage", url)}
                   onError={msg => setError(msg)}
                 />
+                {hasError(fieldErrors, 'whyUsImage') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'whyUsImage')}</p>}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -331,6 +331,7 @@ export default function HomepagePage() {
                     value={form.whyUsStatsValue}
                     onChange={e => set("whyUsStatsValue", e.target.value)}
                   />
+                  {hasError(fieldErrors, 'whyUsStatsValue') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'whyUsStatsValue')}</p>}
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Floating Stat Label</label>
@@ -339,6 +340,7 @@ export default function HomepagePage() {
                     value={form.whyUsStatsLabel}
                     onChange={e => set("whyUsStatsLabel", e.target.value)}
                   />
+                  {hasError(fieldErrors, 'whyUsStatsLabel') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'whyUsStatsLabel')}</p>}
                 </div>
               </div>
 
@@ -346,7 +348,7 @@ export default function HomepagePage() {
                 <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-4 ml-1">Core Features (4)</h4>
                 <div className="space-y-6">
                   {featuresList.slice(0, 4).map((f: any, i: number) => (
-                    <div key={i} className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 space-y-3">
+                    <div key={i} className={`rounded-xl border bg-slate-50/50 p-4 space-y-3 transition-colors ${hasError(fieldErrors, `whyUsFeatures.${i}`) ? 'border-red-300 bg-red-50' : 'border-slate-100'}`}>
                       <div className="flex gap-4">
                         <select
                           className="w-1/3 rounded-lg border-slate-200 bg-white px-3 py-2 text-xs font-semibold"
@@ -365,12 +367,15 @@ export default function HomepagePage() {
                           onChange={(e) => updateFeature(i, 'title', e.target.value)}
                         />
                       </div>
+                      {hasError(fieldErrors, `whyUsFeatures.${i}.title`) && <p className="text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, `whyUsFeatures.${i}.title`)}</p>}
+
                       <textarea
-                        className="w-full rounded-lg border-slate-200 bg-white px-3 py-2 text-xs resize-none"
+                        className={cn("w-full rounded-lg border-slate-200 bg-white px-3 py-2 text-xs resize-none", hasError(fieldErrors, `whyUsFeatures.${i}.desc`) && 'border-red-300 ring-2 ring-red-500/10')}
                         rows={2}
                         value={f.desc}
                         onChange={(e) => updateFeature(i, 'desc', e.target.value)}
                       />
+                      {hasError(fieldErrors, `whyUsFeatures.${i}.desc`) && <p className="text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, `whyUsFeatures.${i}.desc`)}</p>}
                     </div>
                   ))}
                   {featuresList.length === 0 && (

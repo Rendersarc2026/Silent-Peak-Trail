@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { sanitizeInput } from "@/lib/utils";
-import { packageSchema } from "@/lib/validation";
+import { sanitizeInput, slugify } from "@/lib/utils";
+import { packageSchema, parseItinerary } from "@/lib/validation";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 
@@ -19,6 +19,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const numId = parseInt(id);
     const body = await req.json();
+
+    // Parse itinerary if itineraryText is provided
+    if (body.itineraryText !== undefined) {
+      body.itinerary = parseItinerary(body.itineraryText);
+    }
+
     const parsed = packageSchema.partial().parse(body);
 
     const existing = await prisma.package.findUnique({ where: { id: numId } });
@@ -37,7 +43,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const updated = await prisma.package.update({
       where: { id: numId },
       data: {
-        ...(parsed.name && { name: sanitizeInput(parsed.name) }),
+        ...(parsed.name && {
+          name: sanitizeInput(parsed.name),
+          slug: slugify(sanitizeInput(parsed.name))
+        }),
         ...(parsed.tagline && { tagline: sanitizeInput(parsed.tagline) }),
         ...(parsed.duration && { duration: sanitizeInput(parsed.duration) }),
         ...(parsed.price !== undefined && { price: parsed.price }),
@@ -46,9 +55,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(parsed.featured !== undefined && { featured: parsed.featured }),
         ...(parsed.img && { img: parsed.img }),
         ...(parsed.features && { features: parsed.features.map((f: string) => sanitizeInput(f)) }),
-        ...(parsed.itinerary && { itinerary: parsed.itinerary }),
-        ...(parsed.inclusions && { inclusions: parsed.inclusions }),
-        ...(parsed.exclusions && { exclusions: parsed.exclusions }),
+        ...(parsed.itinerary && {
+          itinerary: parsed.itinerary.map((item: any) => ({
+            ...item,
+            ...(item.day && { day: sanitizeInput(item.day) }),
+            ...(item.title && { title: sanitizeInput(item.title) }),
+            ...(item.activities && { activities: sanitizeInput(item.activities) })
+          }))
+        }),
+        ...(parsed.inclusions && { inclusions: parsed.inclusions.map((i: string) => sanitizeInput(i)) }),
+        ...(parsed.exclusions && { exclusions: parsed.exclusions.map((e: string) => sanitizeInput(e)) }),
       },
     });
 

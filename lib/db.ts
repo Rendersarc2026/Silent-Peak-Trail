@@ -8,6 +8,7 @@ export type EnquiryStatus = "new" | "replied" | "confirmed" | "cancelled";
 export interface Package {
   id: string;
   name: string;
+  slug: string;
   tagline: string;
   duration: string;
   price: number;

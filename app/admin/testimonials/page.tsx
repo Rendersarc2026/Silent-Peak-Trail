@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ConfirmModal from "@/components/admin/ConfirmModal";
+import { cn, hasError, getErrorMessage } from "@/lib/utils";
+import { reviewSchema } from "@/lib/validation";
 
 
 interface Review {
@@ -110,6 +112,14 @@ export default function TestimonialsAdmin() {
     setError(null);
     setFieldErrors({});
 
+    // Client-side validation
+    const result = reviewSchema.safeParse(form);
+    if (!result.success) {
+      setFieldErrors(result.error.flatten().fieldErrors as any);
+      setError("Please fill all required fields.");
+      return;
+    }
+
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
@@ -129,7 +139,7 @@ export default function TestimonialsAdmin() {
     } else {
       if (data.details) {
         setFieldErrors(data.details);
-        setError("Please correct the highlighted fields.");
+        setError("Please fill all required fields.");
       } else {
         setError(data.error || "Something went wrong.");
       }
@@ -379,37 +389,37 @@ export default function TestimonialsAdmin() {
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                     Client Name
                   </label>
                   <input
-                    className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.name ? 'border-red-300 ring-2 ring-red-500/10' : ''}`}
+                    className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'name') && 'border-red-300 ring-2 ring-red-500/10')}
                     placeholder="e.g. Rohit Sharma"
                     value={form.name}
                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   />
-                  {fieldErrors.name && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{fieldErrors.name[0]}</p>}
+                  {hasError(fieldErrors, 'name') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'name')}</p>}
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                     Location
                   </label>
                   <input
-                    className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.place ? 'border-red-300 ring-2 ring-red-500/10' : ''}`}
+                    className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'place') && 'border-red-300 ring-2 ring-red-500/10')}
                     placeholder="e.g. Mumbai, India"
                     value={form.place}
                     onChange={e => setForm(f => ({ ...f, place: e.target.value }))}
                   />
-                  {fieldErrors.place && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{fieldErrors.place[0]}</p>}
+                  {hasError(fieldErrors, 'place') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'place')}</p>}
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                   Package or Experience
                 </label>
                 <select
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.packageId ? 'border-red-300 ring-2 ring-red-500/10' : ''}`}
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'packageId') && 'border-red-300 ring-2 ring-red-500/10')}
                   value={form.packageId}
                   onChange={e => setForm(f => ({ ...f, packageId: Number(e.target.value) }))}
                 >
@@ -420,21 +430,21 @@ export default function TestimonialsAdmin() {
                     </option>
                   ))}
                 </select>
-                {fieldErrors.packageId && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{fieldErrors.packageId[0]}</p>}
+                {hasError(fieldErrors, 'packageId') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'packageId')}</p>}
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                   Review Statement
                 </label>
                 <textarea
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none ${fieldErrors.message ? 'border-red-300 ring-2 ring-red-500/10' : ''}`}
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white resize-none", hasError(fieldErrors, 'message') && 'border-red-300 ring-2 ring-red-500/10')}
                   rows={4}
                   placeholder="Share the client's experience..."
                   value={form.message}
                   onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
                 />
-                {fieldErrors.message && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{fieldErrors.message[0]}</p>}
+                {hasError(fieldErrors, 'message') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'message')}</p>}
               </div>
 
               <div className="pt-2">
@@ -469,7 +479,7 @@ export default function TestimonialsAdmin() {
               </button>
               <button
                 onClick={() => handleSave({})}
-                disabled={saving || !form.name || !form.message || !form.packageId}
+                disabled={saving}
                 className="flex items-center justify-center gap-2 min-w-[120px] rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 shadow-sm disabled:opacity-70 active:scale-[0.98]"
               >
                 {saving ? <Loader2 size={18} className="animate-spin" /> : (editing ? "Save Changes" : "Add Review")}

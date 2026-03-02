@@ -20,9 +20,9 @@ import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-    const { id } = await params;
-    const pkg = await prisma.package.findUnique({ where: { id: parseInt(id) || 0 } });
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const pkg = await prisma.package.findUnique({ where: { slug } });
 
     if (!pkg) return { title: "Package Not Found" };
 
@@ -35,11 +35,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
 }
 
-export default async function PackageDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+export default async function PackageDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
 
     const [pkg, settingsRecords, allPackages] = await Promise.all([
-        prisma.package.findUnique({ where: { id: parseInt(id) || 0 } }),
+        prisma.package.findUnique({ where: { slug } }),
         prisma.homepage.findMany(),
         prisma.package.findMany({ select: { id: true, name: true } }),
     ]);
@@ -69,11 +69,25 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
             <main className="min-h-screen bg-[var(--white)] pt-[72px]">
                 {/* Header Hero Section */}
                 <div className="relative h-[50vh] min-h-[480px] w-full overflow-hidden">
-                    <img
-                        src={pkg.img}
-                        alt={pkg.name}
-                        className="h-full w-full object-cover"
-                    />
+                    {slug === 'stargazing-expedition' ? (
+                        <div className="absolute inset-0 bg-black">
+                            <video
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                                className="h-full w-full object-cover opacity-60"
+                            >
+                                <source src="/videos/stargazing.mp4" type="video/mp4" />
+                            </video>
+                        </div>
+                    ) : (
+                        <img
+                            src={pkg.img}
+                            alt={pkg.name}
+                            className="h-full w-full object-cover"
+                        />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--navy)] via-[var(--navy)]/40 to-transparent" />
 
                     <div className="container mx-auto absolute top-0 left-0 right-0 px-5 pt-12 lg:px-[60px]">

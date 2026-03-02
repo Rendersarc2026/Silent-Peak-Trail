@@ -16,6 +16,8 @@ import {
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ConfirmModal from "@/components/admin/ConfirmModal";
+import { cn, hasError, getErrorMessage } from "@/lib/utils";
+import { gallerySchema } from "@/lib/validation";
 
 
 interface GalleryItem { id: string; src: string; alt: string; wide: boolean; tall: boolean; }
@@ -68,27 +70,27 @@ export default function GalleryPage() {
   };
   useEffect(() => { load(); }, []);
 
-  function validate() {
-    const charRegex = /^[a-zA-Z0-9\s.,]*$/;
-    const looseRegex = /^[^<>{}]*$/;
-    if (!form.src) return "Please upload an image.";
-    if (form.alt && !charRegex.test(form.alt)) return "Description can only contain letters, numbers, spaces, periods and commas.";
-    if (form.alt && !looseRegex.test(form.alt)) return "Description cannot contain HTML tags or brackets.";
+
+  async function save() {
+    setError("");
+    setFieldErrors({});
+
+    // Client-side validation
+    const result = gallerySchema.safeParse(form);
+    if (!result.success) {
+      setFieldErrors(result.error.flatten().fieldErrors as any);
+      setError("Please fill all required fields.");
+      return;
+    }
 
     // Duplicate image check
     const isDuplicate = items.some(g => g.src === form.src && g.id !== editing?.id);
-    if (isDuplicate) return "This image is already in the gallery.";
-
-    return null;
-  }
-
-  async function save() {
-    const err = validate();
-    if (err) { setError(err); return; }
+    if (isDuplicate) {
+      setError("This image is already in the gallery.");
+      return;
+    }
 
     setSaving(true);
-    setError("");
-    setFieldErrors({});
     const url = editing ? `/api/gallery/${editing.id}` : "/api/gallery";
     const method = editing ? "PUT" : "POST";
 
@@ -103,7 +105,7 @@ export default function GalleryPage() {
       if (!res.ok) {
         if (data.details) {
           setFieldErrors(data.details);
-          setError("Please correct the highlighted fields below.");
+          setError("Please fill all required fields.");
         } else {
           setError(data.error || "Failed to save image.");
         }
@@ -309,20 +311,20 @@ export default function GalleryPage() {
                 </div>
               )}
               <div>
-                <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.src ? 'text-red-500' : 'text-slate-500'}`}>
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                   Gallery Image
                 </label>
                 <ImageUpload
                   value={form.src}
-                  onChange={url => setForm(f => ({ ...f, src: url }))}
-                  onError={msg => setError(msg)}
+                  onChange={(url: string) => setForm(f => ({ ...f, src: url }))}
+                  onError={(msg: string) => setError(msg)}
                 />
-                {fieldErrors.src && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.src[0]}</p>}
+                {hasError(fieldErrors, 'src') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'src')}</p>}
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-1.5 ml-1">
-                  <label className={`block text-[11px] font-bold uppercase tracking-wider ${fieldErrors.alt ? 'text-red-500' : 'text-slate-500'}`}>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     Description / Alt Text
                   </label>
                   <span className={`text-[10px] font-bold ${form.alt.length > 90 ? 'text-red-500' : 'text-slate-400'}`}>
@@ -331,12 +333,12 @@ export default function GalleryPage() {
                 </div>
                 <input
                   maxLength={100}
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.alt ? 'border-red-300 bg-red-50/30' : ''}`}
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'alt') && 'border-red-300 ring-2 ring-red-500/10')}
                   value={form.alt}
                   onChange={e => setForm(f => ({ ...f, alt: e.target.value }))}
                   placeholder="e.g. Pangong lake at sunrise"
                 />
-                {fieldErrors.alt && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.alt[0]}</p>}
+                {hasError(fieldErrors, 'alt') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'alt')}</p>}
               </div>
 
               <div className="flex flex-wrap gap-x-8 gap-y-3 pt-2">

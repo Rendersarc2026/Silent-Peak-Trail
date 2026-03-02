@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { readDB, writeDB } from "@/lib/db";
-import { sanitizeInput } from "@/lib/utils";
-import { packageSchema } from "@/lib/validation";
+import { sanitizeInput, slugify } from "@/lib/utils";
+import { packageSchema, parseItinerary } from "@/lib/validation";
 import { z } from "zod";
 
 function auth() { return getSession(); }
@@ -22,7 +21,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const parsed = packageSchema.parse(body);
+
+    // Parse itinerary if itineraryText is provided
+    if (body.itineraryText !== undefined) {
+      body.itinerary = parseItinerary(body.itineraryText);
+    }
+
+    const parsed = packageSchema.parse(body); // Use parse for POST as all fields are required
 
     const nameNormal = sanitizeInput(parsed.name).trim();
     const existing = await prisma.package.findFirst({
@@ -36,6 +41,7 @@ export async function POST(req: NextRequest) {
     const newPkg = await prisma.package.create({
       data: {
         name: nameNormal,
+        slug: slugify(nameNormal),
         tagline: sanitizeInput(parsed.tagline),
         duration: sanitizeInput(parsed.duration),
         price: parsed.price,
@@ -44,9 +50,14 @@ export async function POST(req: NextRequest) {
         featured: parsed.featured,
         img: parsed.img,
         features: parsed.features.map((f: string) => sanitizeInput(f)),
-        itinerary: parsed.itinerary || [],
-        inclusions: parsed.inclusions || [],
-        exclusions: parsed.exclusions || [],
+        itinerary: (parsed.itinerary || []).map((item: any) => ({
+          ...item,
+          day: sanitizeInput(item.day),
+          title: sanitizeInput(item.title),
+          activities: item.activities ? sanitizeInput(item.activities) : undefined
+        })),
+        inclusions: (parsed.inclusions || []).map((i: string) => sanitizeInput(i)),
+        exclusions: (parsed.exclusions || []).map((e: string) => sanitizeInput(e)),
       },
     });
 

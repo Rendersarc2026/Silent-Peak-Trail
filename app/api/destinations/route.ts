@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { readDB, writeDB } from "@/lib/db";
 import { sanitizeInput } from "@/lib/utils";
 import { destinationSchema } from "@/lib/validation";
 import { z } from "zod";

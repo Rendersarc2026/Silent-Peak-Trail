@@ -36,7 +36,7 @@ export default function Packages({ packages }: { packages: Package[] }) {
               style={{ animationDelay: `${i * 100}ms` }}
             >
               {/* Image Section */}
-              <Link href={`/packages/${p.id}`} className="relative h-72 overflow-hidden block">
+              <Link href={`/packages/${p.slug}`} className="relative h-72 overflow-hidden block">
                 <img
                   src={p.img}
                   alt={p.name}
@@ -62,7 +62,7 @@ export default function Packages({ packages }: { packages: Package[] }) {
 
               {/* Body Section */}
               <div className="flex flex-1 flex-col p-8">
-                <Link href={`/packages/${p.id}`} className="mb-2 text-2xl font-black tracking-tight text-[var(--navy)] hover:text-[var(--blue)] transition-colors">
+                <Link href={`/packages/${p.slug}`} className="mb-2 text-2xl font-black tracking-tight text-[var(--navy)] hover:text-[var(--blue)] transition-colors">
                   {p.name}
                 </Link>
                 <p className="mb-6 text-sm leading-relaxed text-[var(--text-mid)] line-clamp-2">
@@ -88,7 +88,7 @@ export default function Packages({ packages }: { packages: Package[] }) {
                     </div>
                   </div>
                   <Link
-                    href={`/packages/${p.id}`}
+                    href={`/packages/${p.slug}`}
                     className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--navy)] text-white transition-all hover:bg-[var(--gold)] hover:scale-110 active:scale-95 shadow-lg"
                   >
                     <ArrowRight size={20} />

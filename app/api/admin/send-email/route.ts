@@ -10,13 +10,18 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { to, subject, message } = await req.json();
+        const body = await req.json();
 
-        if (!to || !subject || !message) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-        }
+        // 1. Validate
+        const { sendEmailSchema } = await import("@/lib/validation");
+        const { sanitizeInput } = await import("@/lib/utils");
+        const parsed = sendEmailSchema.parse(body);
 
-        const sent = await sendCustomEmail({ to, subject, message });
+        // 2. Sanitize & Send
+        const cleanSubject = sanitizeInput(parsed.subject);
+        const cleanMessage = sanitizeInput(parsed.message);
+
+        const sent = await sendCustomEmail({ to: parsed.to, subject: cleanSubject, message: cleanMessage });
 
         if (!sent) {
             return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
@@ -24,6 +29,10 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
+        const { z } = await import("zod");
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ error: "Validation failed", details: error.flatten().fieldErrors }, { status: 400 });
+        }
         console.error("API error sending custom email:", error);
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }

@@ -60,7 +60,6 @@ export default function LoginPage() {
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   className="block w-full rounded-xl border-slate-200 bg-slate-50 pl-10 py-3 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white"
-                  required
                 />
               </div>
             </div>
@@ -79,7 +78,6 @@ export default function LoginPage() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   className="block w-full rounded-xl border-slate-200 bg-slate-50 pl-10 py-3 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white"
-                  required
                 />
               </div>
             </div>
