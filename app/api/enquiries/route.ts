@@ -1,19 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { sanitizeInput } from "@/lib/utils";
+import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { enquirySchema } from "@/lib/validation";
-import { z } from "zod";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   if (!await getSession()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const enquiries = await prisma.enquiry.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: "desc" }
+  const { searchParams } = new URL(req.url);
+  const search = searchParams.get("search") || "";
+  const status = searchParams.get("status") || "all";
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "10");
+  const skip = (page - 1) * limit;
+
+  const session = await getSession();
+  const where: any = { isActive: true };
+  if (status !== "all") {
+    where.status = status;
+  }
+  if (search) {
+    where.OR = [
+      { firstName: { contains: search } },
+      { lastName: { contains: search } },
+      { email: { contains: search } },
+      { phone: { contains: search } },
+      { message: { contains: search } },
+    ];
+  }
+
+  const [enquiries, total] = await Promise.all([
+    prisma.enquiry.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      include: { tourPackage: { select: { name: true } } }
+    }),
+    prisma.enquiry.count({ where })
+  ]);
+
+  // Transform to include package name if needed by frontend
+  const data = enquiries.map(e => ({
+    ...e,
+    package: e.tourPackage?.name || "N/A"
+  }));
+
+  const [allCount, statusCounts] = await Promise.all([
+    prisma.enquiry.count({ where: { isActive: true } }),
+    prisma.enquiry.groupBy({
+      by: ['status'],
+      where: { isActive: true },
+      _count: true
+    })
+  ]);
+
+  const counts: Record<string, number> = { all: allCount };
+  statusCounts.forEach(sc => {
+    counts[sc.status] = sc._count;
   });
 
-  return NextResponse.json(enquiries);
+  return NextResponse.json({
+    data,
+    total,
+    totalPages: Math.ceil(total / limit),
+    currentPage: page,
+    counts
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -21,7 +74,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // 1. Validate
-    const parsed = enquirySchema.parse(body);
+    const { success, data: parsed, error: validationError } = await validateWithYup(enquirySchema, body);
+
+    if (!success) {
+      return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
+    }
 
     // 2. Sanitize & Save
     const enquiry = await prisma.enquiry.create({
@@ -74,9 +131,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(enquiry, { status: 201 });
   } catch (err) {
-    if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation failed", details: err.flatten().fieldErrors }, { status: 400 });
-    }
     console.error("Enquiry validation error:", err);
     return NextResponse.json({ error: "Invalid input provided." }, { status: 400 });
   }

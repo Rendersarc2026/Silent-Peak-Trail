@@ -1,9 +1,9 @@
-import { z } from "zod";
+import * as yup from "yup";
 import { safeText, imageUrl } from "./primitives";
 
-export const gallerySchema = z.object({
+export const gallerySchema = yup.object({
     src: imageUrl,
     alt: safeText(2, 100),
-    wide: z.boolean().optional().default(false),
-    tall: z.boolean().optional().default(false),
+    wide: yup.boolean().default(false),
+    tall: yup.boolean().default(false),
 });

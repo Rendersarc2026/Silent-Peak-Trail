@@ -68,7 +68,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
             <Navbar />
             <main className="min-h-screen bg-[var(--white)] pt-[72px]">
                 {/* Header Hero Section */}
-                <div className="relative h-[50vh] min-h-[480px] w-full overflow-hidden">
+                <div className="relative h-[60vh] min-h-[520px] lg:h-[50vh] lg:min-h-[480px] w-full overflow-hidden">
                     {slug === 'stargazing-expedition' ? (
                         <div className="absolute inset-0 bg-black">
                             <video
@@ -90,53 +90,54 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--navy)] via-[var(--navy)]/40 to-transparent" />
 
-                    <div className="container mx-auto absolute top-0 left-0 right-0 px-5 pt-12 lg:px-[60px]">
-                        <Link
-                            href="/#packages"
-                            className="group inline-flex items-center gap-3 rounded-2xl bg-white/10 px-5 py-3 text-sm font-black uppercase tracking-widest text-white backdrop-blur-md ring-1 ring-white/20 transition-all hover:bg-white/20 hover:ring-white/40 active:scale-95 shadow-xl"
-                        >
-                            <ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1" />
-                            <span className="sr-only">Back to Packages</span>
-                        </Link>
-                    </div>
+                    <div className="container mx-auto absolute inset-0 px-5 pt-8 pb-10 lg:px-[60px] flex flex-col justify-between pointer-events-none">
+                        <div className="pointer-events-auto">
+                            <Link
+                                href="/#packages"
+                                className="group inline-flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-2.5 text-xs sm:text-sm font-black uppercase tracking-widest text-white backdrop-blur-md ring-1 ring-white/20 transition-all hover:bg-white/20 hover:ring-white/40 active:scale-95 shadow-xl"
+                            >
+                                <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1 lg:w-[18px]" />
+                                <span className="sr-only">Back to Packages</span>
+                                <span className="lg:inline hidden">Back</span>
+                            </Link>
+                        </div>
 
-                    <div className="container mx-auto absolute bottom-0 left-0 right-0 px-5 pb-16 lg:px-[60px]">
-                        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="flex flex-col gap-6 lg:gap-8 lg:flex-row lg:items-end lg:justify-between pointer-events-auto mt-auto">
                             <div className="max-w-3xl">
                                 {pkg.badge && (
                                     <div className={cn(
-                                        "mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-lg",
+                                        "mb-3 lg:mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 lg:px-4 lg:py-1.5 text-[9px] lg:text-[10px] font-black uppercase tracking-widest shadow-lg",
                                         pkg.badgeGold ? "bg-[var(--gold)] text-white" : "bg-[var(--blue)] text-white"
                                     )}>
                                         {pkg.badgeGold && <Zap size={10} className="fill-white" />}
                                         {pkg.badge}
                                     </div>
                                 )}
-                                <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl font-serif">
+                                <h1 className="text-3xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl font-serif">
                                     {pkg.name}
                                 </h1>
-                                <p className="mt-4 text-lg text-white/90 max-w-2xl font-medium italic">
+                                <p className="mt-3 lg:mt-4 text-base lg:text-lg text-white/90 max-w-2xl font-medium italic">
                                     &ldquo;{pkg.tagline}&rdquo;
                                 </p>
                             </div>
 
-                            <div className="flex flex-col gap-4">
-                                <div className="flex items-center gap-4 rounded-2xl bg-white/10 p-4 backdrop-blur-md ring-1 ring-white/20">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--gold)] text-white">
-                                        <Clock size={20} />
+                            <div className="flex flex-col gap-3 lg:gap-4 mt-2">
+                                <div className="flex items-center gap-3 lg:gap-4 rounded-2xl bg-white/10 p-3 lg:p-4 backdrop-blur-md ring-1 ring-white/20">
+                                    <div className="flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-xl bg-[var(--gold)] text-white">
+                                        <Clock size={16} className="lg:w-5" />
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/60">Duration</div>
-                                        <div className="font-bold text-white">{pkg.duration}</div>
+                                        <div className="text-[9px] lg:text-[10px] font-bold uppercase tracking-widest text-white/60 leading-none">Duration</div>
+                                        <div className="font-bold text-white text-sm lg:text-base">{pkg.duration}</div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 rounded-2xl bg-white/10 p-4 backdrop-blur-md ring-1 ring-white/20">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--blue)] text-white">
-                                        <span className="text-lg font-black italic">₹</span>
+                                <div className="flex items-center gap-3 lg:gap-4 rounded-2xl bg-white/10 p-3 lg:p-4 backdrop-blur-md ring-1 ring-white/20">
+                                    <div className="flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-xl bg-[var(--blue)] text-white">
+                                        <span className="text-base lg:text-lg font-black italic">₹</span>
                                     </div>
                                     <div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/60">Starting At</div>
-                                        <div className="font-bold text-white text-xl">₹{pkg.price.toLocaleString()} <span className="text-xs opacity-60">/ PP</span></div>
+                                        <div className="text-[9px] lg:text-[10px] font-bold uppercase tracking-widest text-white/60 leading-none">Starting At</div>
+                                        <div className="font-bold text-white text-lg lg:text-xl leading-tight">₹{pkg.price.toLocaleString()} <span className="text-[10px] lg:text-xs opacity-60">/ PP</span></div>
                                     </div>
                                 </div>
                             </div>

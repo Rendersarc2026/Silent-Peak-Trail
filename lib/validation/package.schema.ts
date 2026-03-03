@@ -1,61 +1,22 @@
-import { z } from "zod";
+import * as yup from "yup";
 import { safeText, safeOptionalText, imageUrl } from "./primitives";
 
-
-export const packageSchema = z.object({
+export const packageSchema = yup.object({
     name: safeText(2, 100),
     tagline: safeText(2, 200),
     duration: safeText(2, 50, "Duration is required"),
-    price: z.number().nonnegative(),
+    price: yup.number().min(0).required("Price is required"),
     badge: safeOptionalText(30),
-    badgeGold: z.boolean().optional().default(false),
-    featured: z.boolean().optional().default(false),
+    badgeGold: yup.boolean().default(false),
+    featured: yup.boolean().default(false),
     img: imageUrl,
-    features: z.array(safeText(undefined, 100)).default([]),
-    itinerary: z.array(z.object({
-        day: safeText(),
-        title: safeText(),
-        activities: safeOptionalText()
+    features: yup.array().of(safeText(2, 100)).min(1, "At least one feature is required").default([]),
+    itinerary: yup.array().of(yup.object({
+        day: safeText(2, 50),
+        title: safeText(2, 200),
+        activities: safeOptionalText(2000)
     })).min(1, "Itinerary is required").default([]),
-    inclusions: z.array(safeText()).optional().default([]),
-    exclusions: z.array(safeText()).optional().default([]),
+    inclusions: yup.array().of(safeText(2, 200)).default([]),
+    exclusions: yup.array().of(safeText(2, 200)).default([]),
 });
 
-const dayPattern = /^Day\s+\d+$/i;
-
-export function parseItinerary(text: string) {
-    if (!text || typeof text !== "string") {
-        throw new Error("Itinerary is required");
-    }
-
-    const lines = text
-        .split("\n")
-        .map(l => l.trim())
-        .filter(Boolean);
-
-    if (lines.length === 0) {
-        throw new Error("Itinerary is required");
-    }
-
-    return lines.map((line, index) => {
-        const parts = line.split("|").map(p => p.trim());
-
-        if (parts.length < 2) {
-            throw new Error(
-                `Line ${index + 1}: Use format Day X | Title | Activities (optional)`
-            );
-        }
-
-        if (!dayPattern.test(parts[0])) {
-            throw new Error(
-                `Line ${index + 1}: Day must be in format Day X`
-            );
-        }
-
-        return {
-            day: parts[0],
-            title: parts[1],
-            activities: parts.slice(2).join(" | "),
-        };
-    });
-}

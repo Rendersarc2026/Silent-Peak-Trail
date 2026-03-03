@@ -58,9 +58,16 @@ export default function DeleteConfirmModal({
                     <button
                         onClick={onConfirm}
                         disabled={isDeleting}
-                        className="flex items-center justify-center gap-2 min-w-[100px] rounded-xl bg-red-600 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-red-700 shadow-sm disabled:opacity-70 active:scale-[0.98]"
+                        className="flex items-center justify-center gap-2 min-w-[120px] rounded-xl bg-red-600 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-red-700 shadow-sm disabled:opacity-70 active:scale-[0.98]"
                     >
-                        {isDeleting ? <Loader2 size={16} className="animate-spin" /> : "Delete"}
+                        {isDeleting ? (
+                            <>
+                                <Loader2 size={16} className="animate-spin" />
+                                <span>Deleting...</span>
+                            </>
+                        ) : (
+                            "Delete"
+                        )}
                     </button>
                 </div>
             </div>

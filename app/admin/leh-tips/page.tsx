@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
+import Pagination from "@/components/admin/Pagination";
 import {
     Plus,
     Trash2,
@@ -21,12 +22,13 @@ import {
     Sun,
     Camera,
     Heart,
-    Compass,
+    Compass
 } from "lucide-react";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ConfirmModal from "@/components/admin/ConfirmModal";
 import Skeleton from "@/components/admin/Skeleton";
-import { hasError, getErrorMessage } from "@/lib/utils";
+import SearchInput from "@/components/admin/SearchInput";
+import { hasError, getErrorMessage, validateWithYup } from "@/lib/utils";
 import { lehTipSchema } from "@/lib/validation";
 
 // Map of available lucide icon names to components
@@ -39,7 +41,6 @@ const COLOR_OPTIONS = [
     { label: "Blue", color: "bg-blue-50 text-blue-600", border: "border-blue-100" },
     { label: "Amber", color: "bg-amber-50 text-amber-600", border: "border-amber-100" },
     { label: "Red", color: "bg-red-50 text-red-600", border: "border-red-100" },
-    { label: "Indigo", color: "bg-indigo-50 text-indigo-700", border: "border-indigo-100" },
     { label: "Green", color: "bg-green-50 text-green-600", border: "border-green-100" },
     { label: "Slate", color: "bg-slate-50 text-slate-600", border: "border-slate-100" },
     { label: "Purple", color: "bg-purple-50 text-purple-600", border: "border-purple-100" },
@@ -61,6 +62,10 @@ const EMPTY = { icon: "Wind", title: "", desc: "", color: "bg-blue-50 text-blue-
 export default function LehTipsPage() {
     const [items, setItems] = useState<LehTip[]>([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+
     const [modal, setModal] = useState(false);
     const [editing, setEditing] = useState<LehTip | null>(null);
     const [form, setForm] = useState(EMPTY);
@@ -68,6 +73,16 @@ export default function LehTipsPage() {
     const [toast, setToast] = useState("");
     const [error, setError] = useState("");
     const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+
+    const clearFieldError = (field: string) => {
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => {
+                const next = { ...prev };
+                delete next[field];
+                return next;
+            });
+        }
+    };
     const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string }>({ isOpen: false, id: "" });
     const [deleting, setDeleting] = useState(false);
     const [confirmClose, setConfirmClose] = useState(false);
@@ -98,6 +113,7 @@ export default function LehTipsPage() {
         setError("");
         setFieldErrors({});
         setConfirmClose(false);
+        setSaving(false);
     };
 
     const showToast = (msg: string) => {
@@ -105,17 +121,30 @@ export default function LehTipsPage() {
         setTimeout(() => setToast(""), 3000);
     };
 
-    const fetchItems = async () => {
+    const fetchItems = async (page = 1, s = search) => {
         setLoading(true);
         try {
-            const res = await fetch("/api/leh-tips");
-            setItems(await res.json());
+            const params = new URLSearchParams({
+                page: page.toString(),
+                search: s,
+                limit: "12"
+            });
+            const res = await fetch(`/api/leh-tips?${params}`);
+            const data = await res.json();
+            setItems(data.data || []);
+            setTotalPages(data.totalPages || 0);
+            setCurrentPage(data.currentPage || 1);
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => { fetchItems(); }, []);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchItems(1, search);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
 
     const openAdd = () => {
         setEditing(null);
@@ -137,10 +166,10 @@ export default function LehTipsPage() {
         setError("");
         setFieldErrors({});
 
-        // Client-side validation
-        const result = lehTipSchema.safeParse(form);
-        if (!result.success) {
-            setFieldErrors(result.error.flatten().fieldErrors as any);
+        // Client-side validation using Yup
+        const { success, error: validationError } = await validateWithYup(lehTipSchema, form);
+        if (!success) {
+            setFieldErrors(validationError?.fieldErrors as any);
             setError("Please fill all required fields.");
             return;
         }
@@ -162,14 +191,14 @@ export default function LehTipsPage() {
                 } else {
                     setError(data.error || "Something went wrong.");
                 }
+                setSaving(false);
                 return;
             }
             showToast(editing ? "Tip updated!" : "Tip added!");
             closeModal();
-            fetchItems();
+            fetchItems(currentPage);
         } catch {
             setError("Network error. Please try again.");
-        } finally {
             setSaving(false);
         }
     };
@@ -188,23 +217,40 @@ export default function LehTipsPage() {
 
     const handleColorSelect = (opt: typeof COLOR_OPTIONS[0]) => {
         setForm(f => ({ ...f, color: opt.color, border: opt.border }));
+        clearFieldError('color');
+        clearFieldError('border');
     };
 
     return (
         <AdminShell title="Leh Tips">
             <div className="mx-auto max-w-5xl px-4 py-10">
                 {/* Header */}
-                <div className="mb-8 flex items-center justify-between">
-                    <div>
+                <div className="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="flex-1 max-w-lg">
                         <h1 className="text-2xl font-black tracking-tight text-slate-900">Know Before You Go</h1>
                         <p className="mt-1 text-sm text-slate-500">Manage the tips shown in the Leh preparation section.</p>
                     </div>
-                    <button
-                        onClick={openAdd}
-                        className="flex items-center gap-2 rounded-xl bg-[var(--navy)] px-5 py-3 text-sm font-black text-white transition hover:bg-[var(--blue)] active:scale-95"
-                    >
-                        <Plus size={16} /> Add Tip
-                    </button>
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                        {/* Search */}
+                        <SearchInput
+                            value={search}
+                            onChange={(val) => {
+                                setSearch(val);
+                                setCurrentPage(1);
+                            }}
+                            placeholder="Search tips..."
+                            loading={loading && !!search}
+                            className="sm:w-64"
+                        />
+
+                        <button
+                            onClick={openAdd}
+                            className="flex items-center justify-center gap-2 rounded-xl bg-[var(--navy)] px-5 py-2.5 text-sm font-black text-white transition hover:bg-[var(--blue)] active:scale-95 shadow-sm"
+                        >
+                            <Plus size={16} /> Add Tip
+                        </button>
+                    </div>
                 </div>
 
                 {/* Toast */}
@@ -260,6 +306,19 @@ export default function LehTipsPage() {
                         })}
                     </div>
                 )}
+
+                {!loading && items.length > 0 && (
+                    <div className="mt-10 flex justify-center">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(page) => {
+                                setCurrentPage(page);
+                                fetchItems(page, search);
+                            }}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Add/Edit Modal */}
@@ -294,7 +353,7 @@ export default function LehTipsPage() {
                                     <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Icon</label>
                                     <select
                                         value={form.icon}
-                                        onChange={e => setForm(f => ({ ...f, icon: e.target.value }))}
+                                        onChange={e => { setForm(f => ({ ...f, icon: e.target.value })); clearFieldError('icon'); }}
                                         className={`w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none ${hasError(fieldErrors, 'icon') ? 'border-red-300 bg-red-50/30' : ''}`}
                                     >
                                         {Object.keys(ICON_MAP).map(name => (
@@ -309,7 +368,7 @@ export default function LehTipsPage() {
                                     <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Title</label>
                                     <input
                                         value={form.title}
-                                        onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                                        onChange={e => { setForm(f => ({ ...f, title: e.target.value })); clearFieldError('title'); }}
                                         placeholder="e.g. Mandatory Acclimatization"
                                         className={`w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none ${hasError(fieldErrors, 'title') ? 'border-red-300 bg-red-50/30' : ''}`}
                                     />
@@ -322,7 +381,7 @@ export default function LehTipsPage() {
                                     <textarea
                                         rows={3}
                                         value={form.desc}
-                                        onChange={e => setForm(f => ({ ...f, desc: e.target.value }))}
+                                        onChange={e => { setForm(f => ({ ...f, desc: e.target.value })); clearFieldError('desc'); }}
                                         placeholder="Short tip description..."
                                         className={`w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none resize-none ${hasError(fieldErrors, 'desc') ? 'border-red-300 bg-red-50/30' : ''}`}
                                     />
@@ -352,7 +411,7 @@ export default function LehTipsPage() {
                                         type="number"
                                         min={0}
                                         value={form.order}
-                                        onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+                                        onChange={e => { setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 })); clearFieldError('order'); }}
                                         className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none"
                                     />
                                 </div>
@@ -376,7 +435,7 @@ export default function LehTipsPage() {
                                 {saving ? (
                                     <>
                                         <Loader2 size={18} className="animate-spin" />
-                                        <span>Saving...</span>
+                                        <span>{editing ? "Saving..." : "Adding..."}</span>
                                     </>
                                 ) : (
                                     <>

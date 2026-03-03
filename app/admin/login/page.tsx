@@ -19,16 +19,24 @@ export default function LoginPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    setLoading(false);
     if (res.ok) {
+      // keep loading=true so overlay stays while router redirects
       router.push("/admin/dashboard");
     } else {
+      setLoading(false);
       setError("Invalid username or password. Try admin / ladakh2025");
     }
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-900 px-4 py-12">
+      {/* Full-screen overlay while logging in / redirecting */}
+      {loading && (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <Loader2 size={40} className="animate-spin text-white mb-4" />
+          <p className="text-sm font-semibold text-slate-300 tracking-wide">Signing in to Silent Peak Trail</p>
+        </div>
+      )}
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-2xl">
         <div className="text-center">
           <div className="mx-auto mb-4 inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-600">

@@ -1,16 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { sanitizeInput } from "@/lib/utils";
+import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { lehTipSchema } from "@/lib/validation";
-import { z } from "zod";
 import prisma from "@/lib/prisma";
 
-export async function GET() {
-    const items = await prisma.lehTip.findMany({
-        where: { isActive: true },
-        orderBy: { order: "asc" },
+export async function GET(req: NextRequest) {
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search") || "";
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "12");
+    const skip = (page - 1) * limit;
+
+    const session = await getSession();
+    const where: any = { isActive: true };
+    if (search) {
+        where.OR = [
+            { title: { contains: search } },
+            { desc: { contains: search } },
+        ];
+    }
+
+    const [items, total] = await Promise.all([
+        prisma.lehTip.findMany({
+            where,
+            orderBy: { order: "asc" },
+            skip,
+            take: limit,
+        }),
+        prisma.lehTip.count({ where }),
+    ]);
+
+    return NextResponse.json({
+        data: items,
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
     });
-    return NextResponse.json(items);
 }
 
 export async function POST(req: NextRequest) {
@@ -18,7 +43,11 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const parsed = lehTipSchema.parse(body);
+        const { success, data: parsed, error: validationError } = await validateWithYup(lehTipSchema, body);
+
+        if (!success) {
+            return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
+        }
 
         const item = await prisma.lehTip.create({
             data: {
@@ -33,9 +62,6 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(item, { status: 201 });
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: "Validation failed", details: error.flatten().fieldErrors }, { status: 400 });
-        }
         console.error("Error creating leh tip:", error);
         return NextResponse.json({ error: "Invalid tip data." }, { status: 400 });
     }

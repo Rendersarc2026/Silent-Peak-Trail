@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { X, Send, Mail, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAction } from "@/lib/hooks/useAction";
-import { cn, hasError, getErrorMessage } from "@/lib/utils";
+import { cn, hasError, getErrorMessage, validateWithYup } from "@/lib/utils";
 import { sendEmailSchema } from "@/lib/validation";
 
 interface EmailComposerProps {
@@ -18,13 +18,23 @@ export default function EmailComposer({ to, onClose, onSuccess }: EmailComposerP
     const [error, setError] = useState("");
     const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
+    const clearFieldError = (field: string) => {
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => {
+                const next = { ...prev };
+                delete next[field];
+                return next;
+            });
+        }
+    };
+
     const [handleSend, { loading }] = useAction(async () => {
         setError("");
         setFieldErrors({});
 
-        const result = sendEmailSchema.safeParse({ to, subject, message });
-        if (!result.success) {
-            setFieldErrors(result.error.flatten().fieldErrors as any);
+        const { success, error: validationError } = await validateWithYup(sendEmailSchema, { to, subject, message });
+        if (!success) {
+            setFieldErrors(validationError?.fieldErrors as any);
             setError("Please fill all required fields.");
             return;
         }
@@ -83,7 +93,7 @@ export default function EmailComposer({ to, onClose, onSuccess }: EmailComposerP
                     <input
                         type="text"
                         value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
+                        onChange={(e) => { setSubject(e.target.value); clearFieldError('subject'); }}
                         disabled={sent}
                         className={cn("w-full rounded-xl border-slate-200 bg-white px-3 py-2 text-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-300", hasError(fieldErrors, 'subject') && 'border-red-300 ring-4 ring-red-500/10')}
                         placeholder="What's this about?"
@@ -95,7 +105,7 @@ export default function EmailComposer({ to, onClose, onSuccess }: EmailComposerP
                     <label className={cn("mb-1 block text-[10px] font-bold uppercase tracking-wider", hasError(fieldErrors, 'message') ? 'text-red-500' : 'text-slate-400')}>Message</label>
                     <textarea
                         value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        onChange={(e) => { setMessage(e.target.value); clearFieldError('message'); }}
                         disabled={sent}
                         rows={6}
                         className={cn("w-full rounded-xl border-slate-200 bg-white px-3 py-2 text-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 resize-none placeholder:text-slate-300", hasError(fieldErrors, 'message') && 'border-red-300 ring-4 ring-red-500/10')}

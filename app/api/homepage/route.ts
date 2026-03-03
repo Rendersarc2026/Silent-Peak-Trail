@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { sanitizeInput } from "@/lib/utils";
+import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { homepageContentSchema } from "@/lib/validation";
-import { z } from "zod";
-
 import prisma from "@/lib/prisma";
 
 export async function GET() {
@@ -20,7 +18,11 @@ export async function PUT(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const parsed = homepageContentSchema.parse(body);
+        const { success, data: parsed, error: validationError } = await validateWithYup(homepageContentSchema, body);
+
+        if (!success) {
+            return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
+        }
 
         const textFields = [
             "heroBgImage",
@@ -58,9 +60,6 @@ export async function PUT(req: NextRequest) {
 
         return NextResponse.json(result);
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: "Validation failed", details: error.flatten().fieldErrors }, { status: 400 });
-        }
         console.error("Error updating homepage content:", error);
         return NextResponse.json({ error: "Invalid homepage data provided." }, { status: 400 });
     }

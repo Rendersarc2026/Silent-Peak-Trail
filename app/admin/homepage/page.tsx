@@ -17,7 +17,7 @@ import {
   AlertCircle,
   ShieldCheck
 } from "lucide-react";
-import { sanitizeInput, hasError, getErrorMessage, cn } from "@/lib/utils";
+import { sanitizeInput, hasError, getErrorMessage, cn, validateWithYup } from "@/lib/utils";
 import { homepageContentSchema } from "@/lib/validation";
 import ImageUpload from "@/components/admin/ImageUpload";
 
@@ -45,6 +45,13 @@ export default function HomepagePage() {
 
   function set(key: keyof HomepageContent, val: string) {
     setForm(f => f ? { ...f, [key]: val } : f);
+    if (fieldErrors[key]) {
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
   }
 
   // Feature editing helper
@@ -62,15 +69,9 @@ export default function HomepagePage() {
   async function save() {
     if (!form) return;
 
-    const result = homepageContentSchema.safeParse(form);
-    if (!result.success) {
-      const flattenedErrors: Record<string, string[]> = {};
-      result.error.issues.forEach(issue => {
-        const path = issue.path.join('.');
-        if (!flattenedErrors[path]) flattenedErrors[path] = [];
-        flattenedErrors[path].push(issue.message);
-      });
-      setFieldErrors(flattenedErrors);
+    const { success, error: validationError } = await validateWithYup(homepageContentSchema, form);
+    if (!success) {
+      setFieldErrors(validationError?.fieldErrors as any);
       setError("Please fill all required fields.");
       return;
     }

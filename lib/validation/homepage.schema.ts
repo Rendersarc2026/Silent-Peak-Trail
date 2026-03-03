@@ -1,16 +1,16 @@
-import { z } from "zod";
+import * as yup from "yup";
 import { safeText, safeOptionalText, optionalImageUrl } from "./primitives";
 
 // Schema for individual features within the Why Us section
-const featureSchema = z.object({
-    icon: z.string(),
+const featureSchema = yup.object({
+    icon: yup.string().required(),
     title: safeText(2, 100),
     desc: safeText(2, 300),
-    color: z.string().optional(),
-    bg: z.string().optional()
+    color: yup.string().optional(),
+    bg: yup.string().optional()
 });
 
-export const homepageContentSchema = z.object({
+export const homepageContentSchema = yup.object({
     heroTitle: safeText(2, 80, "Required"),
     heroSubtitle: safeText(2, 300, "Required"),
     heroBadge: safeOptionalText(50),
@@ -26,26 +26,18 @@ export const homepageContentSchema = z.object({
     whyUsImage: optionalImageUrl,
     whyUsStatsValue: safeOptionalText(20),
     whyUsStatsLabel: safeOptionalText(50),
-    whyUsFeatures: z.string().optional().default("[]").superRefine((val, ctx) => {
+    whyUsFeatures: yup.string().default("[]").test("is-json-array", "Invalid format", (val) => {
+        if (!val) return true;
         try {
             const parsed = JSON.parse(val);
-            if (!Array.isArray(parsed)) {
-                ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid format" });
-                return;
+            if (!Array.isArray(parsed)) return false;
+            // Quick check for item validity
+            for (const item of parsed) {
+                if (!featureSchema.isValidSync(item)) return false;
             }
-            parsed.forEach((item, i) => {
-                const res = featureSchema.safeParse(item);
-                if (!res.success) {
-                    res.error.issues.forEach(issue => {
-                        ctx.addIssue({
-                            ...issue,
-                            path: [i, ...issue.path]
-                        });
-                    });
-                }
-            });
+            return true;
         } catch {
-            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid JSON" });
+            return false;
         }
     }),
     // Stargazing overrides

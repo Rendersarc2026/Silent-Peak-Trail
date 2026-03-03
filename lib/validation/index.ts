@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as yup from "yup";
 import { safeText, safeOptionalText } from "./primitives";
 
 export * from "./primitives";

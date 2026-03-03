@@ -1,9 +1,9 @@
-import { z } from "zod";
-import { safeOptionalText } from "./primitives";
+import * as yup from "yup";
+import { safeText, phoneText } from "./primitives";
 
-export const agencyProfileSchema = z.object({
-    phone: safeOptionalText(50),
-    email: z.string().email().optional().or(z.literal('')),
-    address: safeOptionalText(200),
-    season: safeOptionalText(100),
+export const agencyProfileSchema = yup.object({
+    phone: phoneText,
+    email: yup.string().trim().email("Invalid email address").required("Email is required"),
+    address: safeText(10, 200),
+    season: safeText(2, 100),
 });

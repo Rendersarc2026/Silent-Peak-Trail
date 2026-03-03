@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { sanitizeInput, slugify } from "@/lib/utils";
-import { packageSchema, parseItinerary } from "@/lib/validation";
-import { z } from "zod";
+import { sanitizeInput, slugify, validateWithYup, makePartial } from "@/lib/utils";
+import { packageSchema } from "@/lib/validation";
 import prisma from "@/lib/prisma";
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -20,12 +19,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const numId = parseInt(id);
     const body = await req.json();
 
-    // Parse itinerary if itineraryText is provided
-    if (body.itineraryText !== undefined) {
-      body.itinerary = parseItinerary(body.itineraryText);
-    }
+    const { success, data: parsed, error: validationError } = await validateWithYup(makePartial(packageSchema), body);
 
-    const parsed = packageSchema.partial().parse(body);
+    if (!success) {
+      return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
+    }
 
     const existing = await prisma.package.findUnique({ where: { id: numId } });
     if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -70,9 +68,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json(updated);
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation failed", details: error.flatten().fieldErrors }, { status: 400 });
-    }
     console.error("Error updating package:", error);
     return NextResponse.json({ error: "Invalid package update data." }, { status: 400 });
   }

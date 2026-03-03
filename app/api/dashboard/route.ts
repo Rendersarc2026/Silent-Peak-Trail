@@ -25,8 +25,18 @@ export async function GET() {
             prisma.enquiry.count({ where: { status: "new", isActive: true } }),
             prisma.enquiry.count({ where: { status: "confirmed", isActive: true } }),
             prisma.enquiry.count({ where: { status: "replied", isActive: true } }),
-            prisma.enquiry.findMany({ where: { isActive: true }, orderBy: { createdAt: "desc" }, take: 5 }),
+            prisma.enquiry.findMany({
+                where: { isActive: true },
+                include: { tourPackage: { select: { name: true } } },
+                orderBy: { createdAt: "desc" },
+                take: 5
+            }),
         ]);
+
+        const mappedRecent = recentEnquiries.map(e => ({
+            ...e,
+            package: e.tourPackage?.name || "N/A"
+        }));
 
         return NextResponse.json({
             packages: packageCount,
@@ -37,7 +47,7 @@ export async function GET() {
             testimonials: reviewCount,
             confirmed: confirmedEnquiriesCount,
             replied: repliedEnquiriesCount,
-            recent: recentEnquiries,
+            recent: mappedRecent,
         });
     } catch (err) {
         console.error("Dashboard API error:", err);

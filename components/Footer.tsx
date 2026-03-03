@@ -69,7 +69,7 @@ export default function Footer({ className }: { className?: string }) {
   };
 
   return (
-    <footer className={cn("bg-[var(--navy)] pt-12 pb-12 text-white overflow-hidden", className)}>
+    <footer className={cn("bg-[var(--navy)] pt-12 pb-12 text-white overflow-hidden", className)} style={{ fontFamily: "'Montserrat', sans-serif" }}>
       <div className="container mx-auto  px-5 lg:px-[60px]">
 
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
@@ -83,8 +83,10 @@ export default function Footer({ className }: { className?: string }) {
                   className="h-28 w-28 rounded-full object-cover shadow-2xl ring-2 ring-white/10"
                 />
               </a>
-              <h3 className="text-lg font-black uppercase tracking-[0.2em] text-white">
-                SILENT <span className="text-[var(--gold)]">PEAK</span> TRAIL
+              <h3 className="text-xl tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                <span className="font-medium text-blue-100/60">Silent</span>
+                <span className="font-medium text-white mx-1.5">Peak</span>
+                <span className="font-medium text-blue-100/60">Trail</span>
               </h3>
             </div>
 
@@ -113,7 +115,7 @@ export default function Footer({ className }: { className?: string }) {
           <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-8 sm:col-span-2 lg:col-span-3 lg:grid-cols-3 ">
             {/* Tour Packages */}
             <div className="space-y-6">
-              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)] pl-5 lg:pl-0">Tour Packages</h4>
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)] pl-5 lg:pl-0" style={{ fontFamily: "'Montserrat', sans-serif" }}>Tour Packages</h4>
               <ul className="space-y-4">
                 {FOOTER_LINKS[0].links.map((link) => (
                   <li key={link.label}>
@@ -133,7 +135,7 @@ export default function Footer({ className }: { className?: string }) {
             {/* Quick Links & Helpful Info */}
             {FOOTER_LINKS.slice(1).map((column) => (
               <div key={column.title} className="space-y-6">
-                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)] pl-5 lg:pl-0">
+                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)] pl-5 lg:pl-0" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                   {column.title}
                 </h4>
                 <ul className="space-y-4">

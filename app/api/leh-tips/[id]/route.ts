@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { sanitizeInput } from "@/lib/utils";
+import { sanitizeInput, validateWithYup, makePartial } from "@/lib/utils";
 import { lehTipSchema } from "@/lib/validation";
-import { z } from "zod";
 import prisma from "@/lib/prisma";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -12,7 +11,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         const { id } = await params;
         const numId = parseInt(id);
         const body = await req.json();
-        const parsed = lehTipSchema.partial().parse(body);
+        const { success, data: parsed, error: validationError } = await validateWithYup(makePartial(lehTipSchema), body);
+
+        if (!success) {
+            return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
+        }
 
         const existing = await prisma.lehTip.findUnique({ where: { id: numId } });
         if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -31,9 +34,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
         return NextResponse.json(updated);
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: "Validation failed", details: error.flatten().fieldErrors }, { status: 400 });
-        }
         console.error("Error updating leh tip:", error);
         return NextResponse.json({ error: "Invalid tip data." }, { status: 400 });
     }

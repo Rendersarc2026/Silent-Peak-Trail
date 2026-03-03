@@ -19,11 +19,22 @@ export default function NewReviewPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
+    const clearFieldError = (field: string) => {
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => {
+                const updated = { ...prev };
+                delete updated[field];
+                return updated;
+            });
+        }
+    };
+
     useEffect(() => {
-        fetch("/api/packages")
+        fetch("/api/packages?limit=100")
             .then(res => res.json())
             .then(data => {
-                if (Array.isArray(data)) setPackages(data);
+                const pkgs = data.data || data;
+                if (Array.isArray(pkgs)) setPackages(pkgs);
             })
             .catch(err => console.error("Failed to fetch packages", err));
     }, []);
@@ -147,8 +158,7 @@ export default function NewReviewPage() {
                                         maxLength={50}
                                         type="text"
                                         value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        onKeyDown={handleNameKeyDown}
+                                        onChange={(e) => { setName(e.target.value); clearFieldError('name'); }}
                                         className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none ${hasError(fieldErrors, 'name') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                         placeholder="John Doe"
                                     />
@@ -165,7 +175,7 @@ export default function NewReviewPage() {
                                             maxLength={50}
                                             type="text"
                                             value={place}
-                                            onChange={(e) => setPlace(e.target.value)}
+                                            onChange={(e) => { setPlace(e.target.value); clearFieldError('place'); }}
                                             className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none ${hasError(fieldErrors, 'place') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                             placeholder="e.g. Mumbai, India"
                                         />
@@ -179,7 +189,7 @@ export default function NewReviewPage() {
                                         </label>
                                         <select
                                             value={packageId}
-                                            onChange={(e) => setPackageId(Number(e.target.value))}
+                                            onChange={(e) => { setPackageId(Number(e.target.value)); clearFieldError('packageId'); }}
                                             className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none appearance-none ${hasError(fieldErrors, 'packageId') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                         >
                                             <option value={0}>Select a package</option>
@@ -207,7 +217,7 @@ export default function NewReviewPage() {
                                         maxLength={1000}
                                         rows={5}
                                         value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
+                                        onChange={(e) => { setMessage(e.target.value); clearFieldError('message'); }}
                                         className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none resize-none ${hasError(fieldErrors, 'message') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                         placeholder="Tell us about your trip..."
                                     />
