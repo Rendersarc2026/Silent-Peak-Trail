@@ -46,6 +46,7 @@ export default function EnquiriesPage() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [counts, setCounts] = useState<Record<string, number>>({});
 
   const [detail, setDetail] = useState<Enquiry | null>(null);
@@ -54,13 +55,13 @@ export default function EnquiriesPage() {
   const [deleting, setDeleting] = useState(false);
   const [composingEmail, setComposingEmail] = useState<string | null>(null);
 
-  const load = (page = 1, s = search, f = filter) => {
+  const load = (page = 1, s = search, f = filter, lim = rowsPerPage) => {
     setLoading(true);
     const params = new URLSearchParams({
       page: page.toString(),
       search: s,
       status: f,
-      limit: "10"
+      limit: lim.toString()
     });
     return fetch(`/api/enquiries?${params}`)
       .then(r => r.json())
@@ -263,6 +264,12 @@ export default function EnquiriesPage() {
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(val) => {
+                  setRowsPerPage(val);
+                  setCurrentPage(1);
+                  load(1, search, filter, val);
+                }}
                 onPageChange={(page) => {
                   setCurrentPage(page);
                   load(page, search, filter);

@@ -46,6 +46,7 @@ export default function PackagesPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<Pkg | null>(null);
@@ -109,12 +110,12 @@ export default function PackagesPage() {
     }
   };
 
-  const load = (page = 1, s = searchQuery) => {
+  const load = (page = 1, s = searchQuery, lim = rowsPerPage) => {
     setLoading(true);
     const params = new URLSearchParams({
       page: page.toString(),
       search: s,
-      limit: "10"
+      limit: lim.toString()
     });
     return fetch(`/api/packages?${params}`)
       .then(r => r.json())
@@ -384,6 +385,12 @@ export default function PackagesPage() {
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(val) => {
+                setRowsPerPage(val);
+                setCurrentPage(1);
+                load(1, searchQuery, val);
+              }}
               onPageChange={(page) => {
                 setCurrentPage(page);
                 load(page, searchQuery);

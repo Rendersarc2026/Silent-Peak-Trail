@@ -31,6 +31,7 @@ export default function GalleryPage() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
@@ -75,12 +76,12 @@ export default function GalleryPage() {
       setFieldErrors({});
     }
   };
-  const load = (page = 1, s = search) => {
+  const load = (page = 1, s = search, lim = rowsPerPage) => {
     setLoading(true);
     const params = new URLSearchParams({
       page: page.toString(),
       search: s,
-      limit: "12"
+      limit: lim.toString()
     });
     return fetch(`/api/gallery?${params}`)
       .then(r => r.json())
@@ -326,6 +327,12 @@ export default function GalleryPage() {
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(val) => {
+              setRowsPerPage(val);
+              setCurrentPage(1);
+              load(1, search, val);
+            }}
             onPageChange={(page) => {
               setCurrentPage(page);
               load(page, search);

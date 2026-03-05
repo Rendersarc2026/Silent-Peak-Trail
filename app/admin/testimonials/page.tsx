@@ -59,6 +59,7 @@ export default function TestimonialsAdmin() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [activeTab, setActiveTab] = useState<"live" | "pending" | "archived">("live");
 
   const [modal, setModal] = useState(false);
@@ -104,14 +105,14 @@ export default function TestimonialsAdmin() {
 
   const statusParam = activeTab === "live" ? "approved" : "hidden";
 
-  const load = useCallback(async (page = 1, s = search, tab = activeTab) => {
+  const load = useCallback(async (page = 1, s = search, tab = activeTab, lim = rowsPerPage) => {
     setLoading(true);
     const tabStatus = tab === "live" ? "approved" : tab === "pending" ? "pending" : "archived";
     try {
       const params = new URLSearchParams({
         page: page.toString(),
         search: s,
-        limit: "9",
+        limit: lim.toString(),
         status: tabStatus
       });
       const [revRes, pkgRes] = await Promise.all([
@@ -466,6 +467,12 @@ export default function TestimonialsAdmin() {
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(val) => {
+                setRowsPerPage(val);
+                setCurrentPage(1);
+                load(1, search, activeTab, val);
+              }}
               onPageChange={(page) => {
                 setCurrentPage(page);
                 load(page, search, activeTab);

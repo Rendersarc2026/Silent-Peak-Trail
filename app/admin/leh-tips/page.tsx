@@ -65,6 +65,7 @@ export default function LehTipsPage() {
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const [modal, setModal] = useState(false);
     const [editing, setEditing] = useState<LehTip | null>(null);
@@ -121,13 +122,13 @@ export default function LehTipsPage() {
         setTimeout(() => setToast(""), 3000);
     };
 
-    const fetchItems = async (page = 1, s = search) => {
+    const fetchItems = async (page = 1, s = search, lim = rowsPerPage) => {
         setLoading(true);
         try {
             const params = new URLSearchParams({
                 page: page.toString(),
                 search: s,
-                limit: "12"
+                limit: lim.toString()
             });
             const res = await fetch(`/api/leh-tips?${params}`);
             const data = await res.json();
@@ -312,6 +313,12 @@ export default function LehTipsPage() {
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={(val) => {
+                                setRowsPerPage(val);
+                                setCurrentPage(1);
+                                fetchItems(1, search, val);
+                            }}
                             onPageChange={(page) => {
                                 setCurrentPage(page);
                                 fetchItems(page, search);
