@@ -3,7 +3,8 @@ import { getSession } from "@/lib/auth";
 import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { destinationSchema } from "@/lib/validation";
 
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import Destination from "@/lib/models/Destination";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -15,20 +16,20 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   const where: any = { isActive: true };
   if (search) {
-    where.OR = [
-      { name: { contains: search } },
-      { type: { contains: search } },
+    where.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { type: { $regex: search, $options: 'i' } },
     ];
   }
 
+  await dbConnect();
+
   const [items, total] = await Promise.all([
-    prisma.destination.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    prisma.destination.count({ where }),
+    Destination.find(where)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Destination.countDocuments(where),
   ]);
 
   return NextResponse.json({
@@ -51,22 +52,19 @@ export async function POST(req: NextRequest) {
     }
 
     const nameNormal = sanitizeInput(parsed.name).trim();
-    const existing = await prisma.destination.findFirst({
-      where: { name: { equals: nameNormal } },
-    });
+    await dbConnect();
+    const existing = await Destination.findOne({ name: nameNormal });
 
     if (existing) {
       return NextResponse.json({ error: `A destination named "${nameNormal}" already exists.` }, { status: 409 });
     }
 
-    const item = await prisma.destination.create({
-      data: {
+    const item = await Destination.create({
         name: nameNormal,
         type: sanitizeInput(parsed.type),
         altitude: sanitizeInput(parsed.altitude),
         img: parsed.img,
         big: parsed.big,
-      },
     });
 
     return NextResponse.json(item, { status: 201 });

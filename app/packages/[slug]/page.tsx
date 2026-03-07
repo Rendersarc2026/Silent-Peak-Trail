@@ -1,4 +1,6 @@
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import Package from "@/lib/models/Package";
+import Homepage from "@/lib/models/Homepage";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -21,8 +23,9 @@ import { cn } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    await dbConnect();
     const { slug } = await params;
-    const pkg = await prisma.package.findUnique({ where: { slug } });
+    const pkg = await Package.findOne({ slug }).lean();
 
     if (!pkg) return { title: "Package Not Found" };
 
@@ -38,17 +41,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PackageDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
+    await dbConnect();
+
     const [pkg, settingsRecords, allPackages] = await Promise.all([
-        prisma.package.findUnique({ where: { slug } }),
-        prisma.homepage.findMany(),
-        prisma.package.findMany({ select: { id: true, name: true } }),
+        Package.findOne({ slug }).lean(),
+        Homepage.find().lean(),
+        Package.find().select('_id name').lean(),
     ]);
 
     if (!pkg) notFound();
 
     const homepageData: Record<string, string> = {};
     settingsRecords.forEach((s: { key: string; value: string }) => { homepageData[s.key] = s.value; });
-    const packageList = allPackages.map((p: { id: number; name: string }) => ({ id: p.id, name: p.name }));
+    const packageList = allPackages.map((p: any) => ({ id: String(p._id), name: p.name }));
 
     const itinerary = (pkg.itinerary as { day: string; title: string; activities?: string }[]) || [];
     const inclusions = (pkg.inclusions as string[]) || [];

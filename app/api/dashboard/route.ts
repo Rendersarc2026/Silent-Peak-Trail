@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import Package from "@/lib/models/Package";
+import GalleryItem from "@/lib/models/GalleryItem";
+import Destination from "@/lib/models/Destination";
+import Review from "@/lib/models/Review";
+import Enquiry from "@/lib/models/Enquiry";
 
 export async function GET() {
     if (!(await getSession())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {
+        await dbConnect();
+        
         const [
             packageCount,
             galleryCount,
@@ -17,25 +24,24 @@ export async function GET() {
             repliedEnquiriesCount,
             recentEnquiries,
         ] = await Promise.all([
-            prisma.package.count({ where: { isActive: true } }),
-            prisma.galleryItem.count({ where: { isActive: true } }),
-            prisma.destination.count({ where: { isActive: true } }),
-            prisma.review.count({ where: { isApproved: true, isActive: true } }),
-            prisma.enquiry.count({ where: { isActive: true } }),
-            prisma.enquiry.count({ where: { status: "new", isActive: true } }),
-            prisma.enquiry.count({ where: { status: "confirmed", isActive: true } }),
-            prisma.enquiry.count({ where: { status: "replied", isActive: true } }),
-            prisma.enquiry.findMany({
-                where: { isActive: true },
-                include: { tourPackage: { select: { name: true } } },
-                orderBy: { createdAt: "desc" },
-                take: 5
-            }),
+            Package.countDocuments({ isActive: true }),
+            GalleryItem.countDocuments({ isActive: true }),
+            Destination.countDocuments({ isActive: true }),
+            Review.countDocuments({ isApproved: true, isActive: true }),
+            Enquiry.countDocuments({ isActive: true }),
+            Enquiry.countDocuments({ status: "new", isActive: true }),
+            Enquiry.countDocuments({ status: "confirmed", isActive: true }),
+            Enquiry.countDocuments({ status: "replied", isActive: true }),
+            Enquiry.find({ isActive: true })
+                .populate({ path: 'packageId', select: 'name', model: Package })
+                .sort({ createdAt: -1 })
+                .limit(5)
+                .lean(),
         ]);
 
         const mappedRecent = recentEnquiries.map(e => ({
             ...e,
-            package: e.tourPackage?.name || "N/A"
+            package: e.packageId ? (e.packageId as any).name : "N/A"
         }));
 
         return NextResponse.json({

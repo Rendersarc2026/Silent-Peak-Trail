@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import Review from "@/lib/models/Review";
 import { reviewSchema } from "@/lib/validation";
 import { sanitizeInput, validateWithYup } from "@/lib/utils";
 
@@ -29,10 +30,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             if (typeof body.isActive === "boolean") data.isActive = body.isActive;
         }
 
-        const review = await prisma.review.update({
-            where: { id: parseInt(id) },
+        await dbConnect();
+        const review = await Review.findByIdAndUpdate(
+            id,
             data,
-        });
+            { new: true }
+        );
 
         return NextResponse.json(review);
     } catch (error) {
@@ -68,9 +71,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         const cleanMessage = sanitizeInput(parsed.message);
         const initial = cleanName[0]?.toUpperCase() || "?";
 
-        const review = await prisma.review.update({
-            where: { id: parseInt(id) },
-            data: {
+        await dbConnect();
+        const review = await Review.findByIdAndUpdate(
+            id,
+            {
                 name: cleanName,
                 place: cleanPlace,
                 packageId: parsed.packageId,
@@ -78,8 +82,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
                 message: cleanMessage,
                 initial,
                 isApproved: true, // Admin edits auto-approve
-            }
-        });
+            },
+            { new: true }
+        );
 
         return NextResponse.json(review);
     } catch (error) {
@@ -94,10 +99,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     try {
         const { id } = await params;
-        await prisma.review.update({
-            where: { id: parseInt(id) },
-            data: { isApproved: false, isActive: false }
-        });
+        await dbConnect();
+        await Review.findByIdAndUpdate(id, { isApproved: false, isActive: false });
         return NextResponse.json({ ok: true });
     } catch (error) {
         console.error("Error deleting review:", error);

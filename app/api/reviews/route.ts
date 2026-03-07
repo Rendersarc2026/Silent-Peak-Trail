@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import Review from "@/lib/models/Review";
+import Package from "@/lib/models/Package";
 import { getSession } from "@/lib/auth";
 import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { reviewSchema } from "@/lib/validation";
@@ -32,34 +34,44 @@ export async function GET(req: NextRequest) {
         }
 
         if (search) {
-            where.OR = [
-                { name: { contains: search } },
-                { message: { contains: search } },
-                { place: { contains: search } },
+            where.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { message: { $regex: search, $options: 'i' } },
+                { place: { $regex: search, $options: 'i' } },
             ];
         }
 
+        await dbConnect();
+
+        const reviewsQuery = Review.find(where)
+            .populate({ path: 'packageId', select: 'name', model: Package })
+            .sort({ createdAt: -1 });
+            
+        if (session) {
+            reviewsQuery.skip(skip).limit(limit);
+        }
+
         const [reviews, total] = await Promise.all([
-            prisma.review.findMany({
-                where,
-                include: { tourPackage: { select: { name: true } } },
-                orderBy: { createdAt: "desc" },
-                skip: session ? skip : undefined,
-                take: session ? limit : undefined,
-            }),
-            prisma.review.count({ where })
+            reviewsQuery.lean(),
+            Review.countDocuments(where)
         ]);
+
+        // Map populated packageId back to tourPackage format for frontend
+        const reviewsMapped = reviews.map(r => ({
+            ...r,
+            tourPackage: r.packageId ? { name: (r.packageId as any).name } : null
+        }));
 
         if (session) {
             return NextResponse.json({
-                data: reviews,
+                data: reviewsMapped,
                 total,
                 totalPages: Math.ceil(total / limit),
                 currentPage: page,
             });
         }
 
-        return NextResponse.json(reviews);
+        return NextResponse.json(reviewsMapped);
     } catch (error) {
         console.error("Error fetching reviews:", error);
         return NextResponse.json({ error: "Failed to fetch reviews" }, { status: 500 });
@@ -91,8 +103,8 @@ export async function POST(req: NextRequest) {
 
         // Admin-added reviews (send isApproved:true explicitly) are auto-approved.
         // Public submissions never send isApproved, so they land as pending.
-        const review = await prisma.review.create({
-            data: {
+        await dbConnect();
+        const review = await Review.create({
                 name: cleanName,
                 place: cleanPlace,
                 packageId: parsed.packageId,
@@ -101,7 +113,6 @@ export async function POST(req: NextRequest) {
                 initial,
                 isApproved: body.isApproved === true,
                 isActive: true,
-            }
         });
 
         return NextResponse.json(review, { status: 201 });

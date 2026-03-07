@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { sanitizeInput, slugify, validateWithYup } from "@/lib/utils";
 import { packageSchema } from "@/lib/validation";
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import Package from "@/lib/models/Package";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -14,20 +15,20 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   const where: any = { isActive: true };
   if (search) {
-    where.OR = [
-      { name: { contains: search } },
-      { tagline: { contains: search } },
+    where.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { tagline: { $regex: search, $options: 'i' } },
     ];
   }
 
+  await dbConnect();
+
   const [pkgs, total] = await Promise.all([
-    prisma.package.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    prisma.package.count({ where })
+    Package.find(where)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Package.countDocuments(where)
   ]);
 
   return NextResponse.json({
@@ -52,16 +53,14 @@ export async function POST(req: NextRequest) {
     }
 
     const nameNormal = sanitizeInput(parsed.name).trim();
-    const existing = await prisma.package.findFirst({
-      where: { name: { equals: nameNormal } },
-    });
+    await dbConnect();
+    const existing = await Package.findOne({ name: nameNormal });
 
     if (existing) {
       return NextResponse.json({ error: `A package named "${nameNormal}" already exists.` }, { status: 409 });
     }
 
-    const newPkg = await prisma.package.create({
-      data: {
+    const newPkg = await Package.create({
         name: nameNormal,
         slug: slugify(nameNormal),
         tagline: sanitizeInput(parsed.tagline),
@@ -80,7 +79,6 @@ export async function POST(req: NextRequest) {
         })),
         inclusions: (parsed.inclusions || []).map((i: string) => sanitizeInput(i)),
         exclusions: (parsed.exclusions || []).map((e: string) => sanitizeInput(e)),
-      },
     });
 
     return NextResponse.json(newPkg, { status: 201 });

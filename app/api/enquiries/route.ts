@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import Enquiry from "@/lib/models/Enquiry";
+import Package from "@/lib/models/Package";
+import Homepage from "@/lib/models/Homepage";
 import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { enquirySchema } from "@/lib/validation";
 
@@ -20,44 +23,44 @@ export async function GET(req: NextRequest) {
     where.status = status;
   }
   if (search) {
-    where.OR = [
-      { firstName: { contains: search } },
-      { lastName: { contains: search } },
-      { email: { contains: search } },
-      { phone: { contains: search } },
-      { message: { contains: search } },
+    where.$or = [
+      { firstName: { $regex: search, $options: 'i' } },
+      { lastName: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } },
+      { phone: { $regex: search, $options: 'i' } },
+      { message: { $regex: search, $options: 'i' } },
     ];
   }
 
+  await dbConnect();
+
   const [enquiries, total] = await Promise.all([
-    prisma.enquiry.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-      include: { tourPackage: { select: { name: true } } }
-    }),
-    prisma.enquiry.count({ where })
+    Enquiry.find(where)
+      .populate({ path: 'packageId', select: 'name', model: Package })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Enquiry.countDocuments(where)
   ]);
 
   // Transform to include package name if needed by frontend
   const data = enquiries.map(e => ({
     ...e,
-    package: e.tourPackage?.name || "N/A"
+    package: e.packageId ? (e.packageId as any).name : "N/A"
   }));
 
   const [allCount, statusCounts] = await Promise.all([
-    prisma.enquiry.count({ where: { isActive: true } }),
-    prisma.enquiry.groupBy({
-      by: ['status'],
-      where: { isActive: true },
-      _count: true
-    })
+    Enquiry.countDocuments({ isActive: true }),
+    Enquiry.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: "$status", _count: { $sum: 1 } } }
+    ])
   ]);
 
   const counts: Record<string, number> = { all: allCount };
   statusCounts.forEach(sc => {
-    counts[sc.status] = sc._count;
+    counts[sc._id] = sc._count;
   });
 
   return NextResponse.json({
@@ -81,27 +84,26 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Sanitize & Save
-    const enquiry = await prisma.enquiry.create({
-      data: {
-        firstName: sanitizeInput(parsed.firstName),
-        lastName: sanitizeInput(parsed.lastName),
-        email: sanitizeInput(parsed.email),
-        phone: sanitizeInput(parsed.phone),
-        packageId: parsed.packageId,
-        travellers: sanitizeInput(parsed.travellers),
-        month: sanitizeInput(parsed.month),
-        budget: sanitizeInput(parsed.budget),
-        message: sanitizeInput(parsed.message),
-        status: "new"
-      }
+    await dbConnect();
+    const enquiry = await Enquiry.create({
+      firstName: sanitizeInput(parsed.firstName),
+      lastName: sanitizeInput(parsed.lastName),
+      email: sanitizeInput(parsed.email),
+      phone: sanitizeInput(parsed.phone),
+      packageId: parsed.packageId,
+      travellers: sanitizeInput(parsed.travellers),
+      month: sanitizeInput(parsed.month),
+      budget: sanitizeInput(parsed.budget),
+      message: sanitizeInput(parsed.message),
+      status: "new"
     });
 
     // 3. Send automated confirmation email asynchronously
     import("@/lib/mailer").then(async ({ sendEnquiryConfirmationMail }) => {
       try {
-        const settingsRecords = await prisma.homepage.findMany({
-          where: { key: { in: ['phone', 'address'] } }
-        });
+        const settingsRecords = await Homepage.find({
+          key: { $in: ['phone', 'address'] }
+        }).lean();
 
         let agencyPhone = "our office";
         let agencyWebsite = "our website"; // fallback if domain isn't in DB

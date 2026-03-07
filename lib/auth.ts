@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
-import prisma from "./prisma";
+import dbConnect from "./db";
+import Admin from "./models/Admin";
 import bcrypt from "bcryptjs";
 import { verifyToken, signToken, type AdminPayload } from "./jwt";
 
@@ -13,10 +14,9 @@ export async function getSession(): Promise<AdminPayload | null> {
 }
 
 export async function checkCredentials(user: string, pass: string): Promise<boolean> {
-  const admin = await prisma.admin.findUnique({
-    where: { username: user }
-  });
+  await dbConnect();
+  const admin = await Admin.findOne({ username: user });
 
   if (!admin) return false;
-  return bcrypt.compare(pass, admin.password);
+  return await bcrypt.compare(pass, admin.password!);
 }

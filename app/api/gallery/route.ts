@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { gallerySchema } from "@/lib/validation";
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import GalleryItem from "@/lib/models/GalleryItem";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -14,17 +15,17 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   const where: any = { isActive: true };
   if (search) {
-    where.alt = { contains: search };
+    where.alt = { $regex: search, $options: 'i' };
   }
 
+  await dbConnect();
+
   const [items, total] = await Promise.all([
-    prisma.galleryItem.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    prisma.galleryItem.count({ where }),
+    GalleryItem.find(where)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    GalleryItem.countDocuments(where),
   ]);
 
   return NextResponse.json({
@@ -46,21 +47,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
     }
 
-    const existing = await prisma.galleryItem.findUnique({
-      where: { src: parsed.src },
-    });
+    await dbConnect();
+    const existing = await GalleryItem.findOne({ src: parsed.src });
 
     if (existing) {
       return NextResponse.json({ error: "This image is already in the gallery." }, { status: 409 });
     }
 
-    const item = await prisma.galleryItem.create({
-      data: {
+    const item = await GalleryItem.create({
         src: parsed.src,
         alt: parsed.alt ? sanitizeInput(parsed.alt) : "",
         wide: parsed.wide,
         tall: parsed.tall,
-      },
     });
 
     return NextResponse.json(item, { status: 201 });

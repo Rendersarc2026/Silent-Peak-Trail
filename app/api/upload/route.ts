@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import { join, extname } from "path";
+import cloudinary from "@/lib/cloudinary";
 
 export async function POST(req: NextRequest) {
     if (!await getSession()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,43 +16,25 @@ export async function POST(req: NextRequest) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Sanitize filename: lowercase, replace spaces/special chars with hyphens
-        const ext = extname(file.name).toLowerCase();
-        let baseName = file.name
-            .replace(/\.[^/.]+$/, "")         // strip extension
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")      // replace non-alphanumeric with hyphen
-            .replace(/^-+|-+$/g, "");          // trim leading/trailing hyphens
+        // Upload to Cloudinary
+        const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    folder: "silent-peak-trail",
+                    resource_type: "image",
+                },
+                (error, result) => {
+                    if (error || !result) {
+                        reject(error || new Error("Upload failed"));
+                    } else {
+                        resolve(result);
+                    }
+                }
+            );
+            stream.end(buffer);
+        });
 
-        if (!baseName) baseName = "image";
-        const filename = `${baseName.slice(0, 60)}${ext}`;
-
-        // Ensure upload directory exists
-        const uploadDir = join(process.cwd(), "public", "uploads");
-        await mkdir(uploadDir, { recursive: true });
-
-        const path = join(uploadDir, filename);
-        const publicPath = `/uploads/${filename}`;
-
-        // Check if file already exists
-        let fileExists = false;
-        try {
-            const { access } = await import("fs/promises");
-            await access(path);
-            fileExists = true;
-        } catch {
-            fileExists = false;
-        }
-
-        if (fileExists) {
-            console.log(`Reusing existing file: ${filename}`);
-            return NextResponse.json({ url: publicPath });
-        }
-
-        await writeFile(path, buffer);
-        console.log(`Saved new file: ${filename}`);
-
-        return NextResponse.json({ url: publicPath });
+        return NextResponse.json({ url: result.secure_url });
     } catch (error) {
         console.error("Upload error:", error);
         return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });

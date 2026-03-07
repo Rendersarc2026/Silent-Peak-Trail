@@ -14,8 +14,12 @@ export async function POST(req: NextRequest) {
 
         // 1. Validate
         const { sendEmailSchema } = await import("@/lib/validation");
-        const { sanitizeInput } = await import("@/lib/utils");
-        const parsed = sendEmailSchema.parse(body);
+        const { sanitizeInput, validateWithYup } = await import("@/lib/utils");
+        const { success, data: parsed, error: validationError } = await validateWithYup(sendEmailSchema, body);
+        
+        if (!success) {
+            return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
+        }
 
         // 2. Sanitize & Send
         const cleanSubject = sanitizeInput(parsed.subject);
@@ -29,10 +33,6 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        const { z } = await import("zod");
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: "Validation failed", details: error.flatten().fieldErrors }, { status: 400 });
-        }
         console.error("API error sending custom email:", error);
         return NextResponse.json({ error: "Server error" }, { status: 500 });
     }

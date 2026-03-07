@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { lehTipSchema } from "@/lib/validation";
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import LehTip from "@/lib/models/LehTip";
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -14,20 +15,20 @@ export async function GET(req: NextRequest) {
     const session = await getSession();
     const where: any = { isActive: true };
     if (search) {
-        where.OR = [
-            { title: { contains: search } },
-            { desc: { contains: search } },
+        where.$or = [
+            { title: { $regex: search, $options: 'i' } },
+            { desc: { $regex: search, $options: 'i' } },
         ];
     }
 
+    await dbConnect();
+
     const [items, total] = await Promise.all([
-        prisma.lehTip.findMany({
-            where,
-            orderBy: { order: "asc" },
-            skip,
-            take: limit,
-        }),
-        prisma.lehTip.count({ where }),
+        LehTip.find(where)
+            .sort({ order: 1 })
+            .skip(skip)
+            .limit(limit),
+        LehTip.countDocuments(where),
     ]);
 
     return NextResponse.json({
@@ -49,15 +50,14 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
         }
 
-        const item = await prisma.lehTip.create({
-            data: {
+        await dbConnect();
+        const item = await LehTip.create({
                 icon: sanitizeInput(parsed.icon),
                 title: sanitizeInput(parsed.title),
                 desc: sanitizeInput(parsed.desc),
                 color: parsed.color,
                 border: parsed.border,
                 order: parsed.order ?? 0,
-            },
         });
 
         return NextResponse.json(item, { status: 201 });

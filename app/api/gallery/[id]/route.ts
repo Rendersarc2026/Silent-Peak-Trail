@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { sanitizeInput, validateWithYup, makePartial } from "@/lib/utils";
 import { gallerySchema } from "@/lib/validation";
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import GalleryItem from "@/lib/models/GalleryItem";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!(await getSession())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const { id } = await params;
-    const numId = parseInt(id);
+    await dbConnect();
     const body = await req.json();
     const { success, data: parsed, error: validationError } = await validateWithYup(makePartial(gallerySchema), body);
 
@@ -17,27 +18,29 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
     }
 
-    const existing = await prisma.galleryItem.findUnique({ where: { id: numId } });
+    const existing = await GalleryItem.findById(id);
     if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (parsed.src) {
-      const duplicate = await prisma.galleryItem.findFirst({
-        where: { src: parsed.src, NOT: { id: numId } },
+      const duplicate = await GalleryItem.findOne({
+        src: parsed.src,
+        _id: { $ne: id },
       });
       if (duplicate) {
         return NextResponse.json({ error: "This image is already in the gallery." }, { status: 409 });
       }
     }
 
-    const updated = await prisma.galleryItem.update({
-      where: { id: numId },
-      data: {
+    const updated = await GalleryItem.findByIdAndUpdate(
+      id,
+      {
         ...(parsed.src && { src: parsed.src }),
         ...(parsed.alt !== undefined && { alt: sanitizeInput(parsed.alt) }),
         ...(parsed.wide !== undefined && { wide: parsed.wide }),
         ...(parsed.tall !== undefined && { tall: parsed.tall }),
       },
-    });
+      { new: true }
+    );
 
     return NextResponse.json(updated);
   } catch (error) {
@@ -49,9 +52,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!(await getSession())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  await prisma.galleryItem.update({
-    where: { id: parseInt(id) },
-    data: { isActive: false }
-  });
+  await dbConnect();
+  await GalleryItem.findByIdAndUpdate(id, { isActive: false });
   return NextResponse.json({ ok: true });
 }
