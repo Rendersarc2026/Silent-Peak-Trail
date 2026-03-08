@@ -83,7 +83,7 @@ export default function Packages({ packages }: { packages: Package[] }) {
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-light)]">Starting at</div>
                     <div className="text-2xl font-black tracking-tighter text-[var(--blue)]">
-                      ₹{p.price.toLocaleString()}
+                      {p.price ? `₹${Number(p.price).toLocaleString()}` : "Price on Request"}
                       <span className="ml-1 text-[10px] font-bold text-[var(--text-light)]">/ PP</span>
                     </div>
                   </div>

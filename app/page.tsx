@@ -92,8 +92,8 @@ export default async function Home() {
   }));
 
   // Separate Stargazing package from main list
-  const stargazingPkg = packagesData.find(p => p.name.toLowerCase().includes('stargazing'));
-  const otherPackages = packagesData.filter(p => !p.name.toLowerCase().includes('stargazing'));
+  const stargazingPkg = packagesData.find(p => p.name?.toLowerCase().includes('stargazing'));
+  const otherPackages = packagesData.filter(p => !p.name?.toLowerCase().includes('stargazing'));
 
   // Map Leh Tips
   const lehTipsData = dbLehTips.map((t: any) => ({
