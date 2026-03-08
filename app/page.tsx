@@ -105,6 +105,16 @@ export default async function Home() {
     border: t.border,
   }));
 
+  // Deep clone everything passed to client components to ensure no hidden Mongoose ObjectIds / Dates
+  const safeHomepageData = JSON.parse(JSON.stringify(homepageData));
+  const safeOtherPackages = JSON.parse(JSON.stringify(otherPackages));
+  const safeStargazingPkg = JSON.parse(JSON.stringify(stargazingPkg || null));
+  const safeDestinationsData = JSON.parse(JSON.stringify(destinationsData));
+  const safeGalleryImages = JSON.parse(JSON.stringify(galleryImages));
+  const safeTestimonials = JSON.parse(JSON.stringify(testimonials));
+  const safePackagesForBooking = packagesData.map((p) => ({ id: p.id, name: p.name }));
+  const safeLehTipsData = JSON.parse(JSON.stringify(lehTipsData));
+
   return (
     <>
       <StructuredData
@@ -118,17 +128,17 @@ export default async function Home() {
       />
       <Navbar />
       <main style={{ paddingTop: "72px" }}>
-        <Hero homepageData={homepageData} />
-        <StatsStrip homepageData={homepageData} />
-        <Packages packages={otherPackages} />
-        <Stargazing packageData={stargazingPkg} homepageData={homepageData} />
-        <Destinations destinations={destinationsData} />
-        <WhyUs homepageData={homepageData} />
-        <Gallery images={galleryImages} />
+        <Hero homepageData={safeHomepageData} />
+        <StatsStrip homepageData={safeHomepageData} />
+        <Packages packages={safeOtherPackages} />
+        <Stargazing packageData={safeStargazingPkg} homepageData={safeHomepageData} />
+        <Destinations destinations={safeDestinationsData} />
+        <WhyUs homepageData={safeHomepageData} />
+        <Gallery images={safeGalleryImages} />
 
-        <Testimonials testimonials={testimonials} />
-        <Booking homepageData={homepageData} packages={packagesData.map((p) => ({ id: p.id, name: p.name }))} />
-        <LehPrep tips={lehTipsData} />
+        <Testimonials testimonials={safeTestimonials} />
+        <Booking homepageData={safeHomepageData} packages={safePackagesForBooking} />
+        <LehPrep tips={safeLehTipsData} />
       </main>
       <Footer />
     </>

@@ -96,7 +96,7 @@ export default function LehPrep({ tips }: LehPrepProps) {
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {displayTips.map((tip, i) => {
-                        const IconComp = typeof tip.icon === 'string' ? (ICON_MAP[tip.icon] || Info) : tip.icon;
+                        const IconComp = (typeof tip.icon === 'string' && tip.icon) ? (ICON_MAP[tip.icon] || Info) : (tip.icon || Info);
                         return (
                             <div
                                 key={'id' in tip && tip.id ? tip.id : tip.title}

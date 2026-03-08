@@ -70,7 +70,7 @@ export default function Packages({ packages }: { packages: Package[] }) {
                 </p>
 
                 <ul className="mb-8 space-y-3">
-                  {p.features.map((f: string, fi: number) => (
+                  {Array.isArray(p.features) && p.features.map((f: string, fi: number) => (
                     <li key={fi} className="flex items-start gap-3 text-xs font-medium text-[var(--text-mid)]">
                       <CheckCircle2 size={16} className="shrink-0 text-[var(--gold)]" />
                       {f}

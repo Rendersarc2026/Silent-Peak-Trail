@@ -55,9 +55,9 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     settingsRecords.forEach((s: { key: string; value: string }) => { homepageData[s.key] = s.value; });
     const packageList = allPackages.map((p: any) => ({ id: String(p._id), name: p.name }));
 
-    const itinerary = (pkg.itinerary as { day: string; title: string; activities?: string }[]) || [];
-    const inclusions = (pkg.inclusions as string[]) || [];
-    const exclusions = (pkg.exclusions as string[]) || [];
+    const itinerary = Array.isArray(pkg.itinerary) ? (pkg.itinerary as { day: string; title: string; activities?: string }[]) : [];
+    const inclusions = Array.isArray(pkg.inclusions) ? (pkg.inclusions as string[]) : [];
+    const exclusions = Array.isArray(pkg.exclusions) ? (pkg.exclusions as string[]) : [];
 
     return (
         <>
@@ -234,7 +234,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                         Trip Highlights
                                     </h3>
                                     <ul className="space-y-4">
-                                        {(pkg.features as string[]).map((f: string, i: number) => (
+                                        {Array.isArray(pkg.features) && (pkg.features as string[]).map((f: string, i: number) => (
                                             <li key={i} className="flex items-start gap-3 text-sm font-medium text-white/80">
                                                 <CheckCircle2 size={18} className="shrink-0 text-[var(--gold)]" />
                                                 {f}
