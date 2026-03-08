@@ -62,6 +62,12 @@ export default function PackagesPage() {
   const [deleting, setDeleting] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
 
+  const ErrorMsg = ({ field }: { field: string }) => {
+    const msg = getErrorMessage(fieldErrors, field);
+    if (!msg) return null;
+    return <p className="mt-1 text-[10px] font-bold text-red-500 ml-1 animate-in fade-in slide-in-from-top-1">{msg}</p>;
+  };
+
   const clearFieldError = (field: string) => {
     if (fieldErrors[field]) {
       setFieldErrors(prev => {
@@ -120,7 +126,12 @@ export default function PackagesPage() {
     return fetch(`/api/packages?${params}`)
       .then(r => r.json())
       .then(res => {
-        setPkgs(res.data);
+        // Map _id from MongoDB to id for the frontend
+        const mappedData = (res.data || []).map((item: any) => ({
+          ...item,
+          id: item._id
+        }));
+        setPkgs(mappedData);
         setTotalPages(res.totalPages);
         setCurrentPage(res.currentPage);
       })
@@ -171,7 +182,7 @@ export default function PackagesPage() {
     const { success, error: validationError } = await validateWithYup(packageSchema, payload);
     if (!success) {
       setFieldErrors(validationError?.fieldErrors as any);
-      setError("Please fill all required fields.");
+      setError("Validation failed. Please check the highlighted fields below.");
       return;
     }
 
@@ -198,7 +209,7 @@ export default function PackagesPage() {
       if (!res.ok) {
         if (data.details) {
           setFieldErrors(data.details);
-          setError("Please fill all required fields.");
+          setError("Validation failed. Please check the highlighted fields below.");
         } else {
           setError(data.error || "Failed to save package.");
         }
@@ -446,7 +457,7 @@ export default function PackagesPage() {
                     value={form.name}
                     onChange={e => { setForm(f => ({ ...f, name: e.target.value })); clearFieldError('name'); }}
                   />
-                  {hasError(fieldErrors, 'name') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'name')}</p>}
+                  <ErrorMsg field="name" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider mb-2 ml-1 text-slate-500">
@@ -461,7 +472,25 @@ export default function PackagesPage() {
                     onChange={e => {
                       const days = Number(e.target.value);
                       const nights = Math.max(0, days - 1);
-                      setForm(f => ({ ...f, duration: days ? `${days} Days · ${nights} Nights` : "" }));
+                      setForm(f => {
+                        let newItinerary = [...f.itinerary];
+                        if (days > 0) {
+                          if (newItinerary.length < days) {
+                            // Add missing days
+                            for (let i = newItinerary.length; i < days; i++) {
+                              newItinerary.push({ day: `Day ${i + 1}`, title: "", activities: "" });
+                            }
+                          } else if (newItinerary.length > days) {
+                            // Trim extra days
+                            newItinerary = newItinerary.slice(0, days);
+                          }
+                        }
+                        return {
+                          ...f,
+                          duration: days ? `${days} Days · ${nights} Nights` : "",
+                          itinerary: newItinerary
+                        };
+                      });
                       clearFieldError('duration');
                     }}
                   >
@@ -470,7 +499,7 @@ export default function PackagesPage() {
                       <option key={d} value={String(d)}>{d} Days · {Math.max(0, d - 1)} Nights</option>
                     ))}
                   </select>
-                  {hasError(fieldErrors, 'duration') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'duration')}</p>}
+                  <ErrorMsg field="duration" />
                   {form.duration && !hasError(fieldErrors, 'duration') && (
                     <p className="mt-2 ml-1 text-[10px] font-bold text-blue-600 uppercase tracking-wider">{form.duration}</p>
                   )}
@@ -493,7 +522,7 @@ export default function PackagesPage() {
                   value={form.tagline}
                   onChange={e => { setForm(f => ({ ...f, tagline: e.target.value })); clearFieldError('tagline'); }}
                 />
-                {hasError(fieldErrors, 'tagline') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'tagline')}</p>}
+                <ErrorMsg field="tagline" />
               </div>
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -507,11 +536,15 @@ export default function PackagesPage() {
                       type="number"
                       className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 pl-8 pr-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white tabular-nums", hasError(fieldErrors, 'price') && 'border-red-300 ring-2 ring-red-500/10')}
                       placeholder="32000"
-                      value={form.price}
-                      onChange={e => { setForm(f => ({ ...f, price: +e.target.value })); clearFieldError('price'); }}
+                      value={form.price === 0 ? "" : form.price}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setForm(f => ({ ...f, price: val === "" ? 0 : Number(val) }));
+                        clearFieldError('price');
+                      }}
                     />
                   </div>
-                  {hasError(fieldErrors, 'price') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'price')}</p>}
+                  <ErrorMsg field="price" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
@@ -523,7 +556,7 @@ export default function PackagesPage() {
                     value={form.badge}
                     onChange={e => { setForm(f => ({ ...f, badge: e.target.value })); clearFieldError('badge'); }}
                   />
-                  {hasError(fieldErrors, 'badge') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'badge')}</p>}
+                  <ErrorMsg field="badge" />
                 </div>
               </div>
 
@@ -536,7 +569,7 @@ export default function PackagesPage() {
                   onChange={url => { setForm(f => ({ ...f, img: url })); clearFieldError('img'); }}
                   onError={msg => setError(msg)}
                 />
-                {hasError(fieldErrors, 'img') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'img')}</p>}
+                <ErrorMsg field="img" />
               </div>
 
               <div>
@@ -550,7 +583,7 @@ export default function PackagesPage() {
                   value={featStr}
                   onChange={e => { setFeatStr(e.target.value); clearFieldError('features'); }}
                 />
-                {hasError(fieldErrors, 'features') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'features')}</p>}
+                <ErrorMsg field="features" />
               </div>
 
               <div>
@@ -558,38 +591,42 @@ export default function PackagesPage() {
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     Itinerary Days
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newDayNum = form.itinerary.length + 1;
-                      setForm(f => ({
-                        ...f,
-                        itinerary: [...f.itinerary, { day: `Day ${newDayNum}`, title: "", activities: "" }]
-                      }));
-                      clearFieldError('itinerary');
-                    }}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-600 transition-all hover:bg-blue-100 active:scale-95 shadow-sm"
-                  >
-                    <Plus size={14} />
-                    Add Day
-                  </button>
+                  {!form.duration && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newDayNum = form.itinerary.length + 1;
+                        setForm(f => ({
+                          ...f,
+                          itinerary: [...f.itinerary, { day: `Day ${newDayNum}`, title: "", activities: "" }]
+                        }));
+                        clearFieldError('itinerary');
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-600 transition-all hover:bg-blue-100 active:scale-95 shadow-sm"
+                    >
+                      <Plus size={14} />
+                      Add Day
+                    </button>
+                  )}
                 </div>
 
                 <div className="space-y-4">
                   {form.itinerary.map((item, idx) => (
                     <div key={idx} className="relative rounded-2xl border border-slate-100 bg-slate-50/50 p-4 animate-in fade-in slide-in-from-top-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setForm(f => ({
-                            ...f,
-                            itinerary: f.itinerary.filter((_, i) => i !== idx)
-                          }));
-                        }}
-                        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm ring-1 ring-slate-200 hover:text-red-500 transition-colors"
-                      >
-                        <X size={14} />
-                      </button>
+                      {!form.duration && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setForm(f => ({
+                              ...f,
+                              itinerary: f.itinerary.filter((_, i) => i !== idx)
+                            }));
+                          }}
+                          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm ring-1 ring-slate-200 hover:text-red-500 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
                         <div className="sm:col-span-1">
@@ -607,11 +644,7 @@ export default function PackagesPage() {
                               clearFieldError(`itinerary[${idx}].day`);
                             }}
                           />
-                          {hasError(fieldErrors, `itinerary[${idx}].day`) && (
-                            <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">
-                              {getErrorMessage(fieldErrors, `itinerary[${idx}].day`)}
-                            </p>
-                          )}
+                          <ErrorMsg field={`itinerary[${idx}].day`} />
                         </div>
                         <div className="sm:col-span-3">
                           <input
@@ -628,11 +661,7 @@ export default function PackagesPage() {
                               clearFieldError(`itinerary[${idx}].title`);
                             }}
                           />
-                          {hasError(fieldErrors, `itinerary[${idx}].title`) && (
-                            <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">
-                              {getErrorMessage(fieldErrors, `itinerary[${idx}].title`)}
-                            </p>
-                          )}
+                          <ErrorMsg field={`itinerary[${idx}].title`} />
                         </div>
                         <div className="sm:col-span-4">
                           <textarea
@@ -650,11 +679,7 @@ export default function PackagesPage() {
                               clearFieldError(`itinerary[${idx}].activities`);
                             }}
                           />
-                          {hasError(fieldErrors, `itinerary[${idx}].activities`) && (
-                            <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">
-                              {getErrorMessage(fieldErrors, `itinerary[${idx}].activities`)}
-                            </p>
-                          )}
+                          <ErrorMsg field={`itinerary[${idx}].activities`} />
                         </div>
                       </div>
                     </div>
@@ -699,7 +724,7 @@ export default function PackagesPage() {
                     value={incStr}
                     onChange={e => { setIncStr(e.target.value); clearFieldError('inclusions'); }}
                   />
-                  {hasError(fieldErrors, 'inclusions') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'inclusions')}</p>}
+                  <ErrorMsg field="inclusions" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
@@ -712,7 +737,7 @@ export default function PackagesPage() {
                     value={excStr}
                     onChange={e => { setExcStr(e.target.value); clearFieldError('exclusions'); }}
                   />
-                  {hasError(fieldErrors, 'exclusions') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'exclusions')}</p>}
+                  <ErrorMsg field="exclusions" />
                 </div>
               </div>
 

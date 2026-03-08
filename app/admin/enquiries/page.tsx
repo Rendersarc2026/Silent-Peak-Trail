@@ -22,7 +22,7 @@ import EmailComposer from "@/components/admin/EmailComposer";
 import SearchInput from "@/components/admin/SearchInput";
 
 interface Enquiry {
-  id: number; firstName: string; lastName: string; email: string; phone: string;
+  id: string; firstName: string; lastName: string; email: string; phone: string;
   package: string; travellers: string; month: string; budget: string;
   message: string; status: string; createdAt: string;
 }
@@ -51,7 +51,7 @@ export default function EnquiriesPage() {
 
   const [detail, setDetail] = useState<Enquiry | null>(null);
   const [toast, setToast] = useState("");
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({ isOpen: false, id: null });
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
   const [deleting, setDeleting] = useState(false);
   const [composingEmail, setComposingEmail] = useState<string | null>(null);
 
@@ -66,7 +66,12 @@ export default function EnquiriesPage() {
     return fetch(`/api/enquiries?${params}`)
       .then(r => r.json())
       .then(res => {
-        setAll(res.data);
+        // Map _id from MongoDB to id for the frontend
+        const mappedData = (res.data || []).map((item: any) => ({
+          ...item,
+          id: item._id
+        }));
+        setAll(mappedData);
         setTotalPages(res.totalPages);
         setCurrentPage(res.currentPage);
         setCounts(res.counts);
@@ -81,7 +86,7 @@ export default function EnquiriesPage() {
     return () => clearTimeout(timer);
   }, [search, filter]);
 
-  const [handleStatusUpdate, { loading: updatingStatus }] = useAction(async ({ id, status }: { id: number, status: string }) => {
+  const [handleStatusUpdate, { loading: updatingStatus }] = useAction(async ({ id, status }: { id: string, status: string }) => {
     await fetch(`/api/enquiries/${id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status })
@@ -91,7 +96,7 @@ export default function EnquiriesPage() {
     if (detail?.id === id) setDetail(d => d ? { ...d, status } : d);
   });
 
-  async function del(id: number) {
+  async function del(id: string) {
     setDeleting(true);
     try {
       await fetch(`/api/enquiries/${id}`, { method: "DELETE" });

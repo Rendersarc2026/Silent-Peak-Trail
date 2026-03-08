@@ -126,7 +126,7 @@ export default async function Home() {
           image: homepageData.heroBgImage,
         }}
       />
-      <Navbar />
+      <Navbar homepageData={safeHomepageData} />
       <main style={{ paddingTop: "72px" }}>
         <Hero homepageData={safeHomepageData} />
         <StatsStrip homepageData={safeHomepageData} />
@@ -138,9 +138,9 @@ export default async function Home() {
 
         <Testimonials testimonials={safeTestimonials} />
         <Booking homepageData={safeHomepageData} packages={safePackagesForBooking} />
-        <LehPrep tips={safeLehTipsData} />
+        <LehPrep tips={safeLehTipsData} homepageData={safeHomepageData} />
       </main>
-      <Footer />
+      <Footer homepageData={safeHomepageData} packages={packagesData} />
     </>
   );
 }

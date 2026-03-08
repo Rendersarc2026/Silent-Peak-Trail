@@ -132,7 +132,12 @@ export default function LehTipsPage() {
             });
             const res = await fetch(`/api/leh-tips?${params}`);
             const data = await res.json();
-            setItems(data.data || []);
+            // Map _id from MongoDB to id for the frontend
+            const mappedData = (data.data || []).map((item: any) => ({
+                ...item,
+                id: item._id
+            }));
+            setItems(mappedData);
             setTotalPages(data.totalPages || 0);
             setCurrentPage(data.currentPage || 1);
         } finally {

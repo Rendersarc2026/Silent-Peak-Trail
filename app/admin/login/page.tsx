@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, User, Loader2 } from "lucide-react";
 
@@ -9,6 +9,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    // If already authenticated, skip login page
+    fetch("/api/auth/me")
+      .then(r => r.json())
+      .then(d => {
+        if (d.authenticated) router.replace("/admin/dashboard");
+      });
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,7 +30,7 @@ export default function LoginPage() {
     });
     if (res.ok) {
       // keep loading=true so overlay stays while router redirects
-      router.push("/admin/dashboard");
+      router.replace("/admin/dashboard");
     } else {
       setLoading(false);
       setError("Invalid username or password. Try admin / ladakh2025");

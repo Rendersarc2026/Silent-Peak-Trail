@@ -17,51 +17,6 @@ const ICON_MAP: Record<string, React.ElementType> = {
     Star, Droplets, Sun, Camera, Heart, Compass, Info, AlertTriangle
 };
 
-const TIPS = [
-    {
-        icon: Wind,
-        title: "Mandatory Acclimatization",
-        desc: "Flyers MUST rest for at least 48 hours in Leh (3,500m) before heading higher. This prevents high altitude sickness.",
-        color: "bg-blue-50 text-blue-600",
-        border: "border-blue-100"
-    },
-    {
-        icon: WifiOff,
-        title: "Connectivity Check",
-        desc: "Only POSTPAID SIM cards from outside Ladakh work here. BSNL and Airtel offer the best connectivity in the region.",
-        color: "bg-amber-50 text-amber-600",
-        border: "border-amber-100"
-    },
-    {
-        icon: FileText,
-        title: "Permits Required",
-        desc: "Inner Line Permits (ILP) are required for visiting sensitive areas like Pangong Lake, Nubra Valley, and Tso Moriri.",
-        color: "bg-red-50  text-red-600",
-        border: "border-green-100"
-    },
-    {
-        icon: Stethoscope,
-        title: "Health & Essentials Matter",
-        desc: "Pack a basic medical kit with Diamox, hydration salts, and personal meds. Access to specialized medical care is limited outside Leh.",
-        color: "bg-indigo-50 text-indigo-700",
-        border: "border-indigo-100"
-    },
-    {
-        icon: ShieldAlert,
-        title: "Eco-Travel Rules",
-        desc: "Ladakh is a plastic-free zone. Carry reusable water bottles and avoid littering to protect this fragile ecosystem.",
-        color: "bg-green-50 text-green-600",
-        border: "border-red-100"
-    },
-    {
-        icon: Mountain,
-        title: "Layered Clothing",
-        desc: "Temperature fluctuates wildly. Even in summer, nights can be freezing. Pack layers, sunblock, and UV sunglasses.",
-        color: "bg-slate-50 text-slate-600",
-        border: "border-slate-100"
-    }
-];
-
 interface LehTip {
     id?: string;
     icon: string | React.ElementType;
@@ -73,10 +28,15 @@ interface LehTip {
 
 interface LehPrepProps {
     tips?: LehTip[];
+    homepageData?: Record<string, string>;
 }
 
-export default function LehPrep({ tips }: LehPrepProps) {
-    const displayTips = tips && tips.length > 0 ? tips : TIPS;
+export default function LehPrep({ tips, homepageData }: LehPrepProps) {
+    if (!tips || tips.length === 0) return null;
+
+    const amsTitle = homepageData?.amsWarningTitle || "Don't ignore the 48-hour rule";
+    const amsDesc = homepageData?.amsWarningDesc || "Acute Mountain Sickness (AMS) can affect anyone, regardless of fitness level. Keep your first two days light, stay hydrated, and consult your doctor about Diamox.";
+
     return (
         <section className="py-24 px-5 lg:px-[60px] bg-white">
             <div className="container mx-auto">
@@ -95,7 +55,7 @@ export default function LehPrep({ tips }: LehPrepProps) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {displayTips.map((tip, i) => {
+                    {tips.map((tip: LehTip, i: number) => {
                         const IconComp = (typeof tip.icon === 'string' && tip.icon) ? (ICON_MAP[tip.icon] || Info) : (tip.icon || Info);
                         return (
                             <div
@@ -130,10 +90,9 @@ export default function LehPrep({ tips }: LehPrepProps) {
                                 <AlertTriangle size={14} className="text-amber-400" />
                                 Altitude Warning
                             </div>
-                            <h3 className="text-3xl font-black mb-4">Don&apos;t ignore the 48-hour rule</h3>
+                            <h3 className="text-3xl font-black mb-4">{amsTitle}</h3>
                             <p className="text-blue-100/80 font-bold leading-relaxed">
-                                Acute Mountain Sickness (AMS) can affect anyone, regardless of fitness level.
-                                Keep your first two days light, stay hydrated, and consult your doctor about Diamox.
+                                {amsDesc}
                             </p>
                         </div>
                         <a

@@ -309,9 +309,15 @@ export default function Booking({
                     name="travellers"
                     type="number"
                     min="1"
+                    defaultValue="1"
+                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                      if (Number(e.target.value) < 1) e.target.value = "1";
+                    }}
                     placeholder="2"
                     error={fieldErrors.travellers?.[0]}
-                    onInput={() => clearFieldError('travellers')}
+                    onInput={(e: React.FormEvent<HTMLInputElement>) => {
+                      clearFieldError('travellers');
+                    }}
                   />
                 </div>
 

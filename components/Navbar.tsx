@@ -13,11 +13,14 @@ const LINKS = [
   { href: "#contact", label: "Contact" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ homepageData }: { homepageData?: Record<string, string> }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  const bookText = homepageData?.bookButtonText || "Book a Trip";
+  const mobileBookText = homepageData?.bookButtonText || "Book Your Soul Trip";
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -88,7 +91,7 @@ export default function Navbar() {
                 : "bg-white text-[var(--navy)] hover:bg-[var(--gold)] hover:text-white"
             )}
           >
-            Book a Trip
+            {bookText}
             <ArrowRight size={14} strokeWidth={3} />
           </a>
 
@@ -105,7 +108,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <div
         className={cn(
-          "fixed inset-0 top-[72px] z-50 bg-white p-8 transition-all duration-500 lg:hidden",
+          "fixed inset-0 top-[72px] z-50 bg-white p-8 transition-all duration-500 lg:hidden border-t border-slate-100",
           open ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
         )}
       >
@@ -115,7 +118,7 @@ export default function Navbar() {
               key={l.href}
               href={l.href}
               onClick={(e) => handleNavClick(e, l.href)}
-              className="text-2xl font-black uppercase tracking-tight text-[var(--navy)] transition-colors hover:text-[var(--gold)]"
+              className="text-lg font-bold uppercase tracking-[0.2em] text-[var(--navy)] transition-colors hover:text-[var(--gold)]"
             >
               {l.label}
             </a>
@@ -123,9 +126,9 @@ export default function Navbar() {
           <a
             href="#contact"
             onClick={(e) => handleNavClick(e, "#contact")}
-            className="flex w-full items-center justify-center gap-3 rounded-2xl bg-[var(--navy)] py-4 text-sm font-bold uppercase tracking-widest text-white shadow-xl active:scale-95 transition-transform"
+            className="flex w-full items-center justify-center gap-3 rounded-full bg-[var(--navy)] py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-lg active:scale-95 transition-transform mt-4"
           >
-            Book Your Soul Trip
+            {mobileBookText}
             <ArrowRight size={18} />
           </a>
         </div>

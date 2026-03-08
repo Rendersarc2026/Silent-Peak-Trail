@@ -24,85 +24,110 @@ const Pagination: React.FC<PaginationProps> = ({
 
     if (totalPages <= 1 && !showRowsDropdown) return null;
 
-    const getPageNumbers = () => {
-        const pages = [];
-        const maxVisiblePages = 5;
+    const renderPageNumbers = () => {
+        const pages: (number | string)[] = [];
+        const maxVisible = 5;
 
-        if (totalPages <= maxVisiblePages) {
+        if (totalPages <= 7) {
             for (let i = 1; i <= totalPages; i++) pages.push(i);
         } else {
-            let start = Math.max(1, currentPage - 2);
-            let end = Math.min(totalPages, start + maxVisiblePages - 1);
+            // Always show first page
+            pages.push(1);
 
-            if (end === totalPages) {
-                start = Math.max(1, end - maxVisiblePages + 1);
+            if (currentPage > 4) {
+                pages.push("...");
             }
 
-            for (let i = start; i <= end; i++) pages.push(i);
+            const start = Math.max(2, currentPage - 1);
+            const end = Math.min(totalPages - 1, currentPage + 1);
+
+            if (currentPage <= 4) {
+                for (let i = 2; i <= 5; i++) pages.push(i);
+            } else if (currentPage >= totalPages - 3) {
+                for (let i = totalPages - 4; i <= totalPages - 1; i++) pages.push(i);
+            } else {
+                for (let i = start; i <= end; i++) pages.push(i);
+            }
+
+            if (currentPage < totalPages - 3) {
+                pages.push("...");
+            }
+
+            // Always show last page
+            pages.push(totalPages);
         }
-        return pages;
+
+        return pages.map((page, idx) => {
+            if (page === "...") {
+                return (
+                    <span key={`dots-${idx}`} className="px-3 py-2 text-slate-400 font-bold">
+                        ...
+                    </span>
+                );
+            }
+
+            const isActive = page === currentPage;
+            return (
+                <button
+                    key={page}
+                    onClick={() => onPageChange(Number(page))}
+                    disabled={isLoading}
+                    className={`
+                        min-w-[44px] px-2 py-3 text-sm font-bold transition-all relative
+                        ${isActive
+                            ? 'text-slate-900 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[3px] after:bg-slate-900'
+                            : 'text-slate-400 hover:text-slate-600'
+                        }
+                        disabled:opacity-50
+                    `}
+                >
+                    {page}
+                </button>
+            );
+        });
     };
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 py-8">
-            {showRowsDropdown && (
-                <div className="flex items-center gap-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">
-                        Rows
-                    </label>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-white border-t border-slate-100">
+            {showRowsDropdown ? (
+                <div className="flex items-center gap-3 order-2 sm:order-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Show Rows</span>
                     <select
                         value={rowsPerPage}
                         onChange={(e) => onRowsPerPageChange(Number(e.target.value))}
                         disabled={isLoading}
-                        className="appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2 pr-8 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer hover:text-blue-600 transition-colors"
                     >
                         {ROWS_PER_PAGE_OPTIONS.map((opt) => (
-                            <option key={opt} value={opt}>
-                                {opt}
-                            </option>
+                            <option key={opt} value={opt}>{opt}</option>
                         ))}
                     </select>
                 </div>
-            )}
+            ) : <div className="order-2 sm:order-1" />}
 
-            {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => onPageChange(currentPage - 1)}
-                        disabled={currentPage === 1 || isLoading}
-                        className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-[var(--navy)] disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
-                    >
-                        <ChevronLeft size={20} />
-                    </button>
+            <div className="flex items-center order-1 sm:order-2">
+                <button
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1 || isLoading}
+                    className="p-3 text-slate-400 hover:text-slate-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                >
+                    <ChevronLeft size={18} strokeWidth={3} />
+                </button>
 
-                    <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/60 backdrop-blur-sm">
-                        {getPageNumbers().map((page) => (
-                            <button
-                                key={page}
-                                onClick={() => onPageChange(page)}
-                                disabled={isLoading}
-                                className={`
-                  min-w-[40px] h-10 px-3 rounded-xl text-sm font-bold transition-all active:scale-95
-                  ${page === currentPage
-                                        ? 'bg-[var(--navy)] text-white shadow-lg shadow-navy/20'
-                                        : 'text-slate-600 hover:bg-white hover:text-[var(--navy)] hover:shadow-sm'
-                                    }
-                `}
-                            >
-                                {page}
-                            </button>
-                        ))}
-                    </div>
-
-                    <button
-                        onClick={() => onPageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages || isLoading}
-                        className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-[var(--navy)] disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
-                    >
-                        <ChevronRight size={20} />
-                    </button>
+                <div className="flex items-center">
+                    {renderPageNumbers()}
                 </div>
-            )}
+
+                <button
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages || isLoading}
+                    className="p-3 text-slate-400 hover:text-slate-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                >
+                    <ChevronRight size={18} strokeWidth={3} />
+                </button>
+            </div>
+
+            <div className="hidden sm:block w-32 order-3" />
         </div>
     );
 };

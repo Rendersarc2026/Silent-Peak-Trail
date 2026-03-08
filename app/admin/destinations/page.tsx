@@ -87,7 +87,12 @@ export default function DestinationsPage() {
     return fetch(`/api/destinations?${params}`)
       .then(r => r.json())
       .then(res => {
-        setItems(res.data);
+        // Map _id from MongoDB to id for the frontend
+        const mappedData = (res.data || []).map((item: any) => ({
+          ...item,
+          id: item._id
+        }));
+        setItems(mappedData);
         setTotalPages(res.totalPages);
         setCurrentPage(res.currentPage);
       })

@@ -67,7 +67,11 @@ export default function DashboardPage() {
           confirmed: data.confirmed,
           replied: data.replied,
         });
-        setRecent(data.recent);
+        const mappedRecent = (data.recent || []).map((e: any) => ({
+          ...e,
+          id: e._id
+        }));
+        setRecent(mappedRecent);
       })
       .catch(console.error)
       .finally(() => setLoading(false));

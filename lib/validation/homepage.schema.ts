@@ -10,6 +10,19 @@ const featureSchema = yup.object({
     bg: yup.string().optional()
 });
 
+// Schema for stargazing highlights
+const highlightSchema = yup.object({
+    icon: yup.string().required(),
+    title: safeText(2, 100),
+    desc: safeText(2, 300)
+});
+
+// Schema for dynamic social links
+const socialLinkSchema = yup.object({
+    platform: yup.string().required(),
+    url: yup.string().url("Invalid URL").required()
+});
+
 export const homepageContentSchema = yup.object({
     heroTitle: safeText(2, 80, "Required"),
     heroSubtitle: safeText(2, 300, "Required"),
@@ -31,7 +44,6 @@ export const homepageContentSchema = yup.object({
         try {
             const parsed = JSON.parse(val);
             if (!Array.isArray(parsed)) return false;
-            // Quick check for item validity
             for (const item of parsed) {
                 if (!featureSchema.isValidSync(item)) return false;
             }
@@ -43,4 +55,38 @@ export const homepageContentSchema = yup.object({
     // Stargazing overrides
     stargazingTitle: safeText(2, 100, "Required"),
     stargazingTagline: safeText(2, 500, "Required"),
+    stargazingHighlights: yup.string().default("[]").test("is-stargazing-highlights", "Invalid format", (val) => {
+        if (!val) return true;
+        try {
+            const parsed = JSON.parse(val);
+            if (!Array.isArray(parsed)) return false;
+            for (const item of parsed) {
+                if (!highlightSchema.isValidSync(item)) return false;
+            }
+            return true;
+        } catch {
+            return false;
+        }
+    }),
+    // Contact & Social
+    socialLinks: yup.string().default("[]").test("is-social-links", "Invalid format", (val) => {
+        if (!val) return true;
+        try {
+            const parsed = JSON.parse(val);
+            if (!Array.isArray(parsed)) return false;
+            for (const item of parsed) {
+                if (!socialLinkSchema.isValidSync(item)) return false;
+            }
+            return true;
+        } catch {
+            return false;
+        }
+    }),
+    whatsappNumber: safeOptionalText(20),
+    footerDescription: safeOptionalText(500),
+    // AMS Warning
+    amsWarningTitle: safeOptionalText(100),
+    amsWarningDesc: safeOptionalText(500),
+    // Call to action
+    bookButtonText: safeOptionalText(50),
 });
