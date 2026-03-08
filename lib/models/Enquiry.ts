@@ -22,11 +22,11 @@ const EnquirySchema: Schema = new Schema(
     lastName: { type: String, required: true },
     email: { type: String, required: true },
     phone: { type: String, required: true },
-    packageId: { type: Schema.Types.ObjectId, ref: 'Package', required: true },
+    packageId: { type: Schema.Types.ObjectId, ref: 'Package', required: false },
     travellers: { type: String, required: true },
     month: { type: String, required: true },
     budget: { type: String, required: true },
-    message: { type: String, required: true },
+    message: { type: String, required: false },
     status: { type: String, default: 'new' }, // "new", "replied", "confirmed", "cancelled"
     isActive: { type: Boolean, default: true },
   },

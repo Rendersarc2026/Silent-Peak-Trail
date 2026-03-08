@@ -85,12 +85,18 @@ export async function POST(req: NextRequest) {
 
     // 2. Sanitize & Save
     await dbConnect();
+
+    let validPackageId = undefined;
+    if (parsed.packageId && /^[0-9a-fA-F]{24}$/.test(String(parsed.packageId))) {
+      validPackageId = String(parsed.packageId);
+    }
+
     const enquiry = await Enquiry.create({
       firstName: sanitizeInput(parsed.firstName),
       lastName: sanitizeInput(parsed.lastName),
       email: sanitizeInput(parsed.email),
       phone: sanitizeInput(parsed.phone),
-      packageId: parsed.packageId,
+      packageId: validPackageId,
       travellers: sanitizeInput(parsed.travellers),
       month: sanitizeInput(parsed.month),
       budget: sanitizeInput(parsed.budget),

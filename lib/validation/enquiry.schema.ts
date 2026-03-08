@@ -6,7 +6,7 @@ export const enquirySchema = yup.object({
     lastName: yup.string().trim().required("Last name is required").min(1).max(50).matches(/^[a-zA-Z\s]*$/, noHtmlError),
     email: yup.string().trim().required("Email is required").email("Invalid email address"),
     phone: phoneText,
-    packageId: yup.number().integer().positive("Please select a package").required("Please select a package"),
+    packageId: yup.string().required("Please select a package"),
     travellers: safeText(1),
     month: safeText(1, 50, "Please select a month"),
     budget: safeText(1, 50, "Please select a budget"),

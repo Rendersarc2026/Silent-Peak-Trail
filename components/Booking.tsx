@@ -21,12 +21,12 @@ import {
 } from "libphonenumber-js";
 
 const PACKAGE_OPTIONS = [
-  { id: 1, name: "Nubra & Pangong Escape" },
-  { id: 2, name: "Stargazing Expedition" },
-  { id: 3, name: "Sham Valley Trek" },
-  { id: 4, name: "Markha Valley Trek" },
-  { id: 5, name: "Manali–Leh Moto Expedition" },
-  { id: 6, name: "Custom / Not Sure Yet" }
+  { id: "1", name: "Nubra & Pangong Escape" },
+  { id: "2", name: "Stargazing Expedition" },
+  { id: "3", name: "Sham Valley Trek" },
+  { id: "4", name: "Markha Valley Trek" },
+  { id: "5", name: "Manali–Leh Moto Expedition" },
+  { id: "custom", name: "Custom / Not Sure Yet" }
 ];
 
 const TRAVELLER_OPTIONS = [
@@ -112,7 +112,7 @@ export default function Booking({
     const { countryCode, phone, packageId, ...rest } = rawBody;
     const body = {
       ...rest,
-      packageId: parseInt(String(packageId), 10),
+      packageId: String(packageId),
       phone: fullPhone
     };
 
@@ -292,9 +292,9 @@ export default function Booking({
                     label="Preferred Package"
                     name="packageId"
                     options={packages.length > 0 ? (
-                      packages.some(p => p.id === 6 || p.id === '6')
+                      packages.some(p => p.id === 'custom' || p.id === 6 || p.id === '6')
                         ? packages
-                        : [...packages, { id: 6, name: "Custom / Not Sure Yet" }]
+                        : [...packages, { id: "custom", name: "Custom / Not Sure Yet" }]
                     ) : PACKAGE_OPTIONS}
                     defaultValue={selectedPackage ? (
                       packages.find(p => p.name === selectedPackage)?.id ||
