@@ -1,4 +1,10 @@
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import Package, { IPackage } from "@/lib/models/Package";
+import Destination from "@/lib/models/Destination";
+import GalleryItem from "@/lib/models/GalleryItem";
+import Review from "@/lib/models/Review";
+import LehTip from "@/lib/models/LehTip";
+import Homepage from "@/lib/models/Homepage";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import StatsStrip from "@/components/StatsStrip";
@@ -17,20 +23,20 @@ import StructuredData from "@/components/StructuredData";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  await dbConnect();
+
   const [settingsRecords, packages, destinations, gallery, dbReviews, dbLehTips] = await Promise.all([
-    prisma.homepage.findMany(),
-    prisma.package.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" } }),
-    prisma.destination.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" } }),
-    prisma.galleryItem.findMany({ where: { isActive: true }, orderBy: { createdAt: "asc" } }),
-    prisma.review.findMany({
-      where: { isApproved: true, isActive: true },
-      include: { tourPackage: { select: { name: true } } },
-      orderBy: { createdAt: "desc" }
-    }),
-    prisma.lehTip.findMany({
-      where: { isActive: true },
-      orderBy: { order: "asc" }
-    })
+    Homepage.find().lean(),
+    Package.find({ isActive: true }).sort({ createdAt: 1 }).lean(),
+    Destination.find({ isActive: true }).sort({ createdAt: 1 }).lean(),
+    GalleryItem.find({ isActive: true }).sort({ createdAt: 1 }).lean(),
+    Review.find({ isApproved: true, isActive: true })
+      .populate({ path: 'packageId', select: 'name', model: Package })
+      .sort({ createdAt: -1 })
+      .lean(),
+    LehTip.find({ isActive: true })
+      .sort({ order: 1 })
+      .lean()
   ]);
 
   // Convert settings array to an object
@@ -38,8 +44,8 @@ export default async function Home() {
   settingsRecords.forEach((s) => { homepageData[s.key] = s.value; });
 
   // Map gallery to format expected by Gallery component
-  const galleryImages = gallery.map((g) => ({
-    id: String(g.id),
+  const galleryImages = gallery.map((g: any) => ({
+    id: String(g._id),
     src: g.src,
     alt: g.alt,
     wide: g.wide,
@@ -47,8 +53,8 @@ export default async function Home() {
   }));
 
   // Map destinations to format expected by Destinations component
-  const destinationsData = destinations.map((d) => ({
-    id: String(d.id),
+  const destinationsData = destinations.map((d: any) => ({
+    id: String(d._id),
     name: d.name,
     type: d.type,
     altitude: d.altitude,
@@ -57,9 +63,10 @@ export default async function Home() {
   }));
 
   // Map packages
-  const packagesData = packages.map((p) => ({
-    id: String(p.id),
+  const packagesData = packages.map((p: any) => ({
+    id: String(p._id),
     name: p.name,
+    slug: p.slug,
     tagline: p.tagline,
     duration: p.duration,
     price: p.price,
@@ -74,11 +81,11 @@ export default async function Home() {
   }));
 
   // Map reviews to testimonials format
-  const testimonials = dbReviews.map((r) => ({
-    id: String(r.id),
+  const testimonials = dbReviews.map((r: any) => ({
+    id: String(r._id),
     name: r.name,
     place: r.place,
-    package: r.tourPackage?.name || "Tour Package",
+    package: r.packageId?.name || "Tour Package",
     initial: r.initial,
     text: r.message,
     stars: r.rating,
@@ -89,8 +96,8 @@ export default async function Home() {
   const otherPackages = packagesData.filter(p => !p.name.toLowerCase().includes('stargazing'));
 
   // Map Leh Tips
-  const lehTipsData = dbLehTips.map((t) => ({
-    id: String(t.id),
+  const lehTipsData = dbLehTips.map((t: any) => ({
+    id: String(t._id),
     icon: t.icon,
     title: t.title,
     desc: t.desc,

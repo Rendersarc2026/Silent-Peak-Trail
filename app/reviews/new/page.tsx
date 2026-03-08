@@ -5,6 +5,7 @@ import { Star, Send, CheckCircle2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import Footer from "@/components/Footer";
+import { hasError, getErrorMessage } from "@/lib/utils";
 
 export default function NewReviewPage() {
     const [rating, setRating] = useState(5);
@@ -18,11 +19,22 @@ export default function NewReviewPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
+    const clearFieldError = (field: string) => {
+        if (fieldErrors[field]) {
+            setFieldErrors(prev => {
+                const updated = { ...prev };
+                delete updated[field];
+                return updated;
+            });
+        }
+    };
+
     useEffect(() => {
-        fetch("/api/packages")
+        fetch("/api/packages?limit=100")
             .then(res => res.json())
             .then(data => {
-                if (Array.isArray(data)) setPackages(data);
+                const pkgs = data.data || data;
+                if (Array.isArray(pkgs)) setPackages(pkgs);
             })
             .catch(err => console.error("Failed to fetch packages", err));
     }, []);
@@ -35,10 +47,6 @@ export default function NewReviewPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (packageId === 0) {
-            setError("Please select a package.");
-            return;
-        }
         setIsSubmitting(true);
         setError(null);
         setFieldErrors({});
@@ -57,7 +65,7 @@ export default function NewReviewPage() {
             } else {
                 if (data.details) {
                     setFieldErrors(data.details);
-                    setError("Please correct the highlighted fields below.");
+                    setError("Please fill all required fields.");
                 } else {
                     setError(data.error || "Something went wrong. Please try again.");
                 }
@@ -147,16 +155,14 @@ export default function NewReviewPage() {
                                         Full Name
                                     </label>
                                     <input
-                                        required
                                         maxLength={50}
                                         type="text"
                                         value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        onKeyDown={handleNameKeyDown}
-                                        className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none ${fieldErrors.name ? 'ring-red-300 bg-red-50/30' : ''}`}
+                                        onChange={(e) => { setName(e.target.value); clearFieldError('name'); }}
+                                        className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none ${hasError(fieldErrors, 'name') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                         placeholder="John Doe"
                                     />
-                                    {fieldErrors.name && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.name[0]}</p>}
+                                    {hasError(fieldErrors, 'name') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'name')}</p>}
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -169,11 +175,11 @@ export default function NewReviewPage() {
                                             maxLength={50}
                                             type="text"
                                             value={place}
-                                            onChange={(e) => setPlace(e.target.value)}
-                                            className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none ${fieldErrors.place ? 'ring-red-300 bg-red-50/30' : ''}`}
+                                            onChange={(e) => { setPlace(e.target.value); clearFieldError('place'); }}
+                                            className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none ${hasError(fieldErrors, 'place') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                             placeholder="e.g. Mumbai, India"
                                         />
-                                        {fieldErrors.place && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.place[0]}</p>}
+                                        {hasError(fieldErrors, 'place') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'place')}</p>}
                                     </div>
 
                                     {/* Package */}
@@ -182,10 +188,9 @@ export default function NewReviewPage() {
                                             Select Package
                                         </label>
                                         <select
-                                            required
                                             value={packageId}
-                                            onChange={(e) => setPackageId(Number(e.target.value))}
-                                            className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none appearance-none ${fieldErrors.packageId ? 'ring-red-300 bg-red-50/30' : ''}`}
+                                            onChange={(e) => { setPackageId(Number(e.target.value)); clearFieldError('packageId'); }}
+                                            className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none appearance-none ${hasError(fieldErrors, 'packageId') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                         >
                                             <option value={0}>Select a package</option>
                                             {packages.map(pkg => (
@@ -194,7 +199,7 @@ export default function NewReviewPage() {
                                                 </option>
                                             ))}
                                         </select>
-                                        {fieldErrors.packageId && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.packageId[0]}</p>}
+                                        {hasError(fieldErrors, 'packageId') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'packageId')}</p>}
                                     </div>
                                 </div>
 
@@ -209,15 +214,14 @@ export default function NewReviewPage() {
                                         </span>
                                     </div>
                                     <textarea
-                                        required
                                         maxLength={1000}
                                         rows={5}
                                         value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
-                                        className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none resize-none ${fieldErrors.message ? 'ring-red-300 bg-red-50/30' : ''}`}
+                                        onChange={(e) => { setMessage(e.target.value); clearFieldError('message'); }}
+                                        className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none resize-none ${hasError(fieldErrors, 'message') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                         placeholder="Tell us about your trip..."
                                     />
-                                    {fieldErrors.message && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.message[0]}</p>}
+                                    {hasError(fieldErrors, 'message') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'message')}</p>}
                                 </div>
 
                                 <button

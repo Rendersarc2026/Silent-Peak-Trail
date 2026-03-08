@@ -22,6 +22,8 @@ import {
   AlertCircle,
   Info
 } from "lucide-react";
+import { cn, hasError, getErrorMessage, validateWithYupSync } from "@/lib/utils";
+import { agencyProfileSchema } from "@/lib/validation";
 
 const NAV = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -49,10 +51,21 @@ export default function AdminShell({
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [settingsForm, setSettingsForm] = useState<Record<string, string> | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [settingsError, setSettingsError] = useState("");
   const [settingsSuccess, setSettingsSuccess] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -84,6 +97,16 @@ export default function AdminShell({
     setSettingsError("");
     setSettingsSuccess("");
     setFieldErrors({});
+
+    // Client-side validation
+    const { success, error } = validateWithYupSync(agencyProfileSchema, settingsForm);
+    if (!success) {
+      setFieldErrors(error?.fieldErrors || {});
+      setSettingsError("Please fill all required fields correctly.");
+      setSavingSettings(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/agency", {
         method: "PUT",
@@ -94,7 +117,7 @@ export default function AdminShell({
       if (!res.ok) {
         if (data.details) {
           setFieldErrors(data.details);
-          setSettingsError("Please correct the highlighted fields below.");
+          setSettingsError("Please fill all required fields.");
         } else {
           setSettingsError(data.error || "Failed to save.");
         }
@@ -134,8 +157,13 @@ export default function AdminShell({
   }, [sidebarOpen]);
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.replace("/admin/login");
+    setIsLoggingOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.replace("/admin/login");
+    } finally {
+      setIsLoggingOut(false);
+    }
   }
 
   const SidebarContent = (
@@ -192,10 +220,11 @@ export default function AdminShell({
           </div>
           <button
             onClick={logout}
-            className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
+            disabled={isLoggingOut}
+            className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50"
             title="Logout"
           >
-            <LogOut className="h-4 w-4" />
+            {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
           </button>
         </div>
       </div>
@@ -204,6 +233,13 @@ export default function AdminShell({
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+      {/* Logout overlay */}
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <Loader2 size={40} className="animate-spin text-white mb-4" />
+          <p className="text-sm font-semibold text-slate-300 tracking-wide">Logging out...</p>
+        </div>
+      )}
       {/* ── Desktop sidebar (always visible ≥ lg) ── */}
       <aside className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:w-64 lg:flex-col bg-slate-900 text-slate-300">
         {SidebarContent}
@@ -277,9 +313,10 @@ export default function AdminShell({
                   </button>
                   <button
                     onClick={() => { setDropdownOpen(false); logout(); }}
-                    className="flex w-full items-center gap-2.5 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-colors text-left"
+                    disabled={isLoggingOut}
+                    className="flex w-full items-center gap-2.5 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-colors text-left disabled:opacity-50"
                   >
-                    <LogOut size={16} /> Logout
+                    {isLoggingOut ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />} Logout
                   </button>
                 </div>
               )}
@@ -340,41 +377,53 @@ export default function AdminShell({
 
                   <div className="grid grid-cols-1 gap-5">
                     <div>
-                      <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.phone ? 'text-red-500' : 'text-slate-500'}`}>Phone / WhatsApp</label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Phone / WhatsApp</label>
                       <input
-                        className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.phone ? 'border-red-300 bg-red-50/30' : ''}`}
+                        className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'phone') && 'border-red-300 ring-2 ring-red-500/10')}
                         value={settingsForm.phone}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, phone: e.target.value })}
+                        onChange={(e) => {
+                          setSettingsForm({ ...settingsForm, phone: e.target.value });
+                          clearFieldError('phone');
+                        }}
                       />
-                      {fieldErrors.phone && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.phone[0]}</p>}
+                      {hasError(fieldErrors, 'phone') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'phone')}</p>}
                     </div>
                     <div>
-                      <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.email ? 'text-red-500' : 'text-slate-500'}`}>Email Address</label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Email Address</label>
                       <input
-                        className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.email ? 'border-red-300 bg-red-50/30' : ''}`}
+                        className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'email') && 'border-red-300 ring-2 ring-red-500/10')}
                         type="email"
                         value={settingsForm.email}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, email: e.target.value })}
+                        onChange={(e) => {
+                          setSettingsForm({ ...settingsForm, email: e.target.value });
+                          clearFieldError('email');
+                        }}
                       />
-                      {fieldErrors.email && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.email[0]}</p>}
+                      {hasError(fieldErrors, 'email') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'email')}</p>}
                     </div>
                     <div>
-                      <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.address ? 'text-red-500' : 'text-slate-500'}`}>Office Address</label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Office Address</label>
                       <input
-                        className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.address ? 'border-red-300 bg-red-50/30' : ''}`}
+                        className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'address') && 'border-red-300 ring-2 ring-red-500/10')}
                         value={settingsForm.address}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, address: e.target.value })}
+                        onChange={(e) => {
+                          setSettingsForm({ ...settingsForm, address: e.target.value });
+                          clearFieldError('address');
+                        }}
                       />
-                      {fieldErrors.address && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.address[0]}</p>}
+                      {hasError(fieldErrors, 'address') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'address')}</p>}
                     </div>
                     <div>
-                      <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.season ? 'text-red-500' : 'text-slate-500'}`}>Best Season Text</label>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Best Season Text</label>
                       <input
-                        className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.season ? 'border-red-300 bg-red-50/30' : ''}`}
+                        className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'season') && 'border-red-300 ring-2 ring-red-500/10')}
                         value={settingsForm.season}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, season: e.target.value })}
+                        onChange={(e) => {
+                          setSettingsForm({ ...settingsForm, season: e.target.value });
+                          clearFieldError('season');
+                        }}
                       />
-                      {fieldErrors.season && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.season[0]}</p>}
+                      {hasError(fieldErrors, 'season') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'season')}</p>}
                     </div>
                   </div>
                 </>

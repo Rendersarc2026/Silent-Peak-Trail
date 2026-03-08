@@ -16,16 +16,23 @@ import {
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ConfirmModal from "@/components/admin/ConfirmModal";
-
+import Skeleton from "@/components/admin/Skeleton";
+import Pagination from "@/components/admin/Pagination";
+import SearchInput from "@/components/admin/SearchInput";
+import { validateWithYup, cn, hasError, getErrorMessage } from "@/lib/utils";
+import { gallerySchema } from "@/lib/validation";
 
 interface GalleryItem { id: string; src: string; alt: string; wide: boolean; tall: boolean; }
 const EMPTY = { src: "", alt: "", wide: false, tall: false };
 
-import Skeleton from "@/components/admin/Skeleton";
-
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -36,6 +43,16 @@ export default function GalleryPage() {
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string }>({ isOpen: false, id: "" });
   const [deleting, setDeleting] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   const isDirty = () => {
     if (editing) {
@@ -59,36 +76,51 @@ export default function GalleryPage() {
       setFieldErrors({});
     }
   };
-  const load = () => {
+  const load = (page = 1, s = search, lim = rowsPerPage) => {
     setLoading(true);
-    return fetch("/api/gallery")
+    const params = new URLSearchParams({
+      page: page.toString(),
+      search: s,
+      limit: lim.toString()
+    });
+    return fetch(`/api/gallery?${params}`)
       .then(r => r.json())
-      .then(setItems)
+      .then(res => {
+        setItems(res.data);
+        setTotalPages(res.totalPages);
+        setCurrentPage(res.currentPage);
+      })
       .finally(() => setLoading(false));
   };
-  useEffect(() => { load(); }, []);
 
-  function validate() {
-    const charRegex = /^[a-zA-Z0-9\s.,]*$/;
-    const looseRegex = /^[^<>{}]*$/;
-    if (!form.src) return "Please upload an image.";
-    if (form.alt && !charRegex.test(form.alt)) return "Description can only contain letters, numbers, spaces, periods and commas.";
-    if (form.alt && !looseRegex.test(form.alt)) return "Description cannot contain HTML tags or brackets.";
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      load(1, search);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+
+  async function save() {
+    setError("");
+    setFieldErrors({});
+
+    // Client-side validation using Yup
+    const { success, error: validationError } = await validateWithYup(gallerySchema, form);
+    if (!success) {
+      setFieldErrors(validationError?.fieldErrors as any);
+      setError("Please fill all required fields.");
+      return;
+    }
 
     // Duplicate image check
     const isDuplicate = items.some(g => g.src === form.src && g.id !== editing?.id);
-    if (isDuplicate) return "This image is already in the gallery.";
-
-    return null;
-  }
-
-  async function save() {
-    const err = validate();
-    if (err) { setError(err); return; }
+    if (isDuplicate) {
+      setError("This image is already in the gallery.");
+      return;
+    }
 
     setSaving(true);
-    setError("");
-    setFieldErrors({});
     const url = editing ? `/api/gallery/${editing.id}` : "/api/gallery";
     const method = editing ? "PUT" : "POST";
 
@@ -103,7 +135,7 @@ export default function GalleryPage() {
       if (!res.ok) {
         if (data.details) {
           setFieldErrors(data.details);
-          setError("Please correct the highlighted fields below.");
+          setError("Please fill all required fields.");
         } else {
           setError(data.error || "Failed to save image.");
         }
@@ -116,7 +148,7 @@ export default function GalleryPage() {
       setForm(EMPTY);
       setEditing(null);
       setFieldErrors({});
-      await load();
+      await load(currentPage);
 
       showToast(editing ? "Image updated successfully!" : "Image added to gallery!");
     } catch (err) {
@@ -178,10 +210,17 @@ export default function GalleryPage() {
         title="Remove Image"
         message="Are you sure you want to remove this image from the gallery? It will no longer be visible on the public site."
       />
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-sm font-medium text-slate-500">Manage your website&apos;s photo gallery</h2>
-        </div>
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <SearchInput
+          value={search}
+          onChange={(val) => {
+            setSearch(val);
+            setCurrentPage(1);
+          }}
+          placeholder="Search gallery..."
+          loading={loading && !!search}
+          className="max-w-md"
+        />
         <button
           onClick={openNew}
           className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs sm:text-sm font-semibold text-white transition-all hover:bg-blue-700 shadow-sm active:scale-[0.98] shrink-0 whitespace-nowrap self-start sm:self-auto"
@@ -283,6 +322,25 @@ export default function GalleryPage() {
         )}
       </div>
 
+      {!loading && items.length > 0 && (
+        <div className="mt-10 flex justify-center">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(val) => {
+              setRowsPerPage(val);
+              setCurrentPage(1);
+              load(1, search, val);
+            }}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              load(page, search);
+            }}
+          />
+        </div>
+      )}
+
       {/* Modal */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm sm:p-4 animate-in fade-in duration-200" onClick={handleCloseAttempt}>
@@ -309,20 +367,20 @@ export default function GalleryPage() {
                 </div>
               )}
               <div>
-                <label className={`block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 ${fieldErrors.src ? 'text-red-500' : 'text-slate-500'}`}>
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
                   Gallery Image
                 </label>
                 <ImageUpload
                   value={form.src}
-                  onChange={url => setForm(f => ({ ...f, src: url }))}
-                  onError={msg => setError(msg)}
+                  onChange={(url: string) => { setForm(f => ({ ...f, src: url })); clearFieldError('src'); }}
+                  onError={(msg: string) => setError(msg)}
                 />
-                {fieldErrors.src && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.src[0]}</p>}
+                {hasError(fieldErrors, 'src') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'src')}</p>}
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-1.5 ml-1">
-                  <label className={`block text-[11px] font-bold uppercase tracking-wider ${fieldErrors.alt ? 'text-red-500' : 'text-slate-500'}`}>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     Description / Alt Text
                   </label>
                   <span className={`text-[10px] font-bold ${form.alt.length > 90 ? 'text-red-500' : 'text-slate-400'}`}>
@@ -331,12 +389,12 @@ export default function GalleryPage() {
                 </div>
                 <input
                   maxLength={100}
-                  className={`block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white ${fieldErrors.alt ? 'border-red-300 bg-red-50/30' : ''}`}
+                  className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'alt') && 'border-red-300 ring-2 ring-red-500/10')}
                   value={form.alt}
-                  onChange={e => setForm(f => ({ ...f, alt: e.target.value }))}
+                  onChange={e => { setForm(f => ({ ...f, alt: e.target.value })); clearFieldError('alt'); }}
                   placeholder="e.g. Pangong lake at sunrise"
                 />
-                {fieldErrors.alt && <p className="mt-1 text-xs text-red-500 font-medium">{fieldErrors.alt[0]}</p>}
+                {hasError(fieldErrors, 'alt') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'alt')}</p>}
               </div>
 
               <div className="flex flex-wrap gap-x-8 gap-y-3 pt-2">
@@ -346,7 +404,7 @@ export default function GalleryPage() {
                       type="checkbox"
                       className="sr-only peer"
                       checked={form.wide}
-                      onChange={e => setForm(f => ({ ...f, wide: e.target.checked }))}
+                      onChange={e => { setForm(f => ({ ...f, wide: e.target.checked })); clearFieldError('wide'); }}
                     />
                     <div className="h-5 w-5 rounded-md border-2 border-slate-200 transition-all peer-checked:bg-blue-600 peer-checked:border-blue-600 group-hover:border-blue-400"></div>
                     <Check size={14} className="absolute inset-0 m-auto text-white opacity-0 transition-opacity peer-checked:opacity-100" strokeWidth={3} />
@@ -360,7 +418,7 @@ export default function GalleryPage() {
                       type="checkbox"
                       className="sr-only peer"
                       checked={form.tall}
-                      onChange={e => setForm(f => ({ ...f, tall: e.target.checked }))}
+                      onChange={e => { setForm(f => ({ ...f, tall: e.target.checked })); clearFieldError('tall'); }}
                     />
                     <div className="h-5 w-5 rounded-md border-2 border-slate-200 transition-all peer-checked:bg-indigo-600 peer-checked:border-indigo-600 group-hover:border-indigo-400"></div>
                     <Check size={14} className="absolute inset-0 m-auto text-white opacity-0 transition-opacity peer-checked:opacity-100" strokeWidth={3} />
@@ -379,10 +437,15 @@ export default function GalleryPage() {
               </button>
               <button
                 onClick={save}
-                disabled={saving || !form.src}
+                disabled={saving}
                 className="flex items-center justify-center gap-2 min-w-[120px] rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 shadow-sm disabled:opacity-70 active:scale-[0.98]"
               >
-                {saving ? <Loader2 size={18} className="animate-spin" /> : (editing ? "Save Changes" : "Add Image")}
+                {saving ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>{editing ? "Saving..." : "Adding..."}</span>
+                  </>
+                ) : (editing ? "Save Changes" : "Add Image")}
               </button>
             </div>
           </div>

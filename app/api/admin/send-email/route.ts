@@ -10,13 +10,22 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { to, subject, message } = await req.json();
+        const body = await req.json();
 
-        if (!to || !subject || !message) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        // 1. Validate
+        const { sendEmailSchema } = await import("@/lib/validation");
+        const { sanitizeInput, validateWithYup } = await import("@/lib/utils");
+        const { success, data: parsed, error: validationError } = await validateWithYup(sendEmailSchema, body);
+        
+        if (!success) {
+            return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
         }
 
-        const sent = await sendCustomEmail({ to, subject, message });
+        // 2. Sanitize & Send
+        const cleanSubject = sanitizeInput(parsed.subject);
+        const cleanMessage = sanitizeInput(parsed.message);
+
+        const sent = await sendCustomEmail({ to: parsed.to, subject: cleanSubject, message: cleanMessage });
 
         if (!sent) {
             return NextResponse.json({ error: "Failed to send email" }, { status: 500 });

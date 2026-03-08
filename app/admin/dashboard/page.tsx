@@ -148,39 +148,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
-        {/* Quick Links */}
-        <div className="lg:col-span-1 space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">Quick Actions</h2>
-          <div className="grid grid-cols-1 gap-4">
-            {[
-              { href: "/admin/packages", icon: Package, label: "Manage Packages", color: "blue" },
-              { href: "/admin/gallery", icon: ImageIcon, label: "Gallery Images", color: "purple" },
-              { href: "/admin/destinations", icon: MapPin, label: "Destinations", color: "orange" },
-              { href: "/admin/testimonials", icon: Star, label: "Testimonials", color: "yellow" },
-              { href: "/admin/homepage", icon: HomeIcon, label: "Homepage", color: "slate" },
-              { href: "/", icon: Globe, label: "View Live Site", color: "emerald", external: true },
-            ].map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                target={l.external ? "_blank" : undefined}
-                className="group flex items-center gap-4 rounded-xl border bg-white p-4 transition-all hover:border-blue-200 hover:shadow-md"
-              >
-                <div className={`rounded-lg bg-${l.color}-50 p-2 text-${l.color}-600`}>
-                  <l.icon size={20} />
-                </div>
-                <div className="flex-1">
-                  <span className="text-sm font-semibold text-slate-700">{l.label}</span>
-                </div>
-                <ArrowUpRight size={16} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
-              </Link>
-            ))}
-          </div>
-        </div>
-
+      <div className="mt-8">
         {/* Recent Enquiries */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">Recent Enquiries</h2>
             <Link href="/admin/enquiries" className="text-xs font-semibold text-blue-600 hover:underline">View All</Link>

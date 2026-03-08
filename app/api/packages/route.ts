@@ -1,20 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { readDB, writeDB } from "@/lib/db";
-import { sanitizeInput } from "@/lib/utils";
+import { sanitizeInput, slugify, validateWithYup } from "@/lib/utils";
 import { packageSchema } from "@/lib/validation";
-import { z } from "zod";
+import dbConnect from "@/lib/db";
+import Package from "@/lib/models/Package";
 
-function auth() { return getSession(); }
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const search = searchParams.get("search") || "";
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "10");
+  const skip = (page - 1) * limit;
 
-import prisma from "@/lib/prisma";
+  const session = await getSession();
+  const where: any = { isActive: true };
+  if (search) {
+    where.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { tagline: { $regex: search, $options: 'i' } },
+    ];
+  }
 
-export async function GET() {
-  const pkgs = await prisma.package.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: "desc" },
+  await dbConnect();
+
+  const [pkgs, total] = await Promise.all([
+    Package.find(where)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Package.countDocuments(where)
+  ]);
+
+  return NextResponse.json({
+    data: pkgs,
+    total,
+    totalPages: Math.ceil(total / limit),
+    currentPage: page
   });
-  return NextResponse.json(pkgs);
 }
 
 export async function POST(req: NextRequest) {
@@ -22,20 +44,25 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const parsed = packageSchema.parse(body);
+
+    // 1. Validate using Yup
+    const { success, data: parsed, error: validationError } = await validateWithYup(packageSchema, body);
+
+    if (!success) {
+      return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
+    }
 
     const nameNormal = sanitizeInput(parsed.name).trim();
-    const existing = await prisma.package.findFirst({
-      where: { name: { equals: nameNormal } },
-    });
+    await dbConnect();
+    const existing = await Package.findOne({ name: nameNormal });
 
     if (existing) {
       return NextResponse.json({ error: `A package named "${nameNormal}" already exists.` }, { status: 409 });
     }
 
-    const newPkg = await prisma.package.create({
-      data: {
+    const newPkg = await Package.create({
         name: nameNormal,
+        slug: slugify(nameNormal),
         tagline: sanitizeInput(parsed.tagline),
         duration: sanitizeInput(parsed.duration),
         price: parsed.price,
@@ -43,18 +70,19 @@ export async function POST(req: NextRequest) {
         badgeGold: parsed.badgeGold,
         featured: parsed.featured,
         img: parsed.img,
-        features: parsed.features.map((f: string) => sanitizeInput(f)),
-        itinerary: parsed.itinerary || [],
-        inclusions: parsed.inclusions || [],
-        exclusions: parsed.exclusions || [],
-      },
+        features: (parsed.features || []).map((f: string) => sanitizeInput(f)),
+        itinerary: (parsed.itinerary || []).map((item: any) => ({
+          ...item,
+          day: sanitizeInput(item.day),
+          title: sanitizeInput(item.title),
+          activities: item.activities ? sanitizeInput(item.activities) : undefined
+        })),
+        inclusions: (parsed.inclusions || []).map((i: string) => sanitizeInput(i)),
+        exclusions: (parsed.exclusions || []).map((e: string) => sanitizeInput(e)),
     });
 
     return NextResponse.json(newPkg, { status: 201 });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation failed", details: error.flatten().fieldErrors }, { status: 400 });
-    }
     console.error("Error creating package:", error);
     return NextResponse.json({ error: "Invalid package data provided." }, { status: 400 });
   }

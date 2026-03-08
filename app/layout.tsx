@@ -44,6 +44,10 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  icons: {
+    icon: "/logo.jpg",
+    apple: "/logo.jpg",
+  },
 };
 
 import NextTopLoader from "nextjs-toploader";

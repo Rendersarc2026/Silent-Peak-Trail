@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import EmailComposer from "@/components/admin/EmailComposer";
+import SearchInput from "@/components/admin/SearchInput";
 
 interface Enquiry {
   id: number; firstName: string; lastName: string; email: string; phone: string;
@@ -36,34 +37,56 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; i
 };
 
 import Skeleton from "@/components/admin/Skeleton";
+import Pagination from "@/components/admin/Pagination";
 
 export default function EnquiriesPage() {
   const [all, setAll] = useState<Enquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
   const [detail, setDetail] = useState<Enquiry | null>(null);
   const [toast, setToast] = useState("");
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({ isOpen: false, id: null });
   const [deleting, setDeleting] = useState(false);
   const [composingEmail, setComposingEmail] = useState<string | null>(null);
 
-  const load = () => {
+  const load = (page = 1, s = search, f = filter, lim = rowsPerPage) => {
     setLoading(true);
-    return fetch("/api/enquiries")
+    const params = new URLSearchParams({
+      page: page.toString(),
+      search: s,
+      status: f,
+      limit: lim.toString()
+    });
+    return fetch(`/api/enquiries?${params}`)
       .then(r => r.json())
-      .then(setAll)
+      .then(res => {
+        setAll(res.data);
+        setTotalPages(res.totalPages);
+        setCurrentPage(res.currentPage);
+        setCounts(res.counts);
+      })
       .finally(() => setLoading(false));
   };
-  useEffect(() => { load(); }, []);
 
-  const shown = filter === "all" ? all : all.filter(e => e.status === filter);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      load(1, search, filter);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search, filter]);
 
   const [handleStatusUpdate, { loading: updatingStatus }] = useAction(async ({ id, status }: { id: number, status: string }) => {
     await fetch(`/api/enquiries/${id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status })
     });
-    await load();
+    await load(currentPage);
     showToast("Status updated!");
     if (detail?.id === id) setDetail(d => d ? { ...d, status } : d);
   });
@@ -72,7 +95,7 @@ export default function EnquiriesPage() {
     setDeleting(true);
     try {
       await fetch(`/api/enquiries/${id}`, { method: "DELETE" });
-      await load();
+      await load(currentPage);
       setDetail(null);
       showToast("Enquiry deleted successfully!");
     } finally {
@@ -82,9 +105,6 @@ export default function EnquiriesPage() {
   }
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(""), 3000); }
-
-  const counts: Record<string, number> = {};
-  STATUSES.forEach(s => { counts[s] = s === "all" ? all.length : all.filter(e => e.status === s).length; });
 
   return (
     <AdminShell title="Enquiries">
@@ -96,31 +116,47 @@ export default function EnquiriesPage() {
         title="Delete Enquiry"
         message="Are you sure you want to permanently delete this enquiry? This action cannot be undone."
       />
-      <div className="mb-6 flex flex-col gap-4">
+
+      <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         {/* Filter tabs */}
         <div className="flex flex-wrap items-center gap-2">
           {STATUSES.map(s => (
             <button
               key={s}
-              onClick={() => setFilter(s)}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${filter === s
-                ? "bg-slate-900 text-white shadow-md"
-                : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+              onClick={() => {
+                setFilter(s);
+                setCurrentPage(1);
+              }}
+              className={`inline-flex items-center gap-3 rounded-2xl px-5 py-2.5 text-sm font-bold transition-all active:scale-95 ${filter === s
+                ? "bg-[var(--navy)] text-white shadow-lg shadow-navy/20"
+                : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm"
                 }`}
             >
               <span className="capitalize">{s}</span>
               {counts[s] > 0 && (
-                <span className={`rounded-full px-2 py-0.5 text-[10px] ${filter === s ? "bg-slate-700 text-slate-200" : "bg-slate-100 text-slate-500"}`}>
+                <span className={`rounded-xl px-2 py-0.5 text-[10px] ${filter === s ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
                   {counts[s]}
                 </span>
               )}
             </button>
           ))}
         </div>
+
+        {/* Search */}
+        <SearchInput
+          value={search}
+          onChange={(val) => {
+            setSearch(val);
+            setCurrentPage(1);
+          }}
+          placeholder="Search enquiries..."
+          loading={loading && !!search}
+          className="lg:w-80"
+        />
       </div>
 
       {toast && (
-        <div className="mb-6 animate-in fade-in slide-in-from-top-2 flex items-center gap-3 rounded-xl bg-green-50 p-4 text-sm font-medium text-green-700 border border-green-100 shadow-sm">
+        <div className="mb-6 animate-in fade-in slide-in-from-top-2 flex items-center gap-3 rounded-2xl bg-green-50 p-5 text-sm font-bold text-green-700 border border-green-100 shadow-sm">
           <CheckCircle2 size={18} className="text-green-600" />
           {toast}
         </div>
@@ -163,14 +199,14 @@ export default function EnquiriesPage() {
                       )}
                     </tr>
                   ))
-                ) : shown.length === 0 ? (
+                ) : all.length === 0 ? (
                   <tr>
                     <td colSpan={detail ? 3 : 4} className="px-6 py-12 text-center text-slate-400">
                       No enquiries found
                     </td>
                   </tr>
                 ) : (
-                  shown.map(e => (
+                  all.map((e: Enquiry) => (
                     <tr
                       key={e.id}
                       onClick={() => setDetail(e)}
@@ -222,6 +258,25 @@ export default function EnquiriesPage() {
               </tbody>
             </table>
           </div>
+
+          {!loading && all.length > 0 && (
+            <div className="border-t bg-slate-50/30">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(val) => {
+                  setRowsPerPage(val);
+                  setCurrentPage(1);
+                  load(1, search, filter, val);
+                }}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  load(page, search, filter);
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Detail Side Panel */}

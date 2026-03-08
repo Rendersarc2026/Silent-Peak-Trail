@@ -9,7 +9,8 @@ import {
   Send,
   CheckCircle2,
   Loader2,
-  Sparkles
+  Sparkles,
+  AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -74,8 +75,19 @@ export default function Booking({
 }) {
 
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
   const [country, setCountry] = useState<LibCountryCode>("IN");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   const [handleSubmit, { loading }] = useAction(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -86,12 +98,12 @@ export default function Booking({
 
     setFieldErrors({});
 
-    // 1. Validate phone professionally
+    // 1. Validate phone professionally (only if non-empty; empty is caught by server Yup schema)
     const dialCode = `+${getCountryCallingCode(country)}`;
-    const phoneValue = rawBody.phone as string;
+    const phoneValue = (rawBody.phone as string) || "";
     const fullPhone = `${dialCode}${phoneValue}`;
 
-    if (!isValidPhoneNumber(fullPhone, country)) {
+    if (phoneValue && !isValidPhoneNumber(fullPhone, country)) {
       setFieldErrors({ phone: [`Invalid number for ${country}. Please check and try again.`] });
       return;
     }
@@ -115,10 +127,11 @@ export default function Booking({
       if (data.details) {
         setFieldErrors(data.details);
       } else {
-        alert(data.error || "Failed to submit enquiry.");
+        setError(data.error || "Failed to submit enquiry.");
       }
       return;
     }
+    setError("");
 
     setSent(true);
     // Redirect to Thank You page
@@ -204,6 +217,12 @@ export default function Booking({
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-8">
+                {error && (
+                  <div className="flex items-center gap-3 rounded-2xl bg-red-50 p-5 text-sm font-bold text-red-600 border border-red-100 animate-in slide-in-from-top-2">
+                    <AlertCircle size={20} className="text-red-600 flex-shrink-0" />
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                   <FormInput
                     label="First Name"
@@ -211,6 +230,7 @@ export default function Booking({
                     placeholder="Rahul"
                     alphaOnly
                     error={fieldErrors.firstName?.[0]}
+                    onInput={() => clearFieldError('firstName')}
                   />
                   <FormInput
                     label="Last Name"
@@ -218,6 +238,7 @@ export default function Booking({
                     placeholder="Sharma"
                     alphaOnly
                     error={fieldErrors.lastName?.[0]}
+                    onInput={() => clearFieldError('lastName')}
                   />
                 </div>
 
@@ -228,6 +249,7 @@ export default function Booking({
                     type="email"
                     placeholder="you@email.com"
                     error={fieldErrors.email?.[0]}
+                    onInput={() => clearFieldError('email')}
                   />
                   <div className="flex flex-col gap-2">
                     <div className="flex gap-4">
@@ -258,6 +280,7 @@ export default function Booking({
                           numericOnly
                           maxLength={15}
                           error={fieldErrors.phone?.[0]}
+                          onInput={() => clearFieldError('phone')}
                         />
                       </div>
                     </div>
@@ -269,14 +292,16 @@ export default function Booking({
                     label="Preferred Package"
                     name="packageId"
                     options={packages.length > 0 ? (
-                      [...packages, { id: 6, name: "Custom / Not Sure Yet" }]
+                      packages.some(p => p.id === 6 || p.id === '6')
+                        ? packages
+                        : [...packages, { id: 6, name: "Custom / Not Sure Yet" }]
                     ) : PACKAGE_OPTIONS}
-                    // defaultValue might need to be resolved from selectedPackage (name)
                     defaultValue={selectedPackage ? (
                       packages.find(p => p.name === selectedPackage)?.id ||
                       PACKAGE_OPTIONS.find(p => p.name === selectedPackage)?.id
                     ) : undefined}
                     error={fieldErrors.packageId?.[0]}
+                    onChange={() => clearFieldError('packageId')}
                   />
 
                   <FormInput
@@ -286,6 +311,7 @@ export default function Booking({
                     min="1"
                     placeholder="2"
                     error={fieldErrors.travellers?.[0]}
+                    onInput={() => clearFieldError('travellers')}
                   />
                 </div>
 
@@ -295,6 +321,7 @@ export default function Booking({
                     name="month"
                     options={MONTH_OPTIONS}
                     error={fieldErrors.month?.[0]}
+                    onChange={() => clearFieldError('month')}
                   />
 
                   <FormSelect
@@ -302,6 +329,7 @@ export default function Booking({
                     name="budget"
                     options={BUDGET_OPTIONS}
                     error={fieldErrors.budget?.[0]}
+                    onChange={() => clearFieldError('budget')}
                   />
                 </div>
 
@@ -313,6 +341,7 @@ export default function Booking({
                     placeholder="Any specific requirements or questions?"
                     maxLength={1000}
                     suppressHydrationWarning
+                    onInput={() => clearFieldError('message')}
                     className="w-full rounded-[2rem] border-transparent bg-[var(--white)] px-6 py-5 text-sm font-medium text-[var(--navy)] shadow-sm ring-1 ring-slate-100 focus:ring-2 focus:ring-[var(--blue)]/20 focus:border-[var(--blue)] outline-none resize-none"
                   />
                   {fieldErrors.message && <p className="ml-1 mt-1 text-[10px] font-bold text-red-500 animate-pulse">{fieldErrors.message[0]}</p>}
@@ -384,14 +413,14 @@ function FormInput({ label, variant, alphaOnly, numericOnly, plusAndNumericOnly,
 }
 
 
-function FormSelect({ label, options, name, defaultValue, variant, required, error }: { label: string, options: (string | { id: string | number, name: string })[], name: string, defaultValue?: string | number, variant?: string, required?: boolean, error?: string }) {
+function FormSelect({ label, options, name, defaultValue, variant, error, onChange }: { label: string, options: (string | { id: string | number, name: string })[], name: string, defaultValue?: string | number, variant?: string, error?: string, onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void }) {
   return (
     <div className="space-y-1.5 flex flex-col items-start w-full">
       <label className="ml-1 text-[10px] font-bold uppercase tracking-widest text-[var(--text-light)]">{label}</label>
       <select
         name={name}
         defaultValue={defaultValue || ""}
-        required={required}
+        onChange={onChange}
         suppressHydrationWarning
         className={cn("w-full rounded-2xl border-transparent bg-[var(--bg-subtle)] px-5 py-4 text-sm font-medium text-[var(--navy)] shadow-sm ring-1 ring-slate-200 focus:ring-2 outline-none appearance-none", error ? "focus:ring-red-500/20 focus:border-red-500 ring-red-200" : "focus:ring-[var(--blue)]/20 focus:border-[var(--blue)]")}
       >

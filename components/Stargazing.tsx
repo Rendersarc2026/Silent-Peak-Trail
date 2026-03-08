@@ -7,6 +7,7 @@ interface StargazingProps {
     packageData?: {
         id: string;
         name: string;
+        slug: string;
         tagline: string;
         duration: string;
         price: number;
@@ -79,7 +80,7 @@ export default function Stargazing({ packageData, homepageData }: StargazingProp
 
                         <div className="mt-12 flex flex-wrap gap-5">
                             <Link
-                                href={packageData ? `/packages/${packageData.id}` : "#contact"}
+                                href={packageData ? `/packages/${packageData.slug}` : "#contact"}
                                 className="group flex items-center gap-3 rounded-2xl bg-white px-10 py-5 text-sm font-black uppercase tracking-widest text-[var(--navy)] transition-all hover:bg-[var(--gold)] hover:text-white shadow-2xl active:scale-95"
                             >
                                 Explore Package

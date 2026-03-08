@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { sanitizeInput } from "@/lib/utils";
+import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { homepageContentSchema } from "@/lib/validation";
-import { z } from "zod";
-
-import prisma from "@/lib/prisma";
+import dbConnect from "@/lib/db";
+import Homepage from "@/lib/models/Homepage";
 
 export async function GET() {
-    const settingsRecords = await prisma.homepage.findMany();
+    await dbConnect();
+    const settingsRecords = await Homepage.find().lean();
     const settings: Record<string, string> = {};
     settingsRecords.forEach((record) => {
         settings[record.key] = record.value;
@@ -20,7 +20,11 @@ export async function PUT(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const parsed = homepageContentSchema.parse(body);
+        const { success, data: parsed, error: validationError } = await validateWithYup(homepageContentSchema, body);
+
+        if (!success) {
+            return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
+        }
 
         const textFields = [
             "heroBgImage",
@@ -42,25 +46,22 @@ export async function PUT(req: NextRequest) {
             }
 
             updates.push(
-                prisma.homepage.upsert({
-                    where: { key },
-                    update: { value: finalVal },
-                    create: { key, value: finalVal },
-                })
+                Homepage.findOneAndUpdate(
+                    { key },
+                    { value: finalVal },
+                    { new: true, upsert: true }
+                )
             );
         }
 
         await Promise.all(updates);
 
-        const all = await prisma.homepage.findMany();
+        const all = await Homepage.find().lean();
         const result: Record<string, string> = {};
         all.forEach((r) => (result[r.key] = r.value));
 
         return NextResponse.json(result);
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: "Validation failed", details: error.flatten().fieldErrors }, { status: 400 });
-        }
         console.error("Error updating homepage content:", error);
         return NextResponse.json({ error: "Invalid homepage data provided." }, { status: 400 });
     }
