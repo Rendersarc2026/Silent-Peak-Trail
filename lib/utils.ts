@@ -10,15 +10,13 @@ export function cn(...classes: (string | boolean | undefined)[]) {
     return classes.filter(Boolean).join(" ");
 }
 
-import DOMPurify from "isomorphic-dompurify";
-
 export function sanitizeInput(input: string): string {
     if (!input) return "";
-    // Strict mode: strip ALL HTML tags and attributes
-    return DOMPurify.sanitize(input, {
-        ALLOWED_TAGS: [],
-        ALLOWED_ATTR: []
-    });
+    // Remove all HTML tags using a robust regex
+    // This avoids the heavy jsdom dependency that crashes on Vercel
+    return input
+        .replace(/<[^>]*>?/gm, '')
+        .trim();
 }
 
 export function sanitize(str: string): string {
