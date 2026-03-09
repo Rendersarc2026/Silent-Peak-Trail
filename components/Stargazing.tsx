@@ -1,7 +1,6 @@
 "use client";
 import { Sparkles, ArrowRight, Clock, CheckCircle2, Zap } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 interface StargazingProps {
     packageData?: {
@@ -17,24 +16,6 @@ interface StargazingProps {
     homepageData?: Record<string, string>;
 }
 
-const DEFAULT_HIGHLIGHTS = [
-    {
-        icon: "Sparkles",
-        title: "Bortle 1 Skies",
-        desc: "Experience the universe in absolute darkness. Hanle is India's only Dark Sky Reserve with zero light pollution."
-    },
-    {
-        icon: "Clock",
-        title: "High Altitude Advantage",
-        desc: "At 4,500m, the atmosphere is thin and pristine, offering clarity that transforms stargazing into a spiritual event."
-    },
-    {
-        icon: "CheckCircle2",
-        title: "Expert Astro-Guides",
-        desc: "Equipped with professional telescopes and celestial knowledge, our guides reveal the stories behind the stars."
-    }
-];
-
 const ICON_MAP: Record<string, React.ElementType> = {
     Sparkles, Clock, CheckCircle2, Zap
 };
@@ -44,7 +25,7 @@ export default function Stargazing({ packageData, homepageData }: StargazingProp
     const displayTitle = homepageData?.stargazingTitle || "Stargazing in the Dark Skies of Hanle";
     const bookText = homepageData?.bookButtonText || "Explore Package";
 
-    let highlights = DEFAULT_HIGHLIGHTS;
+    let highlights: any[] = [];
     if (homepageData?.stargazingHighlights) {
         try {
             const parsed = JSON.parse(homepageData.stargazingHighlights);

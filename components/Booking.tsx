@@ -20,22 +20,8 @@ import {
   CountryCode as LibCountryCode
 } from "libphonenumber-js";
 
-const PACKAGE_OPTIONS = [
-  { id: "1", name: "Nubra & Pangong Escape" },
-  { id: "2", name: "Stargazing Expedition" },
-  { id: "3", name: "Sham Valley Trek" },
-  { id: "4", name: "Markha Valley Trek" },
-  { id: "5", name: "Manali–Leh Moto Expedition" },
-  { id: "custom", name: "Custom / Not Sure Yet" }
-];
 
-const TRAVELLER_OPTIONS = [
-  "1 Person",
-  "2 People",
-  "3–5 People",
-  "6–10 People",
-  "10+ (Group)"
-];
+// Number of travellers is freely typed as a number
 
 const MONTH_OPTIONS = [
   "January (Chadar)",
@@ -216,7 +202,7 @@ export default function Booking({
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <form noValidate onSubmit={handleSubmit} className="space-y-8">
                 {error && (
                   <div className="flex items-center gap-3 rounded-2xl bg-red-50 p-5 text-sm font-bold text-red-600 border border-red-100 animate-in slide-in-from-top-2">
                     <AlertCircle size={20} className="text-red-600 flex-shrink-0" />
@@ -246,7 +232,7 @@ export default function Booking({
                   <FormInput
                     label="Email Address"
                     name="email"
-                    type="email"
+                    type="text"
                     placeholder="you@email.com"
                     error={fieldErrors.email?.[0]}
                     onInput={() => clearFieldError('email')}
@@ -295,10 +281,9 @@ export default function Booking({
                       packages.some(p => p.id === 'custom' || p.id === 6 || p.id === '6')
                         ? packages
                         : [...packages, { id: "custom", name: "Custom / Not Sure Yet" }]
-                    ) : PACKAGE_OPTIONS}
+                    ) : [{ id: "custom", name: "Custom / Not Sure Yet" }]}
                     defaultValue={selectedPackage ? (
-                      packages.find(p => p.name === selectedPackage)?.id ||
-                      PACKAGE_OPTIONS.find(p => p.name === selectedPackage)?.id
+                      packages.find(p => p.name === selectedPackage)?.id || "custom"
                     ) : undefined}
                     error={fieldErrors.packageId?.[0]}
                     onChange={() => clearFieldError('packageId')}

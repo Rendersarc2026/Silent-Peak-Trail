@@ -17,36 +17,7 @@ interface Feature {
   desc: string;
 }
 
-const DEFAULT_FEATURES: Feature[] = [
-  {
-    icon: "Compass",
-    title: "Born-and-Raised Local Guides",
-    color: "text-[var(--blue)]",
-    bg: "bg-blue-50",
-    desc: "Our guides are native Ladakhis with ancestral knowledge of every pass, monastery, and hidden lake."
-  },
-  {
-    icon: "ShieldCheck",
-    title: "Mountain Safety Protocols",
-    color: "text-[var(--gold)]",
-    bg: "bg-amber-50",
-    desc: "Satellite phones, acclimatisation schedules, and 24/7 emergency response team on every single tour."
-  },
-  {
-    icon: "Leaf",
-    title: "Eco-Friendly Exploration",
-    color: "text-green-600",
-    bg: "bg-green-50",
-    desc: "We follow Leave No Trace principles and ensure local communities benefit from every trip."
-  },
-  {
-    icon: "Settings2",
-    title: "Fully Tailored Journeys",
-    color: "text-indigo-600",
-    bg: "bg-indigo-50",
-    desc: "Every package adapts to your pace, fitness level, dietary needs, and specific interests."
-  },
-];
+// Features are fetched from the database and passed as a prop.
 
 interface WhyUsProps {
   homepageData?: Record<string, string>;
@@ -59,7 +30,7 @@ export default function WhyUs({ homepageData }: WhyUsProps) {
   const statsValue = homepageData?.whyUsStatsValue || "8,200+";
   const statsLabel = homepageData?.whyUsStatsLabel || "Happy Guests";
 
-  let features = DEFAULT_FEATURES;
+  let features: Feature[] = [];
   if (homepageData?.whyUsFeatures) {
     try {
       features = JSON.parse(homepageData.whyUsFeatures);

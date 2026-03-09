@@ -119,7 +119,7 @@ export default function NewReviewPage() {
                             <p className="text-slate-600">We&apos;d love to hear about your journey with us.</p>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl ring-1 ring-slate-100">
+                        <form noValidate onSubmit={handleSubmit} className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl ring-1 ring-slate-100">
                             {error && (
                                 <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-2">
                                     {error}

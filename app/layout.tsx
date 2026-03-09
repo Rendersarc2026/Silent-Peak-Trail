@@ -3,16 +3,28 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Silent Peak Trail — Boutique Ladakh Travel Agency",
+    default: "Silent Peak Trail — Ladakh Travel Agency",
     template: "%s | Silent Peak Trail"
   },
   description: "Specializing in premium, off-beat Ladakh expeditions since 2009. From Hanle stargazing to Nubra Valley adventures, we create authentic Himalayan journeys.",
+  keywords: [
+    "Ladakh Travel Agency",
+    "Leh Ladakh tours",
+    "Hanle stargazing",
+    "Nubra Valley adventure",
+    "Pangong Lake trip",
+    "Ladakh bike trip",
+    "Premium Ladakh packages",
+    "Ladakh local guides",
+    "best places to visit in ladakh",
+    "sham valley"
+  ],
   metadataBase: new URL("https://silentpeaktrail.com"), // User should update this when live
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Silent Peak Trail — Boutique Ladakh Travel Agency",
+    title: "Silent Peak Trail — Ladakh Travel Agency",
     description: "Authentic, safe, and premium Ladakh travel experiences. Native guides and perfectly perfected routes.",
     url: "https://silentpeaktrail.com",
     siteName: "Silent Peak Trail",
