@@ -1,10 +1,15 @@
 import * as yup from "yup";
-import { nameText, phoneText, safeText, safeOptionalText, noHtmlError } from "./primitives";
+import { nameText, phoneText, emailText, safeText, safeOptionalText, noHtmlError, isSafe } from "./primitives";
+
 
 export const enquirySchema = yup.object({
     firstName: nameText,
-    lastName: yup.string().trim().required("Last name is required").min(1).max(50).matches(/^[a-zA-Z\s]*$/, noHtmlError),
-    email: yup.string().trim().required("Email is required").email("Invalid email address"),
+    lastName: yup.string().trim().required("Last name is required").min(3, "Last name must be at least 3 characters").max(50).test("is-safe", noHtmlError, val => isSafe(val)).matches(/^[a-zA-Z\s]*$/, noHtmlError),
+
+    email: emailText,
+
+
+
     phone: phoneText,
     packageId: yup.string().required("Please select a package"),
     travellers: yup.number()
@@ -15,4 +20,6 @@ export const enquirySchema = yup.object({
     month: safeText(1, 50, "Please select a month"),
     budget: safeText(1, 50, "Please select a budget"),
     message: safeOptionalText(1000),
+    website_url: yup.string().max(0, "Bot detected"), // Honeypot field - must be empty
 });
+

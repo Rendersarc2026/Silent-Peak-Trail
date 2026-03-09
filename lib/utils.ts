@@ -10,14 +10,16 @@ export function cn(...classes: (string | boolean | undefined)[]) {
     return classes.filter(Boolean).join(" ");
 }
 
-export function sanitizeInput(input: string): string {
-    if (!input) return "";
-    // Remove all HTML tags using a robust regex
+export function sanitizeInput(input: any): string {
+    if (input === null || input === undefined) return "";
+    // Convert to string and remove all HTML tags using a robust regex
     // This avoids the heavy jsdom dependency that crashes on Vercel
-    return input
+    const str = String(input);
+    return str
         .replace(/<[^>]*>?/gm, '')
         .trim();
 }
+
 
 export function sanitize(str: string): string {
     return sanitizeInput(str);

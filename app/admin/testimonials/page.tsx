@@ -261,7 +261,9 @@ export default function TestimonialsAdmin() {
             onChange={(val) => {
               setSearch(val);
               setCurrentPage(1);
+              setLoading(true);
             }}
+
             placeholder="Search reviews..."
             loading={loading && !!search}
             className="sm:w-64"
@@ -293,10 +295,17 @@ export default function TestimonialsAdmin() {
           return (
             <button
               key={tab.key}
-              onClick={() => { setActiveTab(tab.key); setCurrentPage(1); setSearch(""); }}
+              onClick={() => {
+                setActiveTab(tab.key);
+                setCurrentPage(1);
+                setSearch("");
+                setLoading(true);
+                setItems([]);
+              }}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${activeTab === tab.key
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-500 hover:text-slate-700"}`}
+
             >
               <Icon size={15} />
               {tab.label}
@@ -322,33 +331,12 @@ export default function TestimonialsAdmin() {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {loading ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex flex-col rounded-2xl border bg-white p-6 shadow-sm ring-1 ring-slate-100">
-              <div className="flex items-center gap-4 mb-4">
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="h-4 w-32 mb-1" />
-                  <Skeleton className="h-3 w-20" />
-                </div>
-              </div>
-              <div className="flex gap-1 mb-3">
-                <Skeleton className="h-3 w-20" />
-              </div>
-              <div className="flex-1 mb-4">
-                <Skeleton className="h-3 w-full mb-1" />
-                <Skeleton className="h-3 w-full mb-1" />
-                <Skeleton className="h-3 w-2/3" />
-              </div>
-              <div className="mt-auto flex items-center justify-between border-t pt-4">
-                <Skeleton className="h-3 w-24" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-8 w-8 rounded-lg" />
-                  <Skeleton className="h-8 w-8 rounded-lg" />
-                </div>
-              </div>
-            </div>
-          ))
+          <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4 opacity-80" />
+            <p className="text-sm font-medium text-slate-500 animate-pulse">Loading reviews...</p>
+          </div>
         ) : items.length === 0 ? (
+
           <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
             <div className="mb-4 rounded-full bg-slate-100 p-6 text-slate-400">
               <Star size={48} />

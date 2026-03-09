@@ -353,6 +353,17 @@ export default function Booking({
                   {fieldErrors.message && <p className="ml-1 mt-1 text-[10px] font-bold text-red-500 animate-pulse">{fieldErrors.message[0]}</p>}
                 </div>
 
+                {/* Honeypot field - invisible to users, but bots will fill it */}
+                <div style={{ display: 'none' }} aria-hidden="true">
+                  <input
+                    type="text"
+                    name="website_url"
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
+
                 <button
                   type="submit"
                   disabled={loading || sent}

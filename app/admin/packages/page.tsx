@@ -36,7 +36,6 @@ const EMPTY: Omit<Pkg, "id"> = {
   itinerary: [], inclusions: [], exclusions: [],
 };
 
-import Skeleton from "@/components/admin/Skeleton";
 import Pagination from "@/components/admin/Pagination";
 import { validateWithYup } from "@/lib/utils";
 
@@ -290,34 +289,14 @@ export default function PackagesPage() {
             </thead>
             <tbody className="divide-y text-slate-600">
               {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-12 sm:h-16 w-16 sm:w-24 rounded-lg" />
-                        <div className="flex-1">
-                          <Skeleton className="h-4 w-32 mb-1" />
-                          <Skeleton className="h-3 w-24" />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
-                      <div className="flex gap-2">
-                        <Skeleton className="h-4 w-16 rounded-full" />
-                        <Skeleton className="h-4 w-12 rounded-full" />
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
-                      <Skeleton className="h-4 w-16 ml-auto" />
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <Skeleton className="h-8 w-8 rounded-lg" />
-                        <Skeleton className="h-8 w-8 rounded-lg" />
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                <tr>
+                  <td colSpan={4}>
+                    <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
+                      <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4 opacity-80" />
+                      <p className="text-sm font-medium text-slate-500 animate-pulse">Loading packages...</p>
+                    </div>
+                  </td>
+                </tr>
               ) : pkgs.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-slate-400">

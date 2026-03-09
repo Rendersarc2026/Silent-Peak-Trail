@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAction } from "@/lib/hooks/useAction";
 import AdminShell from "@/components/admin/AdminShell";
+import { formatDistanceToNow } from "date-fns";
 import {
   Mail,
   Phone,
@@ -15,7 +16,8 @@ import {
   Filter,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import EmailComposer from "@/components/admin/EmailComposer";
@@ -36,7 +38,6 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; i
   cancelled: { label: "Cancelled", bg: "bg-red-50", text: "text-red-700", icon: X },
 };
 
-import Skeleton from "@/components/admin/Skeleton";
 import Pagination from "@/components/admin/Pagination";
 
 export default function EnquiriesPage() {
@@ -182,28 +183,14 @@ export default function EnquiriesPage() {
               </thead>
               <tbody className="divide-y text-slate-600">
                 {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i}>
-                      <td className="px-3 sm:px-6 py-3 sm:py-4">
-                        <Skeleton className="h-4 w-32 mb-1" />
-                        <Skeleton className="h-3 w-40" />
-                      </td>
-                      <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
-                        <Skeleton className="h-4 w-24 mb-1" />
-                        <Skeleton className="h-3 w-32" />
-                      </td>
-                      <td className="px-3 sm:px-6 py-3 sm:py-4">
-                        <Skeleton className="h-6 w-28 rounded-lg" />
-                      </td>
-                      {!detail && (
-                        <td className="px-3 sm:px-6 py-3 sm:py-4">
-                          <div className="flex justify-center">
-                            <Skeleton className="h-8 w-8 rounded-lg" />
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="flex h-[300px] flex-col items-center justify-center text-center">
+                        <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4 opacity-80" />
+                        <p className="text-sm font-medium text-slate-500 animate-pulse">Loading enquiries...</p>
+                      </div>
+                    </td>
+                  </tr>
                 ) : all.length === 0 ? (
                   <tr>
                     <td colSpan={detail ? 3 : 4} className="px-6 py-12 text-center text-slate-400">

@@ -18,7 +18,6 @@ import {
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ConfirmModal from "@/components/admin/ConfirmModal";
-import Skeleton from "@/components/admin/Skeleton";
 import Pagination from "@/components/admin/Pagination";
 import SearchInput from "@/components/admin/SearchInput";
 import { validateWithYup, cn, hasError, getErrorMessage } from "@/lib/utils";
@@ -226,34 +225,14 @@ export default function DestinationsPage() {
             </thead>
             <tbody className="divide-y text-slate-600">
               {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                      <div className="flex items-center gap-3 sm:gap-4">
-                        <Skeleton className="h-10 w-14 sm:h-12 sm:w-16 rounded-lg" />
-                        <div className="flex-1">
-                          <Skeleton className="h-4 w-32 mb-1" />
-                          <Skeleton className="h-3 w-20" />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
-                      <div className="flex gap-2">
-                        <Skeleton className="h-4 w-16 rounded-full" />
-                        <Skeleton className="h-4 w-12 rounded-full" />
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
-                      <Skeleton className="h-4 w-24" />
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <Skeleton className="h-8 w-8 rounded-lg" />
-                        <Skeleton className="h-8 w-8 rounded-lg" />
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                <tr>
+                  <td colSpan={4}>
+                    <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
+                      <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4 opacity-80" />
+                      <p className="text-sm font-medium text-slate-500 animate-pulse">Loading destinations...</p>
+                    </div>
+                  </td>
+                </tr>
               ) : items.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
