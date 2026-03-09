@@ -83,6 +83,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
     }
 
+    // Honeypot check
+    if (body.website_url) {
+      console.warn("Honeypot triggered, possible bot submission.");
+      return NextResponse.json({ error: "Spam detected." }, { status: 400 });
+    }
+
+
     // 2. Sanitize & Save
     await dbConnect();
 

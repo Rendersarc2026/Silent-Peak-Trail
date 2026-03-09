@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ConfirmModal from "@/components/admin/ConfirmModal";
-import Skeleton from "@/components/admin/Skeleton";
 import SearchInput from "@/components/admin/SearchInput";
 import { hasError, getErrorMessage, validateWithYup } from "@/lib/utils";
 import { lehTipSchema } from "@/lib/validation";
@@ -132,7 +131,12 @@ export default function LehTipsPage() {
             });
             const res = await fetch(`/api/leh-tips?${params}`);
             const data = await res.json();
-            setItems(data.data || []);
+            // Map _id from MongoDB to id for the frontend
+            const mappedData = (data.data || []).map((item: any) => ({
+                ...item,
+                id: item._id
+            }));
+            setItems(mappedData);
             setTotalPages(data.totalPages || 0);
             setCurrentPage(data.currentPage || 1);
         } finally {
@@ -263,8 +267,9 @@ export default function LehTipsPage() {
 
                 {/* Tips Grid */}
                 {loading ? (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-40 rounded-2xl" />)}
+                    <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
+                        <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4 opacity-80" />
+                        <p className="text-sm font-medium text-slate-500 animate-pulse">Loading tips...</p>
                     </div>
                 ) : items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 py-20 text-center">

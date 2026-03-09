@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAction } from "@/lib/hooks/useAction";
 import AdminShell from "@/components/admin/AdminShell";
+import { formatDistanceToNow } from "date-fns";
 import {
   Mail,
   Phone,
@@ -15,14 +16,15 @@ import {
   Filter,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import EmailComposer from "@/components/admin/EmailComposer";
 import SearchInput from "@/components/admin/SearchInput";
 
 interface Enquiry {
-  id: number; firstName: string; lastName: string; email: string; phone: string;
+  id: string; firstName: string; lastName: string; email: string; phone: string;
   package: string; travellers: string; month: string; budget: string;
   message: string; status: string; createdAt: string;
 }
@@ -36,7 +38,6 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; i
   cancelled: { label: "Cancelled", bg: "bg-red-50", text: "text-red-700", icon: X },
 };
 
-import Skeleton from "@/components/admin/Skeleton";
 import Pagination from "@/components/admin/Pagination";
 
 export default function EnquiriesPage() {
@@ -51,7 +52,7 @@ export default function EnquiriesPage() {
 
   const [detail, setDetail] = useState<Enquiry | null>(null);
   const [toast, setToast] = useState("");
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({ isOpen: false, id: null });
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
   const [deleting, setDeleting] = useState(false);
   const [composingEmail, setComposingEmail] = useState<string | null>(null);
 
@@ -66,7 +67,12 @@ export default function EnquiriesPage() {
     return fetch(`/api/enquiries?${params}`)
       .then(r => r.json())
       .then(res => {
-        setAll(res.data);
+        // Map _id from MongoDB to id for the frontend
+        const mappedData = (res.data || []).map((item: any) => ({
+          ...item,
+          id: item._id
+        }));
+        setAll(mappedData);
         setTotalPages(res.totalPages);
         setCurrentPage(res.currentPage);
         setCounts(res.counts);
@@ -81,7 +87,7 @@ export default function EnquiriesPage() {
     return () => clearTimeout(timer);
   }, [search, filter]);
 
-  const [handleStatusUpdate, { loading: updatingStatus }] = useAction(async ({ id, status }: { id: number, status: string }) => {
+  const [handleStatusUpdate, { loading: updatingStatus }] = useAction(async ({ id, status }: { id: string, status: string }) => {
     await fetch(`/api/enquiries/${id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status })
@@ -91,7 +97,7 @@ export default function EnquiriesPage() {
     if (detail?.id === id) setDetail(d => d ? { ...d, status } : d);
   });
 
-  async function del(id: number) {
+  async function del(id: string) {
     setDeleting(true);
     try {
       await fetch(`/api/enquiries/${id}`, { method: "DELETE" });
@@ -177,28 +183,14 @@ export default function EnquiriesPage() {
               </thead>
               <tbody className="divide-y text-slate-600">
                 {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i}>
-                      <td className="px-3 sm:px-6 py-3 sm:py-4">
-                        <Skeleton className="h-4 w-32 mb-1" />
-                        <Skeleton className="h-3 w-40" />
-                      </td>
-                      <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
-                        <Skeleton className="h-4 w-24 mb-1" />
-                        <Skeleton className="h-3 w-32" />
-                      </td>
-                      <td className="px-3 sm:px-6 py-3 sm:py-4">
-                        <Skeleton className="h-6 w-28 rounded-lg" />
-                      </td>
-                      {!detail && (
-                        <td className="px-3 sm:px-6 py-3 sm:py-4">
-                          <div className="flex justify-center">
-                            <Skeleton className="h-8 w-8 rounded-lg" />
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="flex h-[300px] flex-col items-center justify-center text-center">
+                        <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4 opacity-80" />
+                        <p className="text-sm font-medium text-slate-500 animate-pulse">Loading enquiries...</p>
+                      </div>
+                    </td>
+                  </tr>
                 ) : all.length === 0 ? (
                   <tr>
                     <td colSpan={detail ? 3 : 4} className="px-6 py-12 text-center text-slate-400">

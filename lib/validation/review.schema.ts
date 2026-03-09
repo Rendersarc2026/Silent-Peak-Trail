@@ -4,7 +4,7 @@ import { nameText, safeText } from "./primitives";
 export const reviewSchema = yup.object({
     name: nameText,
     place: safeText(2, 100, "Place is required"),
-    packageId: yup.number().integer().min(1, "Required").required("Required"),
+    packageId: yup.string().required("Required"),
     rating: yup.number().integer().min(1).max(5).default(5).required("Rating is required"),
     message: safeText(10, 1000).test("no-whitespace-only", "Review message must contain at least 3 letters or numbers.", (val) => {
         if (!val) return false;

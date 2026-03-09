@@ -53,6 +53,17 @@ export default function ImageUpload({
         setLocalError("");
         onError?.("");
 
+        // 0. Size check (1MB to 10MB)
+        const minSize = 1024 * 1024; // 1MB
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size < minSize || file.size > maxSize) {
+            emitError(
+                `Image size must be between 1MB and 10MB. Current size: ${(file.size / (1024 * 1024)).toFixed(2)}MB`
+            );
+            e.target.value = "";
+            return;
+        }
+
         // 1. Dimension check (client-side, no extra package needed)
         try {
             const { w, h } = await getImageDimensions(file);
@@ -129,7 +140,7 @@ export default function ImageUpload({
                         <div className="text-center">
                             <p className="text-sm font-bold text-slate-700">Click to upload image</p>
                             <p className="text-[10px] text-slate-400">
-                                JPG, PNG or WEBP · Min. {minWidth}×{minHeight}px
+                                JPG, PNG or WEBP · 1MB–10MB · Min. {minWidth}×{minHeight}px
                             </p>
                         </div>
                     </>

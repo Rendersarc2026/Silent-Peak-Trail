@@ -13,6 +13,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
         }
 
+        const minSize = 1024 * 1024; // 1MB
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size < minSize || file.size > maxSize) {
+            return NextResponse.json(
+                { error: `Image size must be between 1MB and 10MB. Current size: ${(file.size / (1024 * 1024)).toFixed(2)}MB` },
+                { status: 400 }
+            );
+        }
+
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 

@@ -11,12 +11,13 @@ import {
   Loader2,
   Image as ImageIcon,
   Edit2,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  CheckCircle2
 } from "lucide-react";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ConfirmModal from "@/components/admin/ConfirmModal";
-import Skeleton from "@/components/admin/Skeleton";
 import Pagination from "@/components/admin/Pagination";
 import SearchInput from "@/components/admin/SearchInput";
 import { validateWithYup, cn, hasError, getErrorMessage } from "@/lib/utils";
@@ -86,7 +87,12 @@ export default function GalleryPage() {
     return fetch(`/api/gallery?${params}`)
       .then(r => r.json())
       .then(res => {
-        setItems(res.data);
+        // Map _id from MongoDB to id for the frontend
+        const mappedData = (res.data || []).map((item: any) => ({
+          ...item,
+          id: item._id
+        }));
+        setItems(mappedData);
         setTotalPages(res.totalPages);
         setCurrentPage(res.currentPage);
       })
@@ -239,22 +245,10 @@ export default function GalleryPage() {
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {loading ? (
-          Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="overflow-hidden rounded-2xl border bg-white shadow-sm ring-1 ring-slate-100">
-              <Skeleton className="aspect-[4/3] w-full" />
-              <div className="p-4">
-                <Skeleton className="h-4 w-3/4 mb-3" />
-                <div className="flex gap-2 mb-4">
-                  <Skeleton className="h-6 w-16 rounded-lg" />
-                  <Skeleton className="h-6 w-16 rounded-lg" />
-                </div>
-                <div className="flex items-center border-t pt-4 gap-2">
-                  <Skeleton className="h-8 flex-1 rounded-lg" />
-                  <Skeleton className="h-8 w-8 rounded-lg" />
-                </div>
-              </div>
-            </div>
-          ))
+          <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4 opacity-80" />
+            <p className="text-sm font-medium text-slate-500 animate-pulse">Loading gallery...</p>
+          </div>
         ) : items.length === 0 ? (
           <div className="col-span-full py-20 text-center text-slate-400 border-2 border-dashed rounded-3xl bg-slate-50/50">
             <div className="flex flex-col items-center gap-3">

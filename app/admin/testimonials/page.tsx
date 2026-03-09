@@ -27,10 +27,10 @@ import { reviewSchema } from "@/lib/validation";
 
 
 interface Review {
-  id: number;
+  id: string;
   name: string;
   place: string;
-  packageId: number;
+  packageId: string;
   tourPackage?: { name: string };
   message: string;
   rating: number;
@@ -40,11 +40,11 @@ interface Review {
 }
 
 interface PackageOption {
-  id: number;
+  id: string;
   name: string;
 }
 
-const EMPTY = { name: "", place: "", packageId: 0, rating: 5, message: "" };
+const EMPTY = { name: "", place: "", packageId: "", rating: 5, message: "" };
 
 import Skeleton from "@/components/admin/Skeleton";
 import Pagination from "@/components/admin/Pagination";
@@ -66,7 +66,7 @@ export default function TestimonialsAdmin() {
   const [editing, setEditing] = useState<Review | null>(null);
   const [form, setForm] = useState(EMPTY);
   const [toast, setToast] = useState("");
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number | null }>({ isOpen: false, id: null });
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
   const [confirmClose, setConfirmClose] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -123,10 +123,20 @@ export default function TestimonialsAdmin() {
         revRes.json(),
         pkgRes.json()
       ]);
-      setItems(revData.data || []);
+      // Map _id from MongoDB to id for the frontend
+      const mappedItems = (revData.data || []).map((item: any) => ({
+        ...item,
+        id: item._id
+      }));
+      setItems(mappedItems);
       setTotalPages(revData.totalPages || 0);
       setCurrentPage(revData.currentPage || 1);
-      setPackages(pkgData.data || []);
+      // Also map packages if they use _id
+      const mappedPackages = (pkgData.data || []).map((item: any) => ({
+        ...item,
+        id: item._id
+      }));
+      setPackages(mappedPackages);
     } catch (err) {
       console.error(err);
     } finally {
@@ -183,7 +193,7 @@ export default function TestimonialsAdmin() {
     }
   }, { onSuccess: () => { } });
 
-  const [actioningId, setActioningId] = useState<number | null>(null);
+  const [actioningId, setActioningId] = useState<string | null>(null);
 
   const patchReview = async (review: Review, action: string, successMsg: string) => {
     setActioningId(review.id);
@@ -206,7 +216,7 @@ export default function TestimonialsAdmin() {
   const handleArchive = (review: Review) => patchReview(review, "archive", "Review hidden — moved to Archive.");
   const handleRestore = (review: Review) => patchReview(review, "restore", "Review restored and live!");
 
-  const [handleDelete, { loading: deleting }] = useAction(async (id: number) => {
+  const [handleDelete, { loading: deleting }] = useAction(async (id: string) => {
     try {
       await fetch(`/api/reviews/${id}`, { method: "DELETE" });
       await load(currentPage, search, activeTab);
@@ -251,7 +261,9 @@ export default function TestimonialsAdmin() {
             onChange={(val) => {
               setSearch(val);
               setCurrentPage(1);
+              setLoading(true);
             }}
+
             placeholder="Search reviews..."
             loading={loading && !!search}
             className="sm:w-64"
@@ -283,10 +295,17 @@ export default function TestimonialsAdmin() {
           return (
             <button
               key={tab.key}
-              onClick={() => { setActiveTab(tab.key); setCurrentPage(1); setSearch(""); }}
+              onClick={() => {
+                setActiveTab(tab.key);
+                setCurrentPage(1);
+                setSearch("");
+                setLoading(true);
+                setItems([]);
+              }}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${activeTab === tab.key
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-500 hover:text-slate-700"}`}
+
             >
               <Icon size={15} />
               {tab.label}
@@ -312,33 +331,12 @@ export default function TestimonialsAdmin() {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {loading ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex flex-col rounded-2xl border bg-white p-6 shadow-sm ring-1 ring-slate-100">
-              <div className="flex items-center gap-4 mb-4">
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="h-4 w-32 mb-1" />
-                  <Skeleton className="h-3 w-20" />
-                </div>
-              </div>
-              <div className="flex gap-1 mb-3">
-                <Skeleton className="h-3 w-20" />
-              </div>
-              <div className="flex-1 mb-4">
-                <Skeleton className="h-3 w-full mb-1" />
-                <Skeleton className="h-3 w-full mb-1" />
-                <Skeleton className="h-3 w-2/3" />
-              </div>
-              <div className="mt-auto flex items-center justify-between border-t pt-4">
-                <Skeleton className="h-3 w-24" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-8 w-8 rounded-lg" />
-                  <Skeleton className="h-8 w-8 rounded-lg" />
-                </div>
-              </div>
-            </div>
-          ))
+          <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4 opacity-80" />
+            <p className="text-sm font-medium text-slate-500 animate-pulse">Loading reviews...</p>
+          </div>
         ) : items.length === 0 ? (
+
           <div className="col-span-full flex flex-col items-center justify-center py-24 text-center">
             <div className="mb-4 rounded-full bg-slate-100 p-6 text-slate-400">
               <Star size={48} />
@@ -542,9 +540,9 @@ export default function TestimonialsAdmin() {
                   <select
                     className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'packageId') && 'border-red-300 ring-2 ring-red-500/10')}
                     value={form.packageId}
-                    onChange={e => { setForm(f => ({ ...f, packageId: Number(e.target.value) })); clearFieldError('packageId'); }}
+                    onChange={e => { setForm(f => ({ ...f, packageId: e.target.value })); clearFieldError('packageId'); }}
                   >
-                    <option value={0}>Select a package</option>
+                    <option value="">Select a package</option>
                     {packages.map(p => (
                       <option key={p.id} value={p.id}>
                         {p.name}

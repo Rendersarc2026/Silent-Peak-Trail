@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn, hasError, getErrorMessage, validateWithYupSync } from "@/lib/utils";
 import { agencyProfileSchema } from "@/lib/validation";
+import ConfirmModal from "./ConfirmModal";
 
 const NAV = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -55,6 +56,7 @@ export default function AdminShell({
   const [settingsError, setSettingsError] = useState("");
   const [settingsSuccess, setSettingsSuccess] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const clearFieldError = (field: string) => {
@@ -219,7 +221,7 @@ export default function AdminShell({
             <p className="truncate text-sm font-semibold text-white">{user || "admin"}</p>
           </div>
           <button
-            onClick={logout}
+            onClick={() => setShowLogoutConfirm(true)}
             disabled={isLoggingOut}
             className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50"
             title="Logout"
@@ -312,7 +314,7 @@ export default function AdminShell({
                     <SettingsIcon size={16} /> Agency Profile
                   </button>
                   <button
-                    onClick={() => { setDropdownOpen(false); logout(); }}
+                    onClick={() => { setDropdownOpen(false); setShowLogoutConfirm(true); }}
                     disabled={isLoggingOut}
                     className="flex w-full items-center gap-2.5 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-colors text-left disabled:opacity-50"
                   >
@@ -380,7 +382,7 @@ export default function AdminShell({
                       <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Phone / WhatsApp</label>
                       <input
                         className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'phone') && 'border-red-300 ring-2 ring-red-500/10')}
-                        value={settingsForm.phone}
+                        value={settingsForm.phone || ""}
                         onChange={(e) => {
                           setSettingsForm({ ...settingsForm, phone: e.target.value });
                           clearFieldError('phone');
@@ -393,7 +395,7 @@ export default function AdminShell({
                       <input
                         className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'email') && 'border-red-300 ring-2 ring-red-500/10')}
                         type="email"
-                        value={settingsForm.email}
+                        value={settingsForm.email || ""}
                         onChange={(e) => {
                           setSettingsForm({ ...settingsForm, email: e.target.value });
                           clearFieldError('email');
@@ -405,7 +407,7 @@ export default function AdminShell({
                       <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Office Address</label>
                       <input
                         className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'address') && 'border-red-300 ring-2 ring-red-500/10')}
-                        value={settingsForm.address}
+                        value={settingsForm.address || ""}
                         onChange={(e) => {
                           setSettingsForm({ ...settingsForm, address: e.target.value });
                           clearFieldError('address');
@@ -417,7 +419,7 @@ export default function AdminShell({
                       <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">Best Season Text</label>
                       <input
                         className={cn("block w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 focus:bg-white", hasError(fieldErrors, 'season') && 'border-red-300 ring-2 ring-red-500/10')}
-                        value={settingsForm.season}
+                        value={settingsForm.season || ""}
                         onChange={(e) => {
                           setSettingsForm({ ...settingsForm, season: e.target.value });
                           clearFieldError('season');
@@ -448,6 +450,20 @@ export default function AdminShell({
           </div>
         </div>
       )}
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          logout();
+        }}
+        title="Confirm Logout"
+        message="Are you sure you want to log out of the admin panel?"
+        confirmText="Logout"
+        cancelText="Stay"
+        variant="danger"
+      />
     </div>
   );
 }

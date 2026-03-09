@@ -36,6 +36,14 @@ export async function PUT(req: NextRequest) {
             "statsTravellers",
             "statsExperience",
             "statsSatisfaction",
+            "whyUsTitle",
+            "whyUsSubtitle",
+            "stargazingTitle",
+            "stargazingTagline",
+            "footerDescription",
+            "amsWarningTitle",
+            "amsWarningDesc",
+            "bookButtonText",
         ];
 
         const updates = [];

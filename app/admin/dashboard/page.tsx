@@ -14,9 +14,10 @@ import {
   TrendingUp,
   CheckCircle2,
   Clock,
-  HomeIcon
+  HomeIcon,
+  Loader2
 } from "lucide-react";
-import Skeleton from "@/components/admin/Skeleton";
+
 
 interface Stats {
   packages: number;
@@ -67,7 +68,11 @@ export default function DashboardPage() {
           confirmed: data.confirmed,
           replied: data.replied,
         });
-        setRecent(data.recent);
+        const mappedRecent = (data.recent || []).map((e: any) => ({
+          ...e,
+          id: e._id
+        }));
+        setRecent(mappedRecent);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -87,7 +92,7 @@ export default function DashboardPage() {
           <div className="mt-4">
             <h3 className="text-sm font-medium text-slate-500">New Enquiries</h3>
             <div className="mt-1">
-              {loading ? <Skeleton className="h-9 w-12" /> : <p className="text-3xl font-bold text-slate-900">{stats?.newEnquiries ?? "0"}</p>}
+              {loading ? <div className="h-9 w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-3xl font-bold text-slate-900">{stats?.newEnquiries ?? "0"}</p>}
             </div>
           </div>
           <div className="mt-4 flex items-center text-xs text-slate-500">
@@ -105,7 +110,7 @@ export default function DashboardPage() {
           <div className="mt-4">
             <h3 className="text-sm font-medium text-slate-500">Confirmed Bookings</h3>
             <div className="mt-1">
-              {loading ? <Skeleton className="h-9 w-12" /> : <p className="text-3xl font-bold text-slate-900">{stats?.confirmed ?? "0"}</p>}
+              {loading ? <div className="h-9 w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-3xl font-bold text-slate-900">{stats?.confirmed ?? "0"}</p>}
             </div>
           </div>
           <div className="mt-4 flex items-center text-xs text-slate-500">
@@ -122,7 +127,7 @@ export default function DashboardPage() {
           <div className="mt-4">
             <h3 className="text-sm font-medium text-slate-500">Tour Packages</h3>
             <div className="mt-1">
-              {loading ? <Skeleton className="h-9 w-12" /> : <p className="text-3xl font-bold text-slate-900">{stats?.packages ?? "0"}</p>}
+              {loading ? <div className="h-9 w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-3xl font-bold text-slate-900">{stats?.packages ?? "0"}</p>}
             </div>
           </div>
           <div className="mt-4 flex items-center text-xs text-slate-500">
@@ -139,7 +144,7 @@ export default function DashboardPage() {
           <div className="mt-4">
             <h3 className="text-sm font-medium text-slate-500">Total Enquiries</h3>
             <div className="mt-1">
-              {loading ? <Skeleton className="h-9 w-12" /> : <p className="text-3xl font-bold text-slate-900">{stats?.enquiries ?? "0"}</p>}
+              {loading ? <div className="h-9 w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-3xl font-bold text-slate-900">{stats?.enquiries ?? "0"}</p>}
             </div>
           </div>
           <div className="mt-4 flex items-center text-xs text-slate-500">
@@ -168,23 +173,14 @@ export default function DashboardPage() {
                 </thead>
                 <tbody className="divide-y text-slate-600">
                   {loading ? (
-                    Array.from({ length: 5 }).map((_, i) => (
-                      <tr key={i}>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4">
-                          <Skeleton className="h-4 w-32 mb-1" />
-                          <Skeleton className="h-3 w-40" />
-                        </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
-                          <Skeleton className="h-4 w-24" />
-                        </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4">
-                          <Skeleton className="h-6 w-16 rounded-full" />
-                        </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
-                          <Skeleton className="h-4 w-12" />
-                        </td>
-                      </tr>
-                    ))
+                    <tr>
+                      <td colSpan={4}>
+                        <div className="flex h-[300px] flex-col items-center justify-center text-center">
+                          <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4 opacity-80" />
+                          <p className="text-sm font-medium text-slate-500 animate-pulse">Loading dashboard data...</p>
+                        </div>
+                      </td>
+                    </tr>
                   ) : recent.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
