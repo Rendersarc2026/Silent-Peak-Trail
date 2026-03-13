@@ -131,7 +131,7 @@ export default async function Home() {
           image: homepageData.heroBgImage,
         }}
       />
-      <Navbar homepageData={safeHomepageData} />
+      <Navbar homepageData={safeHomepageData} transparent={true} />
       <main style={{ paddingTop: "72px" }}>
         <Hero homepageData={safeHomepageData} />
         <StatsStrip homepageData={safeHomepageData} />

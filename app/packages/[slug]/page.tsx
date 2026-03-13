@@ -88,7 +88,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                     price: String(pkg.price),
                 }}
             />
-            <Navbar />
+            <Navbar homepageData={homepageData} transparent={true} />
             <main className="min-h-screen bg-[var(--white)] pt-[72px]">
                 {/* Header Hero Section */}
                 <div className="relative h-[60vh] min-h-[520px] lg:h-[50vh] lg:min-h-[480px] w-full overflow-hidden">

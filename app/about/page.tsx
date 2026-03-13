@@ -30,7 +30,7 @@ export default async function AboutPage() {
 
     return (
         <div className="bg-[#0f2a4a] text-white min-h-screen font-['Lato',_sans-serif]">
-            <Navbar homepageData={safeHomepageData} />
+            <Navbar homepageData={safeHomepageData} transparent={true} />
 
             <main className="pt-[80px]">
                 {/* HERO */}

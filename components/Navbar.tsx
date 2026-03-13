@@ -13,7 +13,7 @@ const LINKS = [
   { href: "/#contact", label: "Contact" },
 ];
 
-export default function Navbar({ homepageData }: { homepageData?: Record<string, string> }) {
+export default function Navbar({ homepageData, transparent = false }: { homepageData?: Record<string, string>, transparent?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -28,15 +28,20 @@ export default function Navbar({ homepageData }: { homepageData?: Record<string,
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
+  const isTransparent = transparent && scrolled;
+
   const navClass = cn(
-    "fixed top-0 left-0 right-0 z-[1000] h-[72px] flex items-center justify-between transition-all duration-300 px-5 lg:px-[60px] bg-white/96 backdrop-blur-md shadow-sm border-b border-[#cddaee]",
+    "fixed top-0 left-0 right-0 z-[1000] h-[72px] flex items-center justify-between transition-all duration-500 px-5 lg:px-[60px]",
+    isTransparent
+      ? "bg-white/60 backdrop-blur-md border-b border-[#cddaee]/30"
+      : "bg-white border-b border-[#cddaee] shadow-sm",
     scrolled ? "py-4" : "py-5"
   );
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setOpen(false);
-    
+
     const normalizedHref = href.startsWith("#") ? "/" + href : href;
 
     if (normalizedHref.startsWith("/#")) {
@@ -62,10 +67,10 @@ export default function Navbar({ homepageData }: { homepageData?: Record<string,
         >
           <img src="/logo.jpg" alt="Silent Peak Trail" className="h-11 w-11 rounded-full object-cover shadow-sm ring-1 ring-slate-100" />
           <span className="text-xl tracking-tight uppercase">
-            <span className="font-medium text-slate-500">Silent</span>
-            <span className="font-medium text-[var(--navy)] mx-1.5">Peak</span>
+            <span className="font-medium text-slate-500 transition-colors duration-500">Silent</span>
+            <span className="font-medium mx-1.5 transition-colors duration-500 text-[var(--navy)]">Peak</span>
             <span className={cn(
-              "font-medium",
+              "font-medium transition-colors duration-500",
               scrolled ? "text-blue-800" : "text-slate-500"
             )}>Trail</span>
           </span>
@@ -78,7 +83,7 @@ export default function Navbar({ homepageData }: { homepageData?: Record<string,
               <a
                 href={l.href}
                 onClick={(e) => handleNavClick(e, l.href)}
-                className="text-sm font-bold uppercase tracking-widest transition-all hover:text-[var(--blue)] text-[var(--navy)]"
+                className="text-sm font-bold uppercase tracking-widest transition-all hover:text-[var(--gold)] text-[var(--navy)]"
               >
                 {l.label}
               </a>
@@ -95,7 +100,7 @@ export default function Navbar({ homepageData }: { homepageData?: Record<string,
               "hidden items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-widest transition-all hover:scale-105 active:scale-95 sm:flex",
               scrolled
                 ? "bg-[var(--navy)] text-[var(--white)] shadow-lg hover:bg-[var(--gold)] hover:text-white"
-                : "bg-white text-[var(--navy)] hover:bg-[var(--gold)] hover:text-white"
+                : "bg-white text-[var(--navy)] hover:bg-[var(--gold)] hover:text-white shadow-sm ring-1 ring-slate-100"
             )}
           >
             {bookText}
