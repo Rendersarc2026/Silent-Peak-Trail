@@ -33,20 +33,31 @@ export async function GET(req: NextRequest) {
             where = { isApproved: true, isActive: true };
         }
 
-        if (search) {
-            where.$or = [
-                { name: { $regex: search, $options: 'i' } },
-                { message: { $regex: search, $options: 'i' } },
-                { place: { $regex: search, $options: 'i' } },
-            ];
-        }
-
         await dbConnect();
+
+        if (search) {
+            const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(^|\\s)${escapedSearch}`, 'i');
+
+            // First find packages that match the search term
+            const matchingPackages = await Package.find({ name: { $regex: regex } }).select('_id');
+            const packageIds = matchingPackages.map(p => p._id);
+
+            where.$or = [
+                { name: { $regex: regex } },
+                { place: { $regex: regex } },
+            ];
+
+            // If any packages match the search, include reviews that belong to those packages
+            if (packageIds.length > 0) {
+                where.$or.push({ packageId: { $in: packageIds } });
+            }
+        }
 
         const reviewsQuery = Review.find(where)
             .populate({ path: 'packageId', select: 'name', model: Package })
             .sort({ createdAt: -1 });
-            
+
         if (session) {
             reviewsQuery.skip(skip).limit(limit);
         }
@@ -57,10 +68,14 @@ export async function GET(req: NextRequest) {
         ]);
 
         // Map populated packageId back to tourPackage format for frontend
-        const reviewsMapped = reviews.map(r => ({
-            ...r,
-            tourPackage: r.packageId ? { name: (r.packageId as any).name } : null
-        }));
+        const reviewsMapped = reviews.map(r => {
+            const pkg = r.packageId as any;
+            return {
+                ...r,
+                packageId: pkg ? (pkg._id || pkg.id || pkg).toString() : r.packageId,
+                tourPackage: pkg ? { name: pkg.name } : null
+            };
+        });
 
         if (session) {
             return NextResponse.json({
@@ -82,15 +97,6 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
 
-        // Reject blank/whitespace-only/junk message
-        const alphanumericCount = (String(body.message || "").match(/[a-zA-Z0-9]/g) || []).length;
-        if (alphanumericCount < 3) {
-            return NextResponse.json(
-                { error: "Validation failed", details: { message: ["Review message must contain at least 3 letters or numbers."] } },
-                { status: 400 }
-            );
-        }
-
         const { success, data: parsed, error: validationError } = await validateWithYup(reviewSchema, body);
         if (!success) {
             return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
@@ -105,14 +111,15 @@ export async function POST(req: NextRequest) {
         // Public submissions never send isApproved, so they land as pending.
         await dbConnect();
         const review = await Review.create({
-                name: cleanName,
-                place: cleanPlace,
-                packageId: parsed.packageId,
-                rating: parsed.rating,
-                message: cleanMessage,
-                initial,
-                isApproved: body.isApproved === true,
-                isActive: true,
+            name: cleanName,
+            place: cleanPlace,
+            packageId: parsed.packageId,
+            rating: parsed.rating,
+            message: cleanMessage,
+            image: parsed.image,
+            initial,
+            isApproved: body.isApproved === true,
+            isActive: true,
         });
 
         return NextResponse.json(review, { status: 201 });

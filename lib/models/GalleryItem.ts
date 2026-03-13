@@ -5,6 +5,7 @@ export interface IGalleryItem extends Document {
   alt: string;
   wide: boolean;
   tall: boolean;
+  isHero: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -16,6 +17,7 @@ const GalleryItemSchema: Schema = new Schema(
     alt: { type: String, default: '' },
     wide: { type: Boolean, default: false },
     tall: { type: Boolean, default: false },
+    isHero: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

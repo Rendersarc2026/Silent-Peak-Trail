@@ -14,18 +14,21 @@ export default function StatsStrip({ homepageData }: { homepageData: Record<stri
   return (
     <section className="relative z-30 -mt-4 px-5 lg:px-[60px]">
       <div className="container mx-auto">
-        <div className="bg-[var(--navy)] rounded-[2.5rem] p-10 lg:p-14 shadow-[var(--shadow-2xl)] border border-white/10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 items-center">
+        <div className="bg-[var(--navy)] rounded-[2.5rem] p-8 lg:p-14 shadow-[var(--shadow-2xl)] border border-white/10">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-y-10 gap-x-4 lg:gap-8 items-center">
             {stats.map((s, i) => (
               <div
                 key={s.lbl}
-                className="flex flex-col items-center text-center group animate-fade-in-up"
+                className={cn(
+                  "flex flex-col items-center text-center group animate-fade-in-up",
+                  i === 4 ? "col-span-2 lg:col-span-1" : ""
+                )}
                 style={{ animationDelay: `${i * 100}ms` }}
               >
-                <div className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-[var(--gold)] mb-2 tabular-nums transition-transform group-hover:scale-110">
+                <div className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-[var(--gold)] mb-1 tabular-nums transition-transform group-hover:scale-110">
                   {s.num}
                 </div>
-                <div className="text-xs lg:text-[14px] font-bold uppercase tracking-[0.3em] text-white/50">
+                <div className="text-[10px] lg:text-[14px] font-bold uppercase tracking-[0.25em] text-white/50">
                   {s.lbl}
                 </div>
               </div>

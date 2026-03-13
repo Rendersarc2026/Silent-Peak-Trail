@@ -13,11 +13,14 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
         }
 
-        const minSize = 1024 * 1024; // 1MB
-        const maxSize = 10 * 1024 * 1024; // 10MB
-        if (file.size < minSize || file.size > maxSize) {
+        const isVideo = file.type.startsWith("video/");
+        const minSize = 1024 * 1024; // 1MB for both
+        const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024; // 50MB for video, 10MB for image
+
+        // Remove minSize check for videos as they can sometimes be small (compressed)
+        if ((!isVideo && file.size < minSize) || file.size > maxSize) {
             return NextResponse.json(
-                { error: `Image size must be between 1MB and 10MB. Current size: ${(file.size / (1024 * 1024)).toFixed(2)}MB` },
+                { error: `File size must be between ${!isVideo ? "1MB" : "0MB"} and ${isVideo ? "50MB" : "10MB"}. Current size: ${(file.size / (1024 * 1024)).toFixed(2)}MB` },
                 { status: 400 }
             );
         }
@@ -30,7 +33,7 @@ export async function POST(req: NextRequest) {
             const stream = cloudinary.uploader.upload_stream(
                 {
                     folder: "silent-peak-trail",
-                    resource_type: "image",
+                    resource_type: "auto",
                 },
                 (error, result) => {
                     if (error || !result) {

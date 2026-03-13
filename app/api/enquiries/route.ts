@@ -13,38 +13,72 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
   const status = searchParams.get("status") || "all";
+  const sortBy = searchParams.get("sortBy") || "createdAt";
+  const sortOrder = parseInt(searchParams.get("sortOrder") || "-1");
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
   const skip = (page - 1) * limit;
 
-  const session = await getSession();
+  // Advanced filter params from drawer
+  const dateFrom = searchParams.get("dateFrom") || "";
+  const dateTo = searchParams.get("dateTo") || "";
+  const packageFilter = searchParams.get("packageFilter") || "";
+  const statusesParam = searchParams.get("statuses") || "";
+  const statuses = statusesParam ? statusesParam.split(",").map(s => s.trim()).filter(Boolean) : [];
+
+  await dbConnect();
+
   const where: any = { isActive: true };
+
+  // Status tab filter (takes precedence over multi-status from drawer)
   if (status !== "all") {
     where.status = status;
+  } else if (statuses.length > 0) {
+    where.status = { $in: statuses };
   }
+
+  // Full-text search
   if (search) {
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(^|\\s)${escapedSearch}`, 'i');
     where.$or = [
-      { firstName: { $regex: search, $options: 'i' } },
-      { lastName: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-      { phone: { $regex: search, $options: 'i' } },
-      { message: { $regex: search, $options: 'i' } },
+      { firstName: { $regex: regex } },
+      { lastName: { $regex: regex } },
+      { email: { $regex: regex } },
+      { phone: { $regex: regex } },
+      { message: { $regex: regex } },
     ];
   }
 
-  await dbConnect();
+  // Date range filter
+  if (dateFrom || dateTo) {
+    where.createdAt = {};
+    if (dateFrom) where.createdAt.$gte = new Date(dateFrom);
+    if (dateTo) {
+      const end = new Date(dateTo);
+      end.setHours(23, 59, 59, 999);
+      where.createdAt.$lte = end;
+    }
+  }
+
+  // Package name filter — look up matching package IDs first
+  if (packageFilter) {
+    const pkgRegex = new RegExp(packageFilter, 'i');
+    const matchedPackages = await Package.find({ name: pkgRegex }).select('_id').lean();
+    where.packageId = { $in: matchedPackages.map((p: any) => p._id) };
+  }
 
   const [enquiries, total] = await Promise.all([
     Enquiry.find(where)
       .populate({ path: 'packageId', select: 'name', model: Package })
-      .sort({ createdAt: -1 })
+      .sort({ [sortBy]: sortOrder as any })
       .skip(skip)
       .limit(limit)
       .lean(),
     Enquiry.countDocuments(where)
   ]);
 
-  // Transform to include package name if needed by frontend
+  // Transform to include package name
   const data = enquiries.map(e => ({
     ...e,
     package: e.packageId ? (e.packageId as any).name : "N/A"
@@ -119,15 +153,12 @@ export async function POST(req: NextRequest) {
         }).lean();
 
         let agencyPhone = "our office";
-        let agencyWebsite = "our website"; // fallback if domain isn't in DB
+        let agencyWebsite = "our website";
 
         settingsRecords.forEach(record => {
           if (record.key === 'phone') agencyPhone = record.value;
-          // You might not have the pure domain in the DB, but we get what we can
-          // if we add a website field later, we can map it here.
         });
 
-        // Use the origin from the request to build the website URL if possible
         const origin = req.headers.get("origin") || req.nextUrl.origin;
         if (origin && origin !== "null") {
           agencyWebsite = origin;

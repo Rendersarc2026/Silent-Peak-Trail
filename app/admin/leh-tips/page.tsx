@@ -56,7 +56,7 @@ interface LehTip {
     order: number;
 }
 
-const EMPTY = { icon: "Wind", title: "", desc: "", color: "bg-blue-50 text-blue-600", border: "border-blue-100", order: 0 };
+const EMPTY = { icon: "Wind", title: "", desc: "", color: "bg-blue-50 text-blue-600", border: "border-blue-100", order: 1 };
 
 export default function LehTipsPage() {
     const [items, setItems] = useState<LehTip[]>([]);
@@ -421,11 +421,12 @@ export default function LehTipsPage() {
                                     <label className="mb-1 block text-xs font-black uppercase tracking-widest text-slate-500">Display Order</label>
                                     <input
                                         type="number"
-                                        min={0}
+                                        min={1}
                                         value={form.order}
-                                        onChange={e => { setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 })); clearFieldError('order'); }}
-                                        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none"
+                                        onChange={e => { setForm(f => ({ ...f, order: parseInt(e.target.value) || 1 })); clearFieldError('order'); }}
+                                        className={`w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium focus:border-[var(--navy)] focus:outline-none ${hasError(fieldErrors, 'order') ? 'border-red-300 bg-red-50/30' : ''}`}
                                     />
+                                    {hasError(fieldErrors, 'order') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'order')}</p>}
                                 </div>
                             </div>
 

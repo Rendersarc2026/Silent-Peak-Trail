@@ -37,25 +37,21 @@ export default function Stargazing({ packageData, homepageData }: StargazingProp
 
 
     return (
-        <section id="stargazing" className="relative min-h-screen w-full overflow-hidden bg-black py-24 flex items-center">
+        <section id="stargazing" className="relative min-h-screen w-full overflow-hidden bg-black pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 flex items-start">
             {/* Video Background */}
             <video
                 autoPlay
                 muted
                 loop
                 playsInline
-                className="absolute inset-0 h-full w-full object-cover opacity-60"
+                className="absolute inset-0 h-full w-full object-cover object-bottom opacity-100"
             >
                 <source src="/videos/stargazing.mp4" type="video/mp4" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#05122b_0%,_#000000_100%)]" />
             </video>
-
-            {/* Cinematic Overlays */}
-            <div className="absolute inset-0 z-[2] bg-gradient-to-b from-black via-transparent to-black" />
 
             {/* Content Container */}
             <div className="container relative z-10 mx-auto px-5 lg:px-[60px]">
-                <div className="flex flex-col gap-20">
+                <div className="flex flex-col gap-12 lg:gap-20">
 
                     {/* Header Area */}
                     <div className="max-w-5xl animate-fade-in-up">
@@ -63,21 +59,24 @@ export default function Stargazing({ packageData, homepageData }: StargazingProp
                             <div className="h-[2px] w-8 bg-[var(--gold)]" />
                             Premium Package
                         </div>
-                        <h2 className="text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl font-serif">
+                        <h2
+                            className="text-[32px] font-medium leading-[1.1] tracking-tighter text-white sm:text-5xl lg:text-6xl"
+                            style={{ fontFamily: "'DM Sans', sans-serif" }}
+                        >
                             {displayTitle.split(' ').map((word, i) => (
                                 word.toLowerCase().includes('hanle') ?
-                                    <span key={i} className="text-[var(--gold)] italic font-playfair"> {word} </span> :
+                                    <span key={i} className="text-[var(--gold)]"> {word} </span> :
                                     ` ${word} `
                             ))}
                         </h2>
-                        <p className="mt-8 text-base leading-relaxed text-blue-100/70 font-medium max-w-2xl">
+                        <p className="mt-6 text-[14px] font-normal leading-snug text-blue-100/70 sm:mt-8 sm:text-base sm:leading-relaxed max-w-2xl" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                             {displayTagline}
                         </p>
 
-                        <div className="mt-12 flex flex-wrap gap-5">
+                        <div className="mt-10 sm:mt-12 flex flex-wrap gap-5">
                             <Link
                                 href={packageData ? `/packages/${packageData.slug}` : "#contact"}
-                                className="group flex items-center gap-3 rounded-2xl bg-white px-10 py-5 text-sm font-black uppercase tracking-widest text-[var(--navy)] transition-all hover:bg-[var(--gold)] hover:text-white shadow-2xl active:scale-[0.98]"
+                                className="group flex items-center gap-3 rounded-2xl bg-white px-8 py-4 sm:px-10 sm:py-5 text-sm font-black uppercase tracking-widest text-[var(--navy)] transition-all hover:bg-[var(--gold)] hover:text-white shadow-2xl active:scale-[0.98]"
                             >
                                 {bookText}
                                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
@@ -85,31 +84,8 @@ export default function Stargazing({ packageData, homepageData }: StargazingProp
                         </div>
                     </div>
 
-                    {/* Highlights Grid - Glassmorphism */}
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 animate-fade-in-up [animation-delay:300ms]">
-                        {highlights.map((item, i) => {
-                            const IconComp = typeof item.icon === 'string' ? (ICON_MAP[item.icon] || Sparkles) : (item.icon || Sparkles);
-                            return (
-                                <div
-                                    key={i}
-                                    className="group relative overflow-hidden rounded-[2.5rem] bg-white/5 p-10 backdrop-blur-md ring-1 ring-white/10 transition-all hover:bg-white/10 hover:ring-white/20"
-                                >
-                                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/10 transition-transform group-hover:scale-110">
-                                        <IconComp size={24} className="text-[var(--gold)]" />
-                                    </div>
-                                    <h3 className="mb-3 text-xl font-bold text-white tracking-tight">
-                                        {item.title}
-                                    </h3>
-                                    <p className="text-sm font-medium leading-relaxed text-blue-100/60">
-                                        {item.desc}
-                                    </p>
 
-                                    {/* Aesthetic Glow */}
-                                    <div className="absolute -bottom-12 -right-12 h-24 w-24 bg-[var(--gold)] opacity-0 blur-[60px] transition-opacity group-hover:opacity-40" />
-                                </div>
-                            );
-                        })}
-                    </div>
+
 
                 </div>
             </div>

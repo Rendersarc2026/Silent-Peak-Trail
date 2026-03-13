@@ -1,69 +1,188 @@
+"use client";
 import type { Testimonial } from "@/lib/db";
-import { Star, Quote, MessageSquare } from "lucide-react";
+import { Star, Quote, MessageSquare, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import CarouselArrow from "./ui/CarouselArrow";
 
 export default function Testimonials({ testimonials }: { testimonials: Testimonial[] }) {
-  return (
-    <section id="testimonials" className="bg-[var(--white)] py-24 px-5 lg:px-[60px] overflow-hidden">
-      <div className="container mx-auto">
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [visibleItems, setVisibleItems] = useState(3);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [expandedReview, setExpandedReview] = useState<Testimonial | null>(null);
+  const total = testimonials.length;
 
-        {/* Header Section */}
-        <div className="mb-16 flex flex-col items-center text-center">
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) setVisibleItems(1);
+      else if (window.innerWidth < 1024) setVisibleItems(2);
+      else setVisibleItems(3);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Lock scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = expandedReview ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [expandedReview]);
+
+  const maxIndex = Math.max(0, total - visibleItems);
+  const next = () => setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+  const prev = () => setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
+
+  const minSwipeDistance = 50;
+  const onTouchStart = (e: React.TouchEvent) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); };
+  const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    if (distance > minSwipeDistance) next();
+    else if (distance < -minSwipeDistance) prev();
+  };
+
+  useEffect(() => {
+    const interval = setInterval(next, 8000);
+    return () => clearInterval(interval);
+  }, [maxIndex]);
+
+  if (!total) return null;
+
+  return (
+    <section id="testimonials" className="bg-[var(--white)] py-16 sm:py-24 px-5 lg:px-[60px] overflow-hidden">
+      <div className="container mx-auto">
+        <div className="mb-8 flex flex-col items-center text-center sm:mb-16">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-1 text-xs font-bold uppercase tracking-widest text-[var(--navy)]">
             <MessageSquare size={12} className="text-[var(--blue)]" />
             Traveller Stories
           </div>
-          <h2 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-[var(--navy)] sm:text-5xl lg:text-6xl font-serif">
-            What Our Guests <span className="text-[var(--blue)] italic font-playfair">Say</span>
+          <h2 
+            className="text-3xl font-medium leading-tight tracking-tight text-[var(--navy)] sm:text-5xl lg:text-6xl"
+            style={{ fontFamily: "'DM Sans', sans-serif" }}
+          >
+            What Our Guests <span className="text-[var(--blue)] italic" style={{ fontFamily: "'Playfair Display', serif" }}>Say</span>
           </h2>
         </div>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((t, i) => (
-            <div
-              key={t.id}
-              className="relative flex flex-col rounded-[2.5rem] bg-[var(--white)] p-10 shadow-[var(--shadow-xl)] ring-1 ring-slate-100 animate-fade-in-up hover:shadow-[var(--shadow-2xl)] transition-all duration-500"
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
-              {/* Quote Icon Background */}
-              <div className="absolute top-10 right-10 text-slate-50">
-                <Quote size={64} strokeWidth={3} className="opacity-40" />
-              </div>
+        <div className="group relative px-[6px] lg:px-16">
+          <CarouselArrow direction="left" onClick={prev} className="absolute left-2 lg:left-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex" disabled={currentIndex === 0} />
+          <CarouselArrow direction="right" onClick={next} className="absolute right-2 lg:right-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex" disabled={currentIndex === maxIndex} />
 
-              {/* Star Rating */}
-              <div className="mb-6 flex items-center gap-1">
-                {Array.from({ length: 5 }).map((_, si) => (
-                  <Star
-                    key={si}
-                    size={16}
-                    className={si < t.stars ? "fill-[var(--gold)] text-[var(--gold)]" : "fill-slate-100 text-slate-100"}
-                  />
-                ))}
-              </div>
+          <div className="overflow-hidden py-10 px-4 sm:px-12 -my-10 -mx-4 sm:-mx-12 touch-pan-y" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+            <div className="flex transition-transform duration-500 ease-out gap-8" style={{ transform: `translateX(calc(-${currentIndex} * (100% + 32px) / ${visibleItems}))` }}>
+              {testimonials.map((t) => (
+                <div
+                  key={t.id}
+                  style={{ width: `calc((100% - ${(visibleItems - 1) * 32}px) / ${visibleItems})` }}
+                  className="relative flex-shrink-0 flex flex-col overflow-hidden rounded-[2.5rem] bg-[var(--white)] p-8 shadow-[var(--shadow-xl)] ring-1 ring-slate-100 transition-all duration-500"
+                >
+                  <div className="flex items-start justify-between mb-8">
+                    <div className="flex h-20 w-20 sm:h-24 sm:w-24 shrink-0 items-center justify-center rounded-full bg-[var(--navy)] text-3xl font-black text-white shadow-xl overflow-hidden ring-4 ring-slate-50 transition-all duration-300">
+                      {t.image ? (
+                        <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                      ) : (
+                        t.initial
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-3 mt-1">
+                       <Quote size={48} strokeWidth={3} className="text-slate-100 opacity-60" />
+                       <div className="flex items-center gap-1">
+                        {Array.from({ length: 5 }).map((_, si) => (
+                          <Star key={si} size={16} className={si < t.stars ? "fill-[var(--gold)] text-[var(--gold)]" : "fill-slate-100 text-slate-100"} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Quote Text */}
-              <p className="relative mb-10 text-lg leading-relaxed text-[var(--navy)]/80 font-medium italic font-serif">
-                &ldquo;{t.text}&rdquo;
-              </p>
+                  {/* Clamped review text */}
+                  <p className="relative mb-3 text-l font-medium italic leading-relaxed text-[var(--navy)]/80 font-serif line-clamp-6 sm:line-clamp-none">
+                    &ldquo;{t.text}&rdquo;
+                  </p>
 
-              {/* Author Info */}
-              <div className="mt-auto flex items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--navy)] text-xl font-black text-white shadow-lg">
-                  {t.initial}
+                  {/* Read more — bottom right, only for long text */}
+                  {t.text.length > 230 && (
+                    <div className="sm:hidden flex justify-end mb-5">
+                      <button
+                        onClick={() => setExpandedReview(t)}
+                        className="text-sm font-semibold text-[var(--blue)]"
+                      >
+                        Read more ↓
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Spacer so author stays low */}
+                  <div className="flex-1" />
+
+                  <div className="pt-4 border-t border-slate-100 flex items-center gap-4">
+                    <div className="min-w-0">
+                      <div className="truncate font-black tracking-tight text-[var(--navy)]">{t.name}</div>
+                      <div className="truncate text-[10px] font-bold uppercase tracking-widest text-[var(--text-light)]">
+                        {t.place} <span className="mx-2 text-slate-200">|</span> {t.package}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-black tracking-tight text-[var(--navy)]">
-                    {t.name}
-                  </div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-light)]">
-                    {t.place} <span className="mx-2 text-slate-200">|</span> {t.package}
-                  </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-12 flex justify-center gap-3 pb-2">
+            {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+              <button key={i} onClick={() => setCurrentIndex(i)} className={cn("h-2 rounded-full transition-all duration-300", currentIndex === i ? "w-8 bg-[var(--blue)]" : "w-2 bg-slate-200 hover:bg-slate-300")} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Full Review Modal */}
+      {expandedReview && (
+        <div
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setExpandedReview(null)}
+        >
+          <div
+            className="relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-[2rem] bg-white p-8 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setExpandedReview(null)}
+              className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="mb-4 flex items-center gap-1">
+              {Array.from({ length: 5 }).map((_, si) => (
+                <Star key={si} size={15} className={si < expandedReview.stars ? "fill-[var(--gold)] text-[var(--gold)]" : "fill-slate-100 text-slate-100"} />
+              ))}
+            </div>
+
+            <p className="mb-6 text-base font-medium italic leading-relaxed text-[var(--navy)]/80 font-serif">
+              &ldquo;{expandedReview.text}&rdquo;
+            </p>
+
+            <div className="flex items-center gap-6 border-t pt-6 border-slate-100">
+              <div className="flex h-20 w-20 sm:h-24 sm:w-24 shrink-0 items-center justify-center rounded-full bg-[var(--navy)] text-3xl font-black text-white shadow-xl overflow-hidden ring-4 ring-slate-50">
+                {expandedReview.image ? (
+                  <img src={expandedReview.image} alt={expandedReview.name} className="w-full h-full object-cover" />
+                ) : (
+                  expandedReview.initial
+                )}
+              </div>
+              <div>
+                <div className="text-xl font-black tracking-tight text-[var(--navy)] mb-1">{expandedReview.name}</div>
+                <div className="text-[12px] font-bold uppercase tracking-widest text-[var(--text-light)]">
+                  {expandedReview.place} <span className="mx-2 text-slate-200">|</span> {expandedReview.package}
                 </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

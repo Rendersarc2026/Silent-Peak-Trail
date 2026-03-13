@@ -7,6 +7,7 @@ export interface IReview extends Document {
   initial: string;
   rating: number;
   message: string;
+  image?: string;
   isApproved: boolean;
   isActive: boolean;
   createdAt: Date;
@@ -21,6 +22,7 @@ const ReviewSchema: Schema = new Schema(
     initial: { type: String, required: true },
     rating: { type: Number, default: 5 },
     message: { type: String, required: true },
+    image: { type: String },
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },

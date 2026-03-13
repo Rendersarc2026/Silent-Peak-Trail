@@ -35,7 +35,7 @@ async function dbConnect() {
       return mongoose;
     });
   }
-  
+
   try {
     cached.conn = await cached.promise;
   } catch (e) {
@@ -82,6 +82,7 @@ export interface GalleryImage {
   alt: string;
   wide?: boolean;
   tall?: boolean;
+  isHero?: boolean;
 }
 
 export interface Testimonial {
@@ -92,4 +93,5 @@ export interface Testimonial {
   initial: string;
   text: string;
   stars: number;
+  image?: string;
 }

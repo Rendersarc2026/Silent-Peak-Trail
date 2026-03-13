@@ -12,7 +12,7 @@ export interface AdminPayload {
 export async function signToken(payload: AdminPayload): Promise<string> {
     return new SignJWT({ ...payload })
         .setProtectedHeader({ alg: "HS256" })
-        .setExpirationTime("24h")
+        .setExpirationTime("12h")
         .setIssuedAt()
         .sign(SECRET);
 }

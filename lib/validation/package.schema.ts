@@ -18,5 +18,7 @@ export const packageSchema = yup.object({
     })).min(1, "Itinerary is required").default([]),
     inclusions: yup.array().of(safeText(2, 200)).default([]),
     exclusions: yup.array().of(safeText(2, 200)).default([]),
+    photos: yup.array().of(imageUrl).default([]),
+    videos: yup.array().of(yup.string()).default([]),
 });
 

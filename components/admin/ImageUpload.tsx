@@ -106,7 +106,13 @@ export default function ImageUpload({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={value} alt="Preview" className="h-full w-full object-cover" />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-[10px] font-bold text-white uppercase tracking-widest">Current Image</span>
+                        <button 
+                            type="button"
+                            onClick={() => onChange("")}
+                            className="rounded-lg bg-red-600 px-3 py-1.5 text-[10px] font-bold text-white uppercase tracking-widest hover:bg-red-700 transition-colors shadow-lg"
+                        >
+                            Remove Photo
+                        </button>
                     </div>
                 </div>
             )}

@@ -12,20 +12,30 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     await dbConnect();
     const body = await req.json();
-    const { success, data: parsed, error: validationError } = await validateWithYup(makePartial(gallerySchema), body);
-
-    if (!success) {
-      return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
-    }
 
     const existing = await GalleryItem.findById(id);
     if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+    // Handle Hero assignment specially — only one hero allowed at a time
+    if (body.isHero === true) {
+      // Remove hero status from all others
+      await GalleryItem.updateMany({ _id: { $ne: id } }, { $set: { isHero: false } });
+      await GalleryItem.findByIdAndUpdate(id, { $set: { isHero: true } }, { new: true });
+      return NextResponse.json({ ok: true, isHero: true });
+    }
+    if (body.isHero === false) {
+      await GalleryItem.findByIdAndUpdate(id, { $set: { isHero: false } }, { new: true });
+      return NextResponse.json({ ok: true, isHero: false });
+    }
+
+    // Regular update (alt text / src)
+    const { success, data: parsed, error: validationError } = await validateWithYup(makePartial(gallerySchema), body);
+    if (!success) {
+      return NextResponse.json({ error: "Validation failed", details: validationError?.fieldErrors }, { status: 400 });
+    }
+
     if (parsed.src) {
-      const duplicate = await GalleryItem.findOne({
-        src: parsed.src,
-        _id: { $ne: id },
-      });
+      const duplicate = await GalleryItem.findOne({ src: parsed.src, _id: { $ne: id } });
       if (duplicate) {
         return NextResponse.json({ error: "This image is already in the gallery." }, { status: 409 });
       }
@@ -36,8 +46,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       {
         ...(parsed.src && { src: parsed.src }),
         ...(parsed.alt !== undefined && { alt: sanitizeInput(parsed.alt) }),
-        ...(parsed.wide !== undefined && { wide: parsed.wide }),
-        ...(parsed.tall !== undefined && { tall: parsed.tall }),
       },
       { new: true }
     );

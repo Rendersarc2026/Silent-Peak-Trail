@@ -17,6 +17,8 @@ import {
   Clock,
   ThumbsUp,
   ThumbsDown,
+  RotateCcw,
+  Archive,
   AlertCircle
 } from "lucide-react";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
@@ -34,6 +36,7 @@ interface Review {
   tourPackage?: { name: string };
   message: string;
   rating: number;
+  image?: string;
   initial: string;
   isApproved: boolean;
   createdAt: string;
@@ -44,13 +47,13 @@ interface PackageOption {
   name: string;
 }
 
-const EMPTY = { name: "", place: "", packageId: "", rating: 5, message: "" };
+const EMPTY = { name: "", place: "", packageId: "", rating: 5, message: "", image: "" };
 
 import Skeleton from "@/components/admin/Skeleton";
 import Pagination from "@/components/admin/Pagination";
 import { validateWithYup } from "@/lib/utils";
+import ImageUpload from "@/components/admin/ImageUpload";
 
-import { Archive, RotateCcw } from "lucide-react";
 
 export default function TestimonialsAdmin() {
   const [items, setItems] = useState<Review[]>([]);
@@ -72,6 +75,7 @@ export default function TestimonialsAdmin() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const clearFieldError = (field: string) => {
+    if (error === "Please fill all required fields.") setError(null);
     if (fieldErrors[field]) {
       setFieldErrors(prev => {
         const next = { ...prev };
@@ -88,7 +92,8 @@ export default function TestimonialsAdmin() {
         form.place !== editing.place ||
         form.packageId !== editing.packageId ||
         form.rating !== editing.rating ||
-        form.message !== editing.message
+        form.message !== editing.message ||
+        form.image !== (editing.image || "")
       );
     }
     return JSON.stringify(form) !== JSON.stringify(EMPTY);
@@ -163,7 +168,14 @@ export default function TestimonialsAdmin() {
     const { success, error: validationError } = await validateWithYup(reviewSchema, form);
     if (!success) {
       setFieldErrors(validationError?.fieldErrors as any);
-      setError("Please fill all required fields.");
+
+      // Smart global error: only show if any required field is empty
+      const requiredFields = ["name", "place", "packageId", "message"];
+      const anyEmpty = requiredFields.some(f => !form[f as keyof typeof form] || String(form[f as keyof typeof form]).trim() === "");
+
+      if (anyEmpty) {
+        setError("Please fill all required fields.");
+      }
       return;
     }
 
@@ -347,115 +359,122 @@ export default function TestimonialsAdmin() {
             </p>
           </div>
         ) : (
-          items.map(t => (
-            <div
-              key={t.id}
-              className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm ring-1 transition-all hover:shadow-md group ${t.isApproved ? 'ring-slate-100' : 'ring-amber-200 bg-amber-50/10'
-                }`}
-            >
-              {!t.isApproved && (
-                <div className="absolute -top-3 right-4 rounded-full bg-amber-500 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-sm">
-                  Pending Approval
-                </div>
-              )}
+          items.map(t => {
+            return (
+              <div
+                key={t.id}
+                className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm ring-1 transition-all hover:shadow-md group ${t.isApproved ? 'ring-slate-100' : 'ring-amber-200 bg-amber-50/10'
+                  }`}
+              >
+                {!t.isApproved && (
+                  <div className="absolute -top-3 right-4 rounded-full bg-amber-500 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-sm z-10">
+                    Pending Approval
+                  </div>
+                )}
 
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold text-white shadow-inner">
-                  {t.initial}
+                <div className="flex items-center gap-4 mb-4 mt-2">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold text-white shadow-inner overflow-hidden">
+                    {t.image ? (
+                      <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                    ) : (
+                      t.initial
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 truncate">{t.name}</div>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <MapPin size={12} className="shrink-0" />
+                      <span className="truncate">{t.place}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="font-bold text-slate-900 truncate">{t.name}</div>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                    <MapPin size={12} className="shrink-0" />
-                    <span className="truncate">{t.place}</span>
+
+                <div className="flex gap-1 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      fill={i < t.rating ? "currentColor" : "transparent"}
+                      className={i < t.rating ? "text-amber-400" : "text-slate-200"}
+                    />
+                  ))}
+                </div>
+
+                <div className="relative mb-4 flex-1">
+                  <Quote size={24} className="absolute -top-2 -left-2 text-slate-50 opacity-50 transition-colors group-hover:text-blue-50" />
+                  <p className="text-sm leading-relaxed text-slate-600 italic line-clamp-4 relative z-10">
+                    &ldquo;{t.message}&rdquo;
+                  </p>
+                </div>
+
+                <div className="mt-auto flex items-center justify-between border-t pt-4">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    {t.tourPackage?.name || "General Experience"}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {activeTab !== "archived" && (
+                      <button
+                        onClick={() => {
+                          setEditing(t);
+                          setForm({
+                            name: t.name,
+                            place: t.place,
+                            packageId: t.packageId,
+                            rating: t.rating,
+                            message: t.message,
+                            image: t.image || ""
+                          });
+                          setError(null);
+                          setFieldErrors({});
+                          setModal(true);
+                        }}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        title="Edit"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                    )}
+                    {activeTab === "pending" && (
+                      <button
+                        onClick={() => handleApprove(t)}
+                        disabled={actioningId === t.id}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white transition-all hover:bg-green-700 active:scale-95 shadow-sm disabled:opacity-50"
+                      >
+                        {actioningId === t.id ? <><Loader2 size={10} className="animate-spin" /><span>...</span></> : <><Check size={14} /> Approve</>}
+                      </button>
+                    )}
+                    {activeTab === "live" && (
+                      <button
+                        onClick={() => handleArchive(t)}
+                        disabled={actioningId === t.id}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition-colors"
+                        title="Hide from website"
+                      >
+                        {actioningId === t.id ? <Loader2 size={16} className="animate-spin" /> : <ThumbsDown size={16} />}
+                      </button>
+                    )}
+                    {activeTab === "archived" && (
+                      <button
+                        onClick={() => handleRestore(t)}
+                        disabled={actioningId === t.id}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white transition-all hover:bg-green-700 active:scale-95 shadow-sm disabled:opacity-50"
+                        title="Restore to live"
+                      >
+                        {actioningId === t.id ? <><Loader2 size={10} className="animate-spin" /><span>...</span></> : <><RotateCcw size={13} /> Restore</>}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setDeleteModal({ isOpen: true, id: t.id })}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      title="Delete permanently"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
               </div>
-
-              <div className="flex gap-1 mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={14}
-                    fill={i < t.rating ? "currentColor" : "transparent"}
-                    className={i < t.rating ? "text-amber-400" : "text-slate-200"}
-                  />
-                ))}
-              </div>
-
-              <div className="relative mb-4 flex-1">
-                <Quote size={24} className="absolute -top-2 -left-2 text-slate-50 opacity-50 transition-colors group-hover:text-blue-50" />
-                <p className="text-sm leading-relaxed text-slate-600 italic line-clamp-4 relative z-10">
-                  &ldquo;{t.message}&rdquo;
-                </p>
-              </div>
-
-              <div className="mt-auto flex items-center justify-between border-t pt-4">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  {t.tourPackage?.name || "General Experience"}
-                </div>
-                <div className="flex items-center gap-2">
-                  {activeTab !== "archived" && (
-                    <button
-                      onClick={() => {
-                        setEditing(t);
-                        setForm({
-                          name: t.name,
-                          place: t.place,
-                          packageId: t.packageId,
-                          rating: t.rating,
-                          message: t.message
-                        });
-                        setError(null);
-                        setFieldErrors({});
-                        setModal(true);
-                      }}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                      title="Edit"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                  )}
-                  {activeTab === "pending" && (
-                    <button
-                      onClick={() => handleApprove(t)}
-                      disabled={actioningId === t.id}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white transition-all hover:bg-green-700 active:scale-95 shadow-sm disabled:opacity-50"
-                    >
-                      {actioningId === t.id ? <><Loader2 size={10} className="animate-spin" /><span>...</span></> : <><Check size={14} /> Approve</>}
-                    </button>
-                  )}
-                  {activeTab === "live" && (
-                    <button
-                      onClick={() => handleArchive(t)}
-                      disabled={actioningId === t.id}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition-colors"
-                      title="Hide from website"
-                    >
-                      {actioningId === t.id ? <Loader2 size={16} className="animate-spin" /> : <ThumbsDown size={16} />}
-                    </button>
-                  )}
-                  {activeTab === "archived" && (
-                    <button
-                      onClick={() => handleRestore(t)}
-                      disabled={actioningId === t.id}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white transition-all hover:bg-green-700 active:scale-95 shadow-sm disabled:opacity-50"
-                      title="Restore to live"
-                    >
-                      {actioningId === t.id ? <><Loader2 size={10} className="animate-spin" /><span>...</span></> : <><RotateCcw size={13} /> Restore</>}
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setDeleteModal({ isOpen: true, id: t.id })}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
-                    title="Delete permanently"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -484,7 +503,7 @@ export default function TestimonialsAdmin() {
         modal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={handleCloseAttempt}>
             <div
-              className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl animate-in zoom-in-95 duration-200"
+              className="relative w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl animate-in zoom-in-95 duration-200"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center justify-between border-b px-6 py-4">
@@ -498,7 +517,7 @@ export default function TestimonialsAdmin() {
                 </button>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-6 overflow-y-auto flex-1">
                 {error && (
                   <div className="flex items-center gap-2 rounded-xl bg-red-50 p-4 text-xs font-bold text-red-600 border border-red-100 animate-in fade-in slide-in-from-top-2">
                     <AlertCircle size={14} />
@@ -574,6 +593,7 @@ export default function TestimonialsAdmin() {
                     {[1, 2, 3, 4, 5].map(n => (
                       <button
                         key={n}
+                        type="button"
                         onClick={() => { setForm(f => ({ ...f, rating: n })); clearFieldError('rating'); }}
                         className="group flex flex-col items-center gap-1 transition-all"
                       >
@@ -586,6 +606,18 @@ export default function TestimonialsAdmin() {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                <div>
+                   <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500">
+                     Reviewer Photo
+                   </label>
+                   <ImageUpload 
+                     value={form.image} 
+                     onChange={(url) => setForm(f => ({ ...f, image: url }))}
+                     minWidth={200}
+                     minHeight={200}
+                   />
                 </div>
               </div>
 

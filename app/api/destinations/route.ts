@@ -16,10 +16,8 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   const where: any = { isActive: true };
   if (search) {
-    where.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { type: { $regex: search, $options: 'i' } },
-    ];
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    where.name = { $regex: new RegExp(`(^|\\s)${escapedSearch}`, 'i') };
   }
 
   await dbConnect();
@@ -60,11 +58,11 @@ export async function POST(req: NextRequest) {
     }
 
     const item = await Destination.create({
-        name: nameNormal,
-        type: sanitizeInput(parsed.type),
-        altitude: sanitizeInput(parsed.altitude),
-        img: parsed.img,
-        big: parsed.big,
+      name: nameNormal,
+      type: sanitizeInput(parsed.type),
+      altitude: sanitizeInput(parsed.altitude),
+      img: parsed.img,
+      big: parsed.big,
     });
 
     return NextResponse.json(item, { status: 201 });

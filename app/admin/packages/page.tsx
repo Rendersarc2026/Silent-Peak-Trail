@@ -17,6 +17,7 @@ import SearchInput from "@/components/admin/SearchInput";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ConfirmModal from "@/components/admin/ConfirmModal";
+import VideoUpload from "@/components/admin/VideoUpload";
 import { cn, hasError, getErrorMessage } from "@/lib/utils";
 import { packageSchema } from "@/lib/validation";
 
@@ -28,12 +29,14 @@ interface Pkg {
   itinerary: { day: string; title: string; activities?: string }[];
   inclusions: string[];
   exclusions: string[];
+  photos: string[];
+  videos: string[];
 }
 
 const EMPTY: Omit<Pkg, "id"> = {
   name: "", slug: "", tagline: "", duration: "", price: 0,
   badge: "", badgeGold: false, featured: false, img: "", features: [],
-  itinerary: [], inclusions: [], exclusions: [],
+  itinerary: [], inclusions: [], exclusions: [], photos: [], videos: [],
 };
 
 import Pagination from "@/components/admin/Pagination";
@@ -155,7 +158,8 @@ export default function PackagesPage() {
       name: p.name, slug: p.slug, tagline: p.tagline, duration: p.duration, price: p.price,
       badge: p.badge, badgeGold: p.badgeGold, featured: p.featured, img: p.img,
       features: p.features, itinerary: p.itinerary || [],
-      inclusions: p.inclusions || [], exclusions: p.exclusions || []
+      inclusions: p.inclusions || [], exclusions: p.exclusions || [],
+      photos: p.photos || [], videos: p.videos || []
     });
     setFeatStr(p.features.join("\n"));
     setIncStr((p.inclusions || []).join("\n"));
@@ -174,7 +178,9 @@ export default function PackagesPage() {
       itinerary: form.itinerary,
       inclusions: incStr.split("\n").map(s => s.trim()).filter(Boolean),
       exclusions: excStr.split("\n").map(s => s.trim()).filter(Boolean),
-      price: Number(form.price)
+      price: Number(form.price),
+      photos: form.photos || [],
+      videos: form.videos || [],
     };
 
     // Client-side validation using Yup
@@ -718,6 +724,98 @@ export default function PackagesPage() {
                   />
                   <ErrorMsg field="exclusions" />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500 flex items-center justify-between">
+                  <span>Trip Photos Gallery</span>
+                  <span className="text-[9px] font-bold text-slate-400 normal-case bg-slate-100 px-2 py-0.5 rounded-full">{form.photos?.length || 0} images</span>
+                </label>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-4">
+                  {/* Photo Grid */}
+                  {(form.photos || []).length > 0 && (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                      {form.photos.map((photoUrl, idx) => (
+                        <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm transition-all hover:shadow-md">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={photoUrl} alt={`Trip photo ${idx + 1}`} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 transition-opacity group-hover:opacity-100" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setForm(f => ({
+                                ...f,
+                                photos: f.photos.filter((_, i) => i !== idx)
+                              }));
+                            }}
+                            className="absolute right-2 top-2 flex h-6 w-6 translate-y-[-10px] items-center justify-center rounded-full bg-white/90 text-slate-600 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:bg-red-50 hover:text-red-600 focus:translate-y-0 focus:opacity-100 group-hover:translate-y-0 group-hover:opacity-100"
+                            title="Remove photo"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Upload Dropzone */}
+                  <ImageUpload
+                    value="" // We don't want it to show a preview block of it's own since we render the grid above
+                    onChange={url => {
+                      setForm(f => ({
+                        ...f,
+                        photos: [...(f.photos || []), url]
+                      }));
+                    }}
+                    onError={msg => setError(msg)}
+                  />
+                </div>
+                <p className="mt-2 text-[10px] ml-1 font-medium text-slate-400">These photos will appear in a masonry gallery on the package details page.</p>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 ml-1 text-slate-500 flex items-center justify-between">
+                  <span>Trip Videos Gallery</span>
+                  <span className="text-[9px] font-bold text-slate-400 normal-case bg-slate-100 px-2 py-0.5 rounded-full">{form.videos?.length || 0} videos</span>
+                </label>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-4">
+                  {/* Video Grid */}
+                  {(form.videos || []).length > 0 && (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {form.videos.map((videoUrl, idx) => (
+                        <div key={idx} className="group relative aspect-video overflow-hidden rounded-xl border border-slate-200 bg-black shadow-sm transition-all hover:shadow-md">
+                          <video src={videoUrl} controls className="h-full w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setForm(f => ({
+                                ...f,
+                                videos: f.videos.filter((_, i) => i !== idx)
+                              }));
+                            }}
+                            className="absolute right-2 top-2 flex h-6 w-6 translate-y-[-10px] z-10 items-center justify-center rounded-full bg-white/90 text-slate-600 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:bg-red-50 hover:text-red-600 focus:translate-y-0 focus:opacity-100 group-hover:translate-y-0 group-hover:opacity-100"
+                            title="Remove video"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Upload Dropzone */}
+                  <VideoUpload
+                    value="" // We don't want it to show a preview block of it's own since we render the grid above
+                    onChange={url => {
+                      setForm(f => ({
+                        ...f,
+                        videos: [...(f.videos || []), url]
+                      }));
+                    }}
+                    onError={msg => setError(msg)}
+                  />
+                </div>
+                <p className="mt-2 text-[10px] ml-1 font-medium text-slate-400">These videos will appear beneath the photos on the package details page.</p>
               </div>
 
               <div className="flex flex-wrap gap-x-8 gap-y-3 pt-2">

@@ -14,6 +14,8 @@ export interface IPackage extends Document {
   itinerary: any[];
   inclusions: string[];
   exclusions: string[];
+  photos: string[];
+  videos: string[];
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -34,6 +36,8 @@ const PackageSchema: Schema = new Schema(
     itinerary: { type: Schema.Types.Mixed, default: [] },
     inclusions: { type: [String], default: [] },
     exclusions: { type: [String], default: [] },
+    photos: { type: [String], default: [] },
+    videos: { type: [String], default: [] },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true, id: true }

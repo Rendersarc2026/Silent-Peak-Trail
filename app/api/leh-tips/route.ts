@@ -15,10 +15,8 @@ export async function GET(req: NextRequest) {
     const session = await getSession();
     const where: any = { isActive: true };
     if (search) {
-        where.$or = [
-            { title: { $regex: search, $options: 'i' } },
-            { desc: { $regex: search, $options: 'i' } },
-        ];
+        const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        where.title = { $regex: new RegExp(`(^|\\s)${escapedSearch}`, 'i') };
     }
 
     await dbConnect();
@@ -51,13 +49,23 @@ export async function POST(req: NextRequest) {
         }
 
         await dbConnect();
+
+        // Check if order already exists
+        const existingOrder = await LehTip.findOne({ order: parsed.order, isActive: true });
+        if (existingOrder) {
+            return NextResponse.json({
+                error: "Validation failed",
+                details: { order: ["This order number is already taken. Please choose another one."] }
+            }, { status: 400 });
+        }
+
         const item = await LehTip.create({
-                icon: sanitizeInput(parsed.icon),
-                title: sanitizeInput(parsed.title),
-                desc: sanitizeInput(parsed.desc),
-                color: parsed.color,
-                border: parsed.border,
-                order: parsed.order ?? 0,
+            icon: sanitizeInput(parsed.icon),
+            title: sanitizeInput(parsed.title),
+            desc: sanitizeInput(parsed.desc),
+            color: parsed.color,
+            border: parsed.border,
+            order: parsed.order ?? 1,
         });
 
         return NextResponse.json(item, { status: 201 });

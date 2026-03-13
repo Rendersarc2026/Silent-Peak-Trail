@@ -25,7 +25,7 @@ export const isSafe = (val: string | undefined) => {
 export const safeText = (min?: number, max?: number, msg?: string) => {
     let schema = yup.string().trim().required(msg || "This field is required");
     if (min !== undefined) {
-        schema = schema.min(min, msg || `Must be at least ${min} characters`);
+        schema = schema.min(min, msg || `Please enter at least ${min} characters`);
     }
     if (max !== undefined) schema = schema.max(max);
     return schema.test("is-safe", noHtmlError, val => isSafe(val));
@@ -35,13 +35,14 @@ export const safeText = (min?: number, max?: number, msg?: string) => {
 export const safeOptionalText = (max?: number) => {
     let schema = yup.string().trim();
     if (max !== undefined) schema = schema.max(max);
-    return schema.ensure().test("is-safe", noHtmlError, val => isSafe(val));
+    return schema.ensure()
+        .test("is-safe", noHtmlError, val => isSafe(val));
 };
 
 export const nameText = yup.string()
     .trim()
     .required("Name is required")
-    .min(3, "Name must be at least 3 characters")
+    .min(1, "Please enter your name")
     .max(50)
     .test("is-safe", noHtmlError, val => isSafe(val))
     .matches(/^[a-zA-Z\s]*$/, noHtmlError);
