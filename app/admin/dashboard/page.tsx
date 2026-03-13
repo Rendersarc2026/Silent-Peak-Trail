@@ -81,73 +81,73 @@ export default function DashboardPage() {
   return (
     <AdminShell title="Dashboard">
       {/* Stats grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm ring-1 ring-blue-50/50">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
+        <div className="rounded-2xl border border-blue-100 bg-white p-4 sm:p-6 shadow-sm ring-1 ring-blue-50/50">
           <div className="flex items-center justify-between">
-            <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600">
-              <Clock size={20} />
+            <div className="rounded-xl bg-blue-50 p-1.5 sm:p-2.5 text-blue-600">
+              <Clock className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
-            <TrendingUp size={16} className="text-blue-500" />
+            <TrendingUp size={12} className="text-blue-500 sm:block hidden" />
           </div>
-          <div className="mt-4">
-            <h3 className="text-sm font-medium text-slate-500">New Enquiries</h3>
-            <div className="mt-1">
-              {loading ? <div className="h-9 w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-3xl font-bold text-slate-900">{stats?.newEnquiries ?? "0"}</p>}
+          <div className="mt-3 sm:mt-4">
+            <h3 className="text-[10px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">New Enquiries</h3>
+            <div className="mt-0.5 sm:mt-1">
+              {loading ? <div className="h-7 w-10 sm:h-9 sm:w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats?.newEnquiries ?? "0"}</p>}
             </div>
           </div>
-          <div className="mt-4 flex items-center text-xs text-slate-500">
+          <div className="mt-3 sm:mt-4 flex items-center text-[9px] sm:text-xs text-slate-500">
             <span className="font-medium text-blue-600">Awaiting reply</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm ring-1 ring-green-50/50">
+        <div className="rounded-2xl border border-green-100 bg-white p-4 sm:p-6 shadow-sm ring-1 ring-green-50/50">
           <div className="flex items-center justify-between">
-            <div className="rounded-xl bg-green-50 p-2.5 text-green-600">
-              <CheckCircle2 size={20} />
+            <div className="rounded-xl bg-green-50 p-1.5 sm:p-2.5 text-green-600">
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
-            <TrendingUp size={16} className="text-green-500" />
+            <TrendingUp size={12} className="text-green-500 sm:block hidden" />
           </div>
-          <div className="mt-4">
-            <h3 className="text-sm font-medium text-slate-500">Confirmed Bookings</h3>
-            <div className="mt-1">
-              {loading ? <div className="h-9 w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-3xl font-bold text-slate-900">{stats?.confirmed ?? "0"}</p>}
+          <div className="mt-3 sm:mt-4">
+            <h3 className="text-[10px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">Confirmed</h3>
+            <div className="mt-0.5 sm:mt-1">
+              {loading ? <div className="h-7 w-10 sm:h-9 sm:w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats?.confirmed ?? "0"}</p>}
             </div>
           </div>
-          <div className="mt-4 flex items-center text-xs text-slate-500">
-            <span className="font-medium text-green-600">Total confirmed</span>
+          <div className="mt-3 sm:mt-4 flex items-center text-[9px] sm:text-xs text-slate-500">
+            <span className="font-medium text-green-600">Total bookings</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm ring-1 ring-slate-50/50">
+        <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-6 shadow-sm ring-1 ring-slate-50/50">
           <div className="flex items-center justify-between">
-            <div className="rounded-xl bg-slate-50 p-2.5 text-slate-600">
-              <Package size={20} />
+            <div className="rounded-xl bg-slate-50 p-1.5 sm:p-2.5 text-slate-600">
+              <Package className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4">
-            <h3 className="text-sm font-medium text-slate-500">Tour Packages</h3>
-            <div className="mt-1">
-              {loading ? <div className="h-9 w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-3xl font-bold text-slate-900">{stats?.packages ?? "0"}</p>}
+          <div className="mt-3 sm:mt-4">
+            <h3 className="text-[10px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">Packages</h3>
+            <div className="mt-0.5 sm:mt-1">
+              {loading ? <div className="h-7 w-10 sm:h-9 sm:w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats?.packages ?? "0"}</p>}
             </div>
           </div>
-          <div className="mt-4 flex items-center text-xs text-slate-500">
-            <span className="font-medium text-slate-600">Active packages</span>
+          <div className="mt-3 sm:mt-4 flex items-center text-[9px] sm:text-xs text-slate-500">
+            <span className="font-medium text-slate-600">Active tours</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-yellow-100 bg-white p-6 shadow-sm ring-1 ring-yellow-50/50">
+        <div className="rounded-2xl border border-yellow-100 bg-white p-4 sm:p-6 shadow-sm ring-1 ring-yellow-50/50">
           <div className="flex items-center justify-between">
-            <div className="rounded-xl bg-yellow-50 p-2.5 text-yellow-600">
-              <MessageSquare size={20} />
+            <div className="rounded-xl bg-yellow-50 p-1.5 sm:p-2.5 text-yellow-600">
+              <MessageSquare className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4">
-            <h3 className="text-sm font-medium text-slate-500">Total Enquiries</h3>
-            <div className="mt-1">
-              {loading ? <div className="h-9 w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-3xl font-bold text-slate-900">{stats?.enquiries ?? "0"}</p>}
+          <div className="mt-3 sm:mt-4">
+            <h3 className="text-[10px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">Enquiries</h3>
+            <div className="mt-0.5 sm:mt-1">
+              {loading ? <div className="h-7 w-10 sm:h-9 sm:w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats?.enquiries ?? "0"}</p>}
             </div>
           </div>
-          <div className="mt-4 flex items-center text-xs text-slate-500">
+          <div className="mt-3 sm:mt-4 flex items-center text-[9px] sm:text-xs text-slate-500">
             <span className="font-medium text-yellow-600">{stats?.replied ?? 0} replied</span>
           </div>
         </div>

@@ -161,11 +161,11 @@ export default function Booking({
               <Sparkles size={12} className="text-blue-600" />
               Ready to Go?
             </div>
-            <h2 
+            <h2
               className="mb-6 text-[35px] font-medium leading-tight tracking-tighter text-[var(--navy)] sm:text-5xl lg:text-6xl"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
             >
-              Start Planning Your <span className="text-[var(--blue)] italic" style={{ fontFamily: "'Playfair Display', serif" }}>Dream Trip</span>
+              Start Planning Your <span className="text-[var(--blue)]">Dream Trip</span>
             </h2>
           </div>
         )}
@@ -208,7 +208,7 @@ export default function Booking({
                 : "bg-[var(--white)] shadow-[var(--shadow-xl)] ring-1 ring-slate-100"
             )}>
               <div className="mb-12 text-center">
-                <h3 
+                <h3
                   className="mb-3 text-3xl font-medium tracking-tight text-[var(--navy)]"
                   style={{ fontFamily: "'DM Sans', sans-serif" }}
                 >

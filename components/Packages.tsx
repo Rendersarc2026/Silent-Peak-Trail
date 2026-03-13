@@ -16,11 +16,11 @@ export default function Packages({ packages }: { packages: Package[] }) {
               <div className="h-[2px] w-8 bg-[var(--blue)]" />
               Our Tour Packages
             </div>
-            <h2 
+            <h2
               className="text-[32px] font-medium leading-[1.1] tracking-tighter text-[var(--navy)] sm:text-5xl lg:text-6xl"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
             >
-              Curated <span className="text-[var(--blue)] italic" style={{ fontFamily: "'Playfair Display', serif" }}>Journeys</span> <br className="hidden sm:block" /> Into the Himalayas
+              Curated <span className="text-[var(--blue)] " >Journeys</span> <br className="hidden sm:block" /> Into the Himalayas
             </h2>
           </div>
           <p className="text-[14px] font-normal leading-relaxed text-slate-500 sm:text-lg lg:max-w-xs lg:text-right lg:mb-2" style={{ fontFamily: "'DM Sans', sans-serif" }}>

@@ -12,8 +12,8 @@ export default function PrivacyPolicy() {
 
             <main className="pt-[72px]">
                 {/* TOP BAR / BREADCRUMB */}
-                <div className="bg-[#0f2a4a] py-4 border-b border-white/5">
-                    <div className="container mx-auto px-6 lg:px-[60px] flex items-center gap-3 text-[13px]">
+                <div className="bg-[#0f2a4a] py-3 border-b border-white/5">
+                    <div className="container mx-auto px-6 lg:px-[90px] flex items-center gap-3 text-[13px]">
                         <Link href="/" className="text-white/50 hover:text-white transition-colors">
                             Silent Peak Trail
                         </Link>
@@ -23,13 +23,13 @@ export default function PrivacyPolicy() {
                 </div>
 
                 {/* PAGE HEADER */}
-                <div className="bg-white border-b border-[#e8edf4] py-16 ">
-                    <div className="container mx-auto px-6 lg:px-[90px]">
+                <div className="bg-white border-b border-[#e8edf4] py-8 md:py-16">
+                    <div className="container mx-auto px-6 md:px-12 lg:px-[90px]">
                         <div className="max-w-4xl">
-                            <h1 className="font-['DM_Sans',_sans-serif] text-[clamp(32px,5vw,48px)] font-bold text-[#0f2a4a] mb-4">
+                            <h1 className="font-['DM_Sans',_sans-serif] text-[clamp(24px,5vw,32px)] md:text-[clamp(32px,5vw,48px)] font-bold text-[#0f2a4a] mb-3 md:mb-4">
                                 Privacy Policy
                             </h1>
-                            <div className="flex items-center gap-2 text-[13px] text-[#8aabce] font-medium">
+                            <div className="flex items-center gap-2 text-[12px] md:text-[13px] text-[#8aabce] font-medium">
                                 <Clock size={14} />
                                 <span>Last updated: March 2026</span>
                                 <span className="mx-1">·</span>
@@ -40,33 +40,31 @@ export default function PrivacyPolicy() {
                 </div>
 
                 {/* CONTENT */}
-                <div className="container mx-auto px-60 lg:px-[100px] py-16">
-                    <div className="max-w-6xl space-y-6">
+                <div className="container mx-auto px-6 md:px-12 lg:px-[100px] py-10 md:py-16">
+                    <div className="max-w-6xl space-y-6 md:space-y-8">
                         {/* INTRO */}
-                        <div className="bg-[#eef4fb] border-l-4 border-[#4a8fd4] p-6 md:p-8 rounded-r-2xl mb-16 text-[18px] text-[#3a5a7a] leading-relaxed">
-                            At Silent Peak Trail, your privacy is a foundational commitment. This policy explains what personal information we collect, why we collect it, how we use it, and the rights you have over it. <strong className="text-[#0f2a4a] font-bold">We do not sell your data. We do not share it with third parties for advertising purposes.</strong>
+                        <div className="bg-[#eef4fb] border-l-4 border-[#4a8fd4] p-5 md:p-8 rounded-r-2xl mb-8 md:mb-12 text-sm md:text-[18px] text-[#3a5a7a] leading-relaxed">
+                            Silent Peak Trail is committed to your privacy. We collect only what is necessary to plan your journey and <strong className="text-[#0f2a4a] font-bold">never sell your data or share it for advertising.</strong>
                         </div>
 
                         <div className="space-y-8">
                             {/* SECTION 01 */}
                             <section className="relative">
-                                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">01</div>
-                                <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Information We Collect</h2>
-                                <p className="text-[#444] font-light leading-relaxed mb-6 text-[18px]">
+                                <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">01</div>
+                                <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Information We Collect</h2>
+                                <p className="text-[#444] font-light leading-relaxed mb-5 md:mb-6 text-sm md:text-[18px]">
                                     When you book a tour, enquire about a package, or communicate with us, we collect certain personal information. This includes:
                                 </p>
                                 <ul className="space-y-3">
                                     {[
-                                        { label: "Identity information", desc: "full name, date of birth, nationality, and passport details required for permits in restricted areas." },
-                                        { label: "Contact information", desc: "email address, phone number, and home address for communication and booking confirmations." },
-                                        { label: "Health information", desc: "any medical conditions, allergies, or fitness limitations you voluntarily disclose, critical for high-altitude safety planning." },
-                                        { label: "Payment information", desc: "billing details processed securely through our payment gateway. We do not store card numbers on our servers." },
-                                        { label: "Emergency contact details", desc: "the name and contact number of a person we can reach in the event of an emergency." },
-                                        { label: "Usage data", desc: "anonymised information about how you interact with our website, collected via cookies." },
+                                        { label: "Identity & Contact", desc: "Names, passport details, nationality, and contact info for permits and bookings." },
+                                        { label: "Health & Emergency", desc: "Relevant medical details you share for safety, and your emergency contact person." },
+                                        { label: "Payment Details", desc: "Billing info processed securely; we do not store card numbers on our servers." },
+                                        { label: "Technical Data", desc: "Anonymised usage information collected via essential website cookies." },
                                     ].map((item, idx) => (
-                                        <li key={idx} className="flex gap-4 pb-4 border-b border-gray-100 last:border-0 group">
-                                            <span className="w-2 h-2 bg-[#4a8fd4] rounded-full mt-2 flex-shrink-0"></span>
-                                            <p className="text-[18px] font-light text-[#444] leading-relaxed">
+                                        <li key={idx} className="flex gap-3 md:gap-4 pb-4 border-b border-gray-100 last:border-0 group">
+                                            <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#4a8fd4] rounded-full mt-2 md:mt-2 flex-shrink-0"></span>
+                                            <p className="text-sm md:text-[18px] font-light text-[#444] leading-relaxed">
                                                 <strong className="text-[#1a1a2e] font-bold">{item.label}</strong> — {item.desc}
                                             </p>
                                         </li>
@@ -78,19 +76,18 @@ export default function PrivacyPolicy() {
 
                             {/* SECTION 02 */}
                             <section>
-                                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">02</div>
-                                <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">How We Use Your Information</h2>
+                                <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">02</div>
+                                <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">How We Use Your Information</h2>
                                 <ul className="space-y-3">
                                     {[
-                                        { label: "Trip planning and logistics", desc: "to arrange permits, accommodation, transport, and guides tailored to your group." },
-                                        { label: "Safety and emergency response", desc: "to maintain accessible medical information and communicate with emergency services when necessary." },
-                                        { label: "Booking communications", desc: "to send itinerary details, payment receipts, and pre-departure information." },
-                                        { label: "Legal compliance", desc: "to meet obligations under Indian tourism regulations, including guest registers for restricted zones." },
-                                        { label: "Service improvement", desc: "anonymised feedback helps us refine our routes and customer experience." },
+                                        { label: "Logistics", desc: "To arrange permits, accommodation, transport, and guides." },
+                                        { label: "Safety", desc: "To maintain medical info for emergency response if needed." },
+                                        { label: "Communications", desc: "To send itinerary updates, receipts, and pre-departure info." },
+                                        { label: "Legal", desc: "To meet Indian tourism regulations for restricted zones." },
                                     ].map((item, idx) => (
-                                        <li key={idx} className="flex gap-4 pb-4 border-b border-gray-100 last:border-0">
-                                            <span className="w-2 h-2 bg-[#4a8fd4] rounded-full mt-2 flex-shrink-0"></span>
-                                            <p className="text-[18px] font-light text-[#444] leading-relaxed">
+                                        <li key={idx} className="flex gap-3 md:gap-4 pb-4 border-b border-gray-100 last:border-0">
+                                            <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#4a8fd4] rounded-full mt-2 md:mt-2 flex-shrink-0"></span>
+                                            <p className="text-sm md:text-[18px] font-light text-[#444] leading-relaxed">
                                                 <strong className="text-[#1a1a2e] font-bold">{item.label}</strong> — {item.desc}
                                             </p>
                                         </li>
@@ -102,9 +99,9 @@ export default function PrivacyPolicy() {
 
                             {/* SECTION 03 */}
                             <section>
-                                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">03</div>
-                                <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Information Sharing & Third Parties</h2>
-                                <p className="text-[#444] font-light leading-relaxed mb-6 text-[16px]">
+                                <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">03</div>
+                                <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Information Sharing & Third Parties</h2>
+                                <p className="text-[#444] font-light leading-relaxed mb-5 md:mb-6 text-sm md:text-[16px]">
                                     We never sell, rent, or trade your personal information. We share limited information only with partners required to deliver your journey:
                                 </p>
                                 <ul className="space-y-3">
@@ -114,9 +111,9 @@ export default function PrivacyPolicy() {
                                         { label: "Payment processors", desc: "PCI-DSS compliant gateways process your billing information securely." },
                                         { label: "Emergency services", desc: "in the event of a medical emergency, relevant information may be shared with hospitals or rescue services." },
                                     ].map((item, idx) => (
-                                        <li key={idx} className="flex gap-4 pb-4 border-b border-gray-100 last:border-0">
-                                            <span className="w-2 h-2 bg-[#4a8fd4] rounded-full mt-2 flex-shrink-0"></span>
-                                            <p className="text-[18px] font-light text-[#444] leading-relaxed">
+                                        <li key={idx} className="flex gap-3 md:gap-4 pb-4 border-b border-gray-100 last:border-0">
+                                            <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#4a8fd4] rounded-full mt-2 md:mt-2 flex-shrink-0"></span>
+                                            <p className="text-sm md:text-[18px] font-light text-[#444] leading-relaxed">
                                                 <strong className="text-[#1a1a2e] font-bold">{item.label}</strong> — {item.desc}
                                             </p>
                                         </li>
@@ -128,13 +125,10 @@ export default function PrivacyPolicy() {
 
                             {/* SECTION 04 */}
                             <section>
-                                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">04</div>
-                                <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Data Retention & Storage</h2>
-                                <p className="text-[#444] font-light leading-relaxed mb-6 text-[18px]">
-                                    Booking records are retained for seven years per Indian financial regulations. Health and emergency information is deleted within 90 days of your tour&apos;s completion unless you have a future booking. Communication records are retained for three years.
-                                </p>
-                                <p className="text-[#444] font-light leading-relaxed text-[18px]">
-                                    Your data is stored on secure servers in India, with access limited to authorised staff on a need-to-know basis.
+                                <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">04</div>
+                                <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Data Retention & Storage</h2>
+                                <p className="text-[#444] font-light leading-relaxed text-sm md:text-[18px]">
+                                    Booking records are kept for seven years per Indian financial laws. Health data is deleted within 90 days of trip completion. Your data is stored on secure servers in India with strictly authorised access.
                                 </p>
                             </section>
 
@@ -142,34 +136,32 @@ export default function PrivacyPolicy() {
 
                             {/* SECTION 05 */}
                             <section>
-                                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">05</div>
-                                <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Your Rights</h2>
+                                <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">05</div>
+                                <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Your Rights</h2>
                                 <ul className="space-y-4">
                                     {[
-                                        { label: "Right to access", desc: "request a copy of all personal data we hold about you." },
-                                        { label: "Right to correction", desc: "request correction of inaccurate or outdated information." },
-                                        { label: "Right to deletion", desc: "request deletion of your data, subject to legal retention obligations." },
-                                        { label: "Right to withdraw consent", desc: "withdraw consent for marketing communications at any time." },
-                                        { label: "Right to portability", desc: "request your data in a structured, machine-readable format." },
+                                        { label: "Access & Correction", desc: "Request a copy of your data or correction of inaccurate info." },
+                                        { label: "Deletion", desc: "Request deletion of your data, subject to legal obligations." },
+                                        { label: "Consent", desc: "Withdraw consent for communications at any time." },
                                     ].map((item, idx) => (
-                                        <li key={idx} className="flex gap-4 pb-4 border-b border-gray-100 last:border-0">
-                                            <span className="w-2 h-2 bg-[#4a8fd4] rounded-full mt-2 flex-shrink-0"></span>
-                                            <p className="text-[18px] font-light text-[#444] leading-relaxed">
+                                        <li key={idx} className="flex gap-3 md:gap-4 pb-4 border-b border-gray-100 last:border-0">
+                                            <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#4a8fd4] rounded-full mt-2 md:mt-2 flex-shrink-0"></span>
+                                            <p className="text-sm md:text-[18px] font-light text-[#444] leading-relaxed">
                                                 <strong className="text-[#1a1a2e] font-bold">{item.label}</strong> — {item.desc}
                                             </p>
                                         </li>
                                     ))}
                                 </ul>
-                                
+
                             </section>
 
                             <hr className="border-[#e8edf4]" />
 
                             {/* SECTION 06 */}
                             <section>
-                                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">06</div>
-                                <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Cookies</h2>
-                                <p className="text-[#444] font-light leading-relaxed text-[18px]">
+                                <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">06</div>
+                                <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Cookies</h2>
+                                <p className="text-[#444] font-light leading-relaxed text-sm md:text-[18px]">
                                     Our website uses a minimal set of cookies — essential cookies required for the site to function, and anonymised analytics cookies. We do not use advertising cookies. You may disable analytics cookies through your browser settings without affecting your use of the site.
                                 </p>
                             </section>
@@ -178,9 +170,9 @@ export default function PrivacyPolicy() {
 
                             {/* SECTION 07 */}
                             <section>
-                                <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">07</div>
-                                <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Changes to This Policy</h2>
-                                <p className="text-[#444] font-light leading-relaxed text-[18px]">
+                                <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">07</div>
+                                <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Changes to This Policy</h2>
+                                <p className="text-[#444] font-light leading-relaxed text-sm md:text-[18px]">
                                     We may update this policy from time to time. When we make material changes, we will notify active customers by email and update the date above.
                                 </p>
                             </section>

@@ -77,18 +77,18 @@ export default function WhyUs({ homepageData }: WhyUsProps) {
                 <CheckCircle2 size={12} className="fill-amber-600 text-amber-100" />
                 Why travel with us
               </div>
-              <h2 
+              <h2
                 className="text-[32px] font-medium leading-tight tracking-tighter text-white sm:text-5xl lg:text-6xl"
                 style={{ fontFamily: "'DM Sans', sans-serif" }}
               >
                 {title.split(' ').map((word, i) => (
                   word.toLowerCase() === 'transform' || word.toLowerCase() === 'transformed' ?
-                    <span key={i} className="text-[var(--sky)] italic" style={{ fontFamily: "'Playfair Display', serif" }}> {word} </span> :
+                    <span key={i} className="text-[var(--sky)] " > {word} </span> :
                     ` ${word} `
                 ))}
               </h2>
             </div>
-          
+
             <p className="mb-6 text-sm font-normal leading-snug text-blue-100/60 sm:mb-12 sm:text-lg sm:leading-relaxed" style={{ fontFamily: "'DM Sans', sans-serif" }}>
               {subtitle}
             </p>

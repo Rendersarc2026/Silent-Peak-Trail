@@ -45,11 +45,11 @@ export default function LehPrep({ tips, homepageData }: LehPrepProps) {
                         <Info size={12} />
                         Important Guide
                     </div>
-                    <h2 
+                    <h2
                         className="text-[32px] leading-[1.1] font-medium tracking-tighter text-[var(--navy)] sm:text-5xl lg:text-6xl"
                         style={{ fontFamily: "'DM Sans', sans-serif" }}
                     >
-                        What to Know <span className="text-[var(--blue)] italic" style={{ fontFamily: "'Playfair Display', serif" }}>Before Arrival</span>
+                        What to Know <span className="text-[var(--blue)]">Before Arrival</span>
                     </h2>
                     <p className="mt-4 max-w-2xl text-[14px] text-slate-500 font-normal leading-normal sm:mt-8 sm:text-lg sm:leading-relaxed lg:max-w-2xl" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                         Preparation is key to a safe and enjoyable journey in the high Himalayas.
@@ -93,13 +93,13 @@ export default function LehPrep({ tips, homepageData }: LehPrepProps) {
                                 <AlertTriangle size={14} className="text-amber-400" />
                                 Altitude Warning
                             </div>
-                            <h3 
+                            <h3
                                 className="text-2xl sm:text-3xl font-medium mb-3"
                                 style={{ fontFamily: "'DM Sans', sans-serif" }}
                             >
                                 {amsTitle}
                             </h3>
-                            <p 
+                            <p
                                 className="text-blue-100/80 text-base sm:text-lg font-normal leading-relaxed"
                                 style={{ fontFamily: "'DM Sans', sans-serif" }}
                             >

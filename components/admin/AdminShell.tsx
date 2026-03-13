@@ -266,7 +266,7 @@ export default function AdminShell({
       )}
 
       {/* ── Main area ── */}
-      <div className="flex flex-1 flex-col lg:pl-64">
+      <div className="flex flex-1 flex-col lg:pl-64 bg-gray-50">
         {/* Topbar */}
         <header className="sticky top-0 z-40 flex h-14 sm:h-16 items-center justify-between border-b bg-white px-4 sm:px-6 xl:px-8 gap-3 shadow-sm">
           <div className="flex items-center gap-3 min-w-0">

@@ -25,11 +25,11 @@ export default function Destinations({ destinations }: { destinations: Destinati
               <div className="h-[2px] w-8 bg-[var(--blue)]" />
               Where We Go
             </div>
-            <h2 
+            <h2
               className="text-[32px] font-medium leading-[1.1] tracking-tight text-[var(--navy)] sm:text-5xl lg:text-6xl"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
             >
-              Iconic <span className="text-[var(--blue)] italic" style={{ fontFamily: "'Playfair Display', serif" }}>Destinations</span> <br className="hidden sm:block" /> of Ladakh
+              Iconic <span className="text-[var(--blue)]" >Destinations</span> <br className="hidden sm:block" /> of Ladakh
             </h2>
           </div>
 

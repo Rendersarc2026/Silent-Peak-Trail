@@ -33,11 +33,11 @@ export default function TripVideos({ packages }: { packages: PackageData[] }) {
                         <Film size={12} className="fill-amber-600 text-amber-100" />
                         Video Gallery
                     </div>
-                    <h2 
+                    <h2
                         className="mb-6 text-[32px] font-medium leading-tight tracking-tighter text-[var(--navy)] sm:text-5xl lg:text-6xl"
                         style={{ fontFamily: "'DM Sans', sans-serif" }}
                     >
-                        Ladakh In <span className="text-[var(--blue)] italic" style={{ fontFamily: "'Playfair Display', serif" }}>Motion</span>
+                        Ladakh In <span className="text-[var(--blue)]">Motion</span>
                     </h2>
                     <p className="text-[14px] font-normal leading-snug text-slate-500 sm:text-lg sm:leading-relaxed lg:max-w-2xl mx-auto" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                         A glimpse of the breathtaking landscapes, vibrant culture, and unforgettable

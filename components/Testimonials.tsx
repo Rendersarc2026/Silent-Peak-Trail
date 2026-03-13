@@ -59,11 +59,11 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
             <MessageSquare size={12} className="text-[var(--blue)]" />
             Traveller Stories
           </div>
-          <h2 
+          <h2
             className="text-3xl font-medium leading-tight tracking-tight text-[var(--navy)] sm:text-5xl lg:text-6xl"
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
-            What Our Guests <span className="text-[var(--blue)] italic" style={{ fontFamily: "'Playfair Display', serif" }}>Say</span>
+            What Our Guests <span className="text-[var(--blue)]">Say</span>
           </h2>
         </div>
 
@@ -88,8 +88,8 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-3 mt-1">
-                       <Quote size={48} strokeWidth={3} className="text-slate-100 opacity-60" />
-                       <div className="flex items-center gap-1">
+                      <Quote size={48} strokeWidth={3} className="text-slate-100 opacity-60" />
+                      <div className="flex items-center gap-1">
                         {Array.from({ length: 5 }).map((_, si) => (
                           <Star key={si} size={16} className={si < t.stars ? "fill-[var(--gold)] text-[var(--gold)]" : "fill-slate-100 text-slate-100"} />
                         ))}
@@ -98,16 +98,16 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
                   </div>
 
                   {/* Clamped review text */}
-                  <p className="relative mb-3 text-l font-medium italic leading-relaxed text-[var(--navy)]/80 font-serif line-clamp-6 sm:line-clamp-none">
+                  <p className="relative mb-3 text-l font-medium italic leading-relaxed text-[var(--navy)]/80 font-serif line-clamp-6 break-words">
                     &ldquo;{t.text}&rdquo;
                   </p>
 
                   {/* Read more — bottom right, only for long text */}
-                  {t.text.length > 230 && (
-                    <div className="sm:hidden flex justify-end mb-5">
+                  {t.text.length > 250 && (
+                    <div className="flex justify-end mb-5">
                       <button
                         onClick={() => setExpandedReview(t)}
-                        className="text-sm font-semibold text-[var(--blue)]"
+                        className="text-sm font-semibold text-[var(--blue)] hover:underline"
                       >
                         Read more ↓
                       </button>
@@ -141,42 +141,49 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
       {/* Full Review Modal */}
       {expandedReview && (
         <div
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200"
           onClick={() => setExpandedReview(null)}
         >
           <div
-            className="relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-[2rem] bg-white p-8 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
+            className="relative w-full max-w-[90%] sm:max-w-md max-h-[85vh] overflow-y-auto rounded-3xl bg-white p-6 sm:p-8 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setExpandedReview(null)}
-              className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+              className="absolute top-4 right-4 flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
             >
-              <X size={16} />
+              <X size={14} className="sm:hidden" />
+              <X size={16} className="hidden sm:block" />
             </button>
 
             <div className="mb-4 flex items-center gap-1">
               {Array.from({ length: 5 }).map((_, si) => (
-                <Star key={si} size={15} className={si < expandedReview.stars ? "fill-[var(--gold)] text-[var(--gold)]" : "fill-slate-100 text-slate-100"} />
+                <Star
+                  key={si}
+                  className={cn(
+                    "w-3 h-3 sm:w-4 sm:h-4",
+                    si < expandedReview.stars ? "fill-[var(--gold)] text-[var(--gold)]" : "fill-slate-100 text-slate-100"
+                  )}
+                />
               ))}
             </div>
 
-            <p className="mb-6 text-base font-medium italic leading-relaxed text-[var(--navy)]/80 font-serif">
+            <p className="mb-5 text-sm sm:text-base font-medium italic leading-relaxed text-[var(--navy)]/80 font-serif break-words">
               &ldquo;{expandedReview.text}&rdquo;
             </p>
 
-            <div className="flex items-center gap-6 border-t pt-6 border-slate-100">
-              <div className="flex h-20 w-20 sm:h-24 sm:w-24 shrink-0 items-center justify-center rounded-full bg-[var(--navy)] text-3xl font-black text-white shadow-xl overflow-hidden ring-4 ring-slate-50">
+            <div className="flex items-center gap-3 sm:gap-4 border-t pt-4 sm:pt-5 border-slate-100">
+              <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-full bg-[var(--navy)] text-xl sm:text-2xl font-black text-white shadow-md overflow-hidden ring-2 sm:ring-4 ring-slate-50">
                 {expandedReview.image ? (
                   <img src={expandedReview.image} alt={expandedReview.name} className="w-full h-full object-cover" />
                 ) : (
                   expandedReview.initial
                 )}
               </div>
-              <div>
-                <div className="text-xl font-black tracking-tight text-[var(--navy)] mb-1">{expandedReview.name}</div>
-                <div className="text-[12px] font-bold uppercase tracking-widest text-[var(--text-light)]">
-                  {expandedReview.place} <span className="mx-2 text-slate-200">|</span> {expandedReview.package}
+              <div className="min-w-0">
+                <div className="text-base sm:text-lg font-black tracking-tight text-[var(--navy)] mb-0.5 truncate">{expandedReview.name}</div>
+                <div className="text-[9px] sm:text-[11px] font-bold uppercase tracking-widest text-[var(--text-light)] truncate">
+                  {expandedReview.place} <span className="mx-1 sm:mx-2 text-slate-200">|</span> {expandedReview.package}
                 </div>
               </div>
             </div>

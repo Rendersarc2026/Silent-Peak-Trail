@@ -28,11 +28,11 @@ export default function Gallery({ images }: { images: GalleryImage[] }) {
             <ImageIcon size={12} className="fill-blue-600 text-blue-100" />
             Photo Gallery
           </div>
-          <h2 
+          <h2
             className="mb-6 text-[32px] font-medium leading-tight tracking-tighter text-[var(--navy)] sm:text-5xl lg:text-6xl"
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
-            Ladakh Through <br className="sm:hidden" /><span className="text-[var(--blue)] italic" style={{ fontFamily: "'Playfair Display', serif" }}>Our Lens</span>
+            Ladakh Through <br className="sm:hidden" /><span className="text-[var(--blue)]" >Our Lens</span>
           </h2>
           <p className="text-[14px] font-normal leading-snug text-slate-500 sm:text-lg sm:leading-relaxed lg:max-w-2xl mx-auto" style={{ fontFamily: "'DM Sans', sans-serif" }}>
             A glimpse of the breathtaking landscapes, vibrant culture, and unforgettable

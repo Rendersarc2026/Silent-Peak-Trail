@@ -37,7 +37,7 @@ export default function Stargazing({ packageData, homepageData }: StargazingProp
 
 
     return (
-        <section id="stargazing" className="relative min-h-screen w-full overflow-hidden bg-black pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 flex items-start">
+        <section id="stargazing" className="relative min-h-[600px] md:min-h-screen w-full overflow-hidden bg-black pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 flex items-start">
             {/* Video Background */}
             <video
                 autoPlay
@@ -76,7 +76,7 @@ export default function Stargazing({ packageData, homepageData }: StargazingProp
                         <div className="mt-10 sm:mt-12 flex flex-wrap gap-5">
                             <Link
                                 href={packageData ? `/packages/${packageData.slug}` : "#contact"}
-                                className="group flex items-center gap-3 rounded-2xl bg-white px-8 py-4 sm:px-10 sm:py-5 text-sm font-black uppercase tracking-widest text-[var(--navy)] transition-all hover:bg-[var(--gold)] hover:text-white shadow-2xl active:scale-[0.98]"
+                                className="group flex items-center gap-2 rounded-xl bg-white px-5 py-3 sm:px-10 sm:py-5 text-[11px] sm:text-sm font-black uppercase tracking-widest text-[var(--navy)] transition-all hover:bg-[var(--gold)] hover:text-white shadow-2xl active:scale-[0.98]"
                             >
                                 {bookText}
                                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />

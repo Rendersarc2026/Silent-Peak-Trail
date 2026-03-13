@@ -12,24 +12,24 @@ export default function TermsAndConditions() {
 
             <main className="pt-[72px]">
                 {/* TOP BAR / BREADCRUMB */}
-                <div className="bg-[#0f2a4a] py-4 border-b border-white/5">
-                    <div className="container mx-auto px-6 lg:px-[60px] flex items-center gap-3 text-[13px]">
+                <div className="bg-[#0f2a4a] py-3 border-b border-white/5">
+                    <div className="container mx-auto px-6 lg:px-[90px] flex items-center gap-3 text-[13px]">
                         <Link href="/" className="text-white/50 hover:text-white transition-colors">
                             Silent Peak Trail
                         </Link>
                         <ChevronRight size={12} className="text-white/20" />
-                         <span className="text-white/85">Terms & Conditions</span>
+                        <span className="text-white/85">Terms & Conditions</span>
                     </div>
                 </div>
 
                 {/* PAGE HEADER */}
-                <div className="bg-white border-b border-[#e8edf4] py-16">
-                    <div className="container mx-auto px-6 lg:px-[100px]">
+                <div className="bg-white border-b border-[#e8edf4] py-8 md:py-16">
+                    <div className="container mx-auto px-6 md:px-12 lg:px-[100px]">
                         <div className="max-w-6xl">
-                            <h1 className="font-['DM_Sans',_sans-serif] text-[clamp(32px,5vw,48px)] font-bold text-[#0f2a4a] mb-4">
+                            <h1 className="font-['DM_Sans',_sans-serif] text-[clamp(24px,5vw,32px)] md:text-[clamp(32px,5vw,48px)] font-bold text-[#0f2a4a] mb-3 md:mb-4">
                                 Terms &amp; Conditions
                             </h1>
-                            <div className="flex items-center gap-2 text-[13px] text-[#8aabce] font-medium">
+                            <div className="flex items-center gap-2 text-[12px] md:text-[13px] text-[#8aabce] font-medium">
                                 <Clock size={14} />
                                 <span>Last updated: March 2026</span>
                                 <span className="mx-1">·</span>
@@ -40,25 +40,22 @@ export default function TermsAndConditions() {
                 </div>
 
                 {/* CONTENT */}
-                <div className="container mx-auto px-60 lg:px-[100px] py-16">
-                    <div className="max-w-6xl space-y-8">
+                <div className="container mx-auto px-6 md:px-12 lg:px-[100px] py-10 md:py-16">
+                    <div className="max-w-6xl space-y-8 md:space-y-12">
                         {/* INTRO */}
-                        <div className="bg-[#eef4fb] border-l-4 border-[#4a8fd4] p-6 md:p-8 rounded-r-2xl mb-16 text-[18px] text-[#3a5a7a] leading-relaxed">
-                            These Terms and Conditions govern all bookings made with <strong className="text-[#0f2a4a] font-bold">Silent Peak Trail</strong> By making a booking or payment, you confirm that you have read, understood, and agreed to these terms in full — on behalf of yourself and all participants in your group.
+                        <div className="bg-[#eef4fb] border-l-4 border-[#4a8fd4] p-5 md:p-8 rounded-r-2xl mb-8 md:mb-12 text-sm md:text-[18px] text-[#3a5a7a] leading-relaxed">
+                            These Terms govern all bookings with <strong className="text-[#0f2a4a] font-bold">Silent Peak Trail</strong>. By booking or making a payment, you agree to these terms in full for yourself and your group participants.
                         </div>
 
                         {/* SECTION 01 */}
                         <section>
-                            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">01</div>
-                            <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Bookings &amp; Confirmation</h2>
-                            <p className="text-[18px] font-light text-black leading-relaxed mb-6">
-                                A booking is confirmed only once Silent Peak Trail has received the required deposit and issued a written confirmation by email. Until both conditions are met, your preferred dates remain subject to availability.
+                            <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">01</div>
+                            <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Bookings &amp; Confirmation</h2>
+                            <p className="text-sm md:text-[18px] font-light text-black leading-relaxed mb-6">
+                                Bookings are confirmed only after we receive a <strong className="text-[#0f2a4a] font-bold">30% non-refundable deposit</strong> and issue email confirmation. The balance is due 45 days before departure. For bookings within 45 days, full payment is due immediately.
                             </p>
-                            <p className="text-[18px] font-light text-black leading-relaxed mb-6">
-                                <strong className="text-[#0f2a4a] font-bold">A non-refundable deposit of 30% of the total trip cost</strong> is required to secure your booking. The remaining balance must be paid in full no later than 45 days before departure. For bookings made within 45 days of departure, full payment is due immediately.
-                            </p>
-                            <p className="text-[18px] font-light text-black leading-relaxed">
-                                It is your responsibility to ensure all information provided at booking — names, passport details, health disclosures, dietary requirements — is accurate and complete.
+                            <p className="text-sm md:text-[18px] font-light text-black leading-relaxed">
+                                Guests must provide accurate names, passport details, health disclosures, and dietary requirements at the time of booking.
                             </p>
                         </section>
 
@@ -66,42 +63,36 @@ export default function TermsAndConditions() {
 
                         {/* SECTION 02 */}
                         <section>
-                            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">02</div>
-                            <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Cancellations &amp; Refunds</h2>
-                            <p className="text-[18px] font-light text-black leading-relaxed mb-6">
+                            <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">02</div>
+                            <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Cancellations &amp; Refunds</h2>
+                            <p className="text-sm md:text-[18px] font-light text-black leading-relaxed mb-6">
                                 All cancellations must be submitted in writing to <strong className="text-[#0f2a4a] font-bold">silentpeaktrails@gmail.com</strong>. The following fees apply based on notice received:
                             </p>
-                            <table className="w-full border-collapse mb-6 text-[18px]">
-                                <thead>
-                                    <tr>
-                                        <th className="text-left py-2 font-bold text-[#4a8fd4] text-[11px] tracking-[0.08em] uppercase border-b-2 border-[#dde8f5] bg-[#f0f6ff]">Notice Before Departure</th>
-                                        <th className="text-left py-2 font-bold text-[#4a8fd4] text-[11px] tracking-[0.08em] uppercase border-b-2 border-[#dde8f5] bg-[#f0f6ff]">Cancellation Fee</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td className="py-2 text-black">60 days or more</td>
-                                        <td className="py-2 text-black">Loss of deposit (30%)</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-black">45 – 59 days</td>
-                                        <td className="py-2 text-black">50% of total trip cost</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-black">30 – 44 days</td>
-                                        <td className="py-2 text-black">75% of total trip cost</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-black">Less than 30 days</td>
-                                        <td className="py-2 text-black">100% — no refund</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-black">No show</td>
-                                        <td className="py-2 text-black">100% — no refund</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <p className="text-[18px] font-light text-black leading-relaxed">
+                            <div className="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0 mb-6 font-['Lato',_sans-serif]">
+                                <table className="w-full border-collapse text-sm md:text-[18px] min-w-[500px]">
+                                    <thead>
+                                        <tr>
+                                            <th className="text-left py-3 px-4 font-bold text-[#4a8fd4] text-[12px] md:text-[11px] tracking-[0.08em] uppercase border-b-2 border-[#dde8f5] bg-[#f0f6ff]">Notice Before Departure</th>
+                                            <th className="text-left py-3 px-4 font-bold text-[#4a8fd4] text-[12px] md:text-[11px] tracking-[0.08em] uppercase border-b-2 border-[#dde8f5] bg-[#f0f6ff]">Cancellation Fee</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {[
+                                            { notice: "60 days or more", fee: "Loss of deposit (30%)" },
+                                            { notice: "45 – 59 days", fee: "50% of total trip cost" },
+                                            { notice: "30 – 44 days", fee: "75% of total trip cost" },
+                                            { notice: "Less than 30 days", fee: "100% — no refund" },
+                                            { notice: "No show", fee: "100% — no refund" },
+                                        ].map((row, idx) => (
+                                            <tr key={idx} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
+                                                <td className="py-2.5 md:py-3 px-4 text-black">{row.notice}</td>
+                                                <td className="py-2.5 md:py-3 px-4 text-black font-medium">{row.fee}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p className="text-sm md:text-[18px] font-light text-black leading-relaxed">
                                 Refunds, where applicable, are processed within 14 business days to the original payment method.
                             </p>
                         </section>
@@ -110,16 +101,10 @@ export default function TermsAndConditions() {
 
                         {/* SECTION 03 */}
                         <section>
-                            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">03</div>
-                            <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Itinerary Changes &amp; Force Majeure</h2>
-                            <p className="text-[18px] font-light text-black leading-relaxed mb-6">
-                                Silent Peak Trails reserves the right to modify any itinerary where necessary for the safety, well-being, or legal compliance of guests and staff. We will make every reasonable effort to provide an equivalent alternative.
-                            </p>
-                            <p className="text-[18px] font-light text-black leading-relaxed mb-6">
-                                No cash refund will be issued for modifications arising from circumstances beyond our control, including extreme weather, government directives, natural disasters, public health emergencies, or political unrest.
-                            </p>
-                            <p className="text-[18px] font-light text-black leading-relaxed">
-                                We strongly recommend all guests purchase comprehensive travel insurance that includes trip interruption and emergency evacuation cover.
+                            <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">03</div>
+                            <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Itinerary Changes &amp; Force Majeure</h2>
+                            <p className="text-sm md:text-[18px] font-light text-black leading-relaxed">
+                                We reserve the right to modify itineraries for safety or legal compliance. No refunds are issued for delays or changes caused by force majeure, including extreme weather, government directives, or natural disasters. <strong className="text-[#0f2a4a] font-bold">Comprehensive travel insurance is mandatory.</strong>
                             </p>
                         </section>
 
@@ -127,9 +112,9 @@ export default function TermsAndConditions() {
 
                         {/* SECTION 04 */}
                         <section>
-                            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">04</div>
-                            <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Health, Fitness &amp; Altitude Risk</h2>
-                            <p className="text-[18px] font-light text-black leading-relaxed mb-6">
+                            <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">04</div>
+                            <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Health, Fitness &amp; Altitude Risk</h2>
+                            <p className="text-sm md:text-[18px] font-light text-black leading-relaxed mb-6">
                                 Trekking in Ladakh involves physical exertion at high altitude. <strong className="text-[#0f2a4a] font-bold">High altitude sickness is a genuine and potentially life-threatening condition</strong> that can affect anyone regardless of age or fitness. By booking with us, you confirm that:
                             </p>
                             <ul className="space-y-4">
@@ -139,14 +124,14 @@ export default function TermsAndConditions() {
                                     "You accept that our guides have final authority on safety decisions, including halting or modifying your trek.",
                                     "You understand that emergency helicopter evacuation, where available, is at your own cost unless covered by insurance.",
                                 ].map((item, idx) => (
-                                    <li key={idx} className="flex gap-4 pb-4 border-b border-gray-100 last:border-0">
-                                        <span className="w-2 h-2 bg-[#4a8fd4] rounded-full mt-2 flex-shrink-0"></span>
-                                        <p className="text-[18px] font-light text-black leading-relaxed">{item}</p>
+                                    <li key={idx} className="flex gap-3 md:gap-4 pb-4 border-b border-gray-100 last:border-0">
+                                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#4a8fd4] rounded-full mt-2 md:mt-2 flex-shrink-0"></span>
+                                        <p className="text-sm md:text-[18px] font-light text-black leading-relaxed">{item}</p>
                                     </li>
                                 ))}
                             </ul>
-                            <div className="note-box bg-[#f0f6ff] border border-[#dde8f5] rounded-2xl p-6 mt-6 text-[18px] text-[#3a5a7a] leading-relaxed">
-                                <strong className="text-[#0f2a4a]">Note:</strong> Our guides carry supplemental oxygen and altitude medication and are trained in Wilderness First Response. However, we are not a medical service. In emergencies, our priority is stabilisation and evacuation to the nearest appropriate facility.
+                            <div className="note-box bg-[#f0f6ff] border border-[#dde8f5] rounded-2xl p-5 md:p-6 mt-6 text-sm md:text-[18px] text-[#3a5a7a] leading-relaxed">
+                                <strong className="text-[#0f2a4a]">Note:</strong> Guides carry oxygen and first aid. In emergencies, our priority is stabilisation and evacuation to the nearest hospital.
                             </div>
                         </section>
 
@@ -154,12 +139,10 @@ export default function TermsAndConditions() {
 
                         {/* SECTION 05 */}
                         <section>
-                            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">05</div>
-                            <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Travel Insurance &amp; Liability</h2>
-                            <p className="text-[18px] font-light text-black leading-relaxed mb-6">
-                                <strong className="text-[#0f2a4a] font-bold">Comprehensive travel insurance is mandatory for all guests.</strong> Your policy must cover medical expenses, emergency evacuation and repatriation, and trip cancellation. We recommend a policy that specifically covers high-altitude trekking.</p>
-                            <p className="text-[18px] font-light text-black leading-relaxed">
-                                Silent Peak Trails is not liable for loss or damage to personal property, injury arising from activities outside your booked itinerary, flight delays or cancellations, or any indirect or consequential losses. Our maximum liability for any claim shall not exceed the total amount paid for the relevant booking.
+                            <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">05</div>
+                            <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Travel Insurance &amp; Liability</h2>
+                            <p className="text-sm md:text-[18px] font-light text-black leading-relaxed">
+                                <strong className="text-[#0f2a4a] font-bold">Comprehensive travel insurance is mandatory.</strong> We are not liable for personal property loss, injuries outside the itinerary, or flight delays. Our maximum liability is limited to the total amount paid for the booking.
                             </p>
                         </section>
 
@@ -167,19 +150,19 @@ export default function TermsAndConditions() {
 
                         {/* SECTION 06 */}
                         <section>
-                            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">06</div>
-                            <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Guest Responsibilities &amp; Conduct</h2>
+                            <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">06</div>
+                            <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Guest Responsibilities &amp; Conduct</h2>
                             <ul className="space-y-4">
                                 {[
-                                    "Environmental responsibility — carry all non-biodegradable waste out of wilderness areas and respect Leave No Trace principles.",
-                                    "Cultural sensitivity — dress modestly at monasteries and villages, ask permission before photographing people, and respect local customs.",
-                                    "Compliance with guide instructions — your guide's authority on safety matters is final. Refusal to comply may result in removal from the trek without refund.",
-                                    "Conduct toward others — behaviour that is disruptive or offensive toward other guests or staff may result in immediate removal without compensation.",
-                                    "Legal compliance — you are responsible for obtaining all required permits and visas. Carrying illegal substances is grounds for immediate termination of your booking without refund.",
+                                    "Environmental responsibility — Leave No Trace principles.",
+                                    "Cultural sensitivity — dress modestly and respect local customs.",
+                                    "Guide Authority — focus on safety; instructions are final.",
+                                    "Conduct — disruptive behaviour may result in removal without refund.",
+                                    "Legal — carrying illegal substances results in immediate termination.",
                                 ].map((item, idx) => (
-                                    <li key={idx} className="flex gap-4 pb-4 border-b border-gray-100 last:border-0">
-                                        <span className="w-2 h-2 bg-[#4a8fd4] rounded-full mt-2 flex-shrink-0"></span>
-                                        <p className="text-[18px] font-light text-black leading-relaxed">{item}</p>
+                                    <li key={idx} className="flex gap-3 md:gap-4 pb-4 border-b border-gray-100 last:border-0">
+                                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#4a8fd4] rounded-full mt-2 md:mt-2 flex-shrink-0"></span>
+                                        <p className="text-sm md:text-[18px] font-light text-black leading-relaxed">{item}</p>
                                     </li>
                                 ))}
                             </ul>
@@ -189,13 +172,10 @@ export default function TermsAndConditions() {
 
                         {/* SECTION 07 */}
                         <section>
-                            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">07</div>
-                            <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Photography &amp; Intellectual Property</h2>
-                            <p className="text-[18px] font-light text-black leading-relaxed mb-6">
-                                Silent Peak Trails retains all rights to our website content, itinerary documents, and marketing materials. You may not reproduce or commercially exploit our content without prior written consent.
-                            </p>
-                            <p className="text-[18px] font-light text-black leading-relaxed">
-                                If you share photographs publicly that feature Silent Peak Trails branding or staff, you grant us a non-exclusive licence to reshare with appropriate credit. If you do not wish your photographs to be reshared, please inform us at the time of sharing. If you do not wish to appear in our marketing materials, notify your guide at the start of your tour.
+                            <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">07</div>
+                            <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Photography &amp; Intellectual Property</h2>
+                            <p className="text-sm md:text-[18px] font-light text-black leading-relaxed mt-2">
+                                We retain all rights to our website and marketing content. By sharing photos featuring our branding, you grant us a non-exclusive license to reshare with credit. Notify your guide if you prefer not to appear in marketing materials.
                             </p>
                         </section>
 
@@ -203,13 +183,10 @@ export default function TermsAndConditions() {
 
                         {/* SECTION 08 */}
                         <section>
-                            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-3">08</div>
-                            <h2 className="font-['DM_Sans',_sans-serif] text-2xl font-bold text-[#0f2a4a] mb-6">Governing Law &amp; Disputes</h2>
-                            <p className="text-[18px] font-light text-black leading-relaxed mb-6">
-                                These terms are governed by the laws of India. Disputes shall first be subject to good-faith negotiation. If unresolved within 30 days, matters will be referred to arbitration under the Arbitration and Conciliation Act, 1996, with the seat of arbitration in Leh, Ladakh.
-                            </p>
-                            <p className="text-[18px] font-light text-black leading-relaxed">
-                                These terms do not affect any statutory rights you may have under consumer protection law in your country of residence.
+                            <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-[#e8913a] mb-2 md:mb-3">08</div>
+                            <h2 className="font-['DM_Sans',_sans-serif] text-[20px] md:text-2xl font-bold text-[#0f2a4a] mb-4 md:mb-6">Governing Law &amp; Disputes</h2>
+                            <p className="text-sm md:text-[18px] font-light text-black leading-relaxed mt-2">
+                                These terms are governed by Indian law. Unresolved disputes will be referred to arbitration in Leh, Ladakh. This does not affect your statutory consumer rights.
                             </p>
                         </section>
 

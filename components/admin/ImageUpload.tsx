@@ -105,11 +105,21 @@ export default function ImageUpload({
                 <div className="relative group aspect-video w-full overflow-hidden rounded-xl border bg-slate-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={value} alt="Preview" className="h-full w-full object-cover" />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button 
                             type="button"
                             onClick={() => onChange("")}
-                            className="rounded-lg bg-red-600 px-3 py-1.5 text-[10px] font-bold text-white uppercase tracking-widest hover:bg-red-700 transition-colors shadow-lg"
+                            className="hidden sm:block rounded-lg bg-red-600 px-3 py-1.5 text-[10px] font-bold text-white uppercase tracking-widest hover:bg-red-700 transition-colors shadow-lg"
+                        >
+                            Remove Photo
+                        </button>
+                    </div>
+                    {/* Persistent remove for mobile */}
+                    <div className="absolute inset-x-0 bottom-0 sm:hidden flex justify-center p-2 bg-black/20">
+                        <button 
+                            type="button"
+                            onClick={() => onChange("")}
+                            className="rounded-lg bg-red-600/90 px-3 py-1.5 text-[9px] font-bold text-white uppercase tracking-widest active:bg-red-700 shadow-lg backdrop-blur-sm"
                         >
                             Remove Photo
                         </button>
