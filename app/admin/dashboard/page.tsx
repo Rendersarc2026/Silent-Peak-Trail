@@ -90,12 +90,12 @@ export default function DashboardPage() {
             <TrendingUp size={12} className="text-blue-500 sm:block hidden" />
           </div>
           <div className="mt-3 sm:mt-4">
-            <h3 className="text-[10px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">New Enquiries</h3>
+            <h3 className="text-[11px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">New Enquiries</h3>
             <div className="mt-0.5 sm:mt-1">
               {loading ? <div className="h-7 w-10 sm:h-9 sm:w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats?.newEnquiries ?? "0"}</p>}
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 flex items-center text-[9px] sm:text-xs text-slate-500">
+          <div className="mt-3 sm:mt-4 flex items-center text-[12px] sm:text-xs text-slate-500">
             <span className="font-medium text-blue-600">Awaiting reply</span>
           </div>
         </div>
@@ -108,12 +108,12 @@ export default function DashboardPage() {
             <TrendingUp size={12} className="text-green-500 sm:block hidden" />
           </div>
           <div className="mt-3 sm:mt-4">
-            <h3 className="text-[10px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">Confirmed</h3>
+            <h3 className="text-[11px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">Confirmed</h3>
             <div className="mt-0.5 sm:mt-1">
               {loading ? <div className="h-7 w-10 sm:h-9 sm:w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats?.confirmed ?? "0"}</p>}
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 flex items-center text-[9px] sm:text-xs text-slate-500">
+          <div className="mt-3 sm:mt-4 flex items-center text-[12px] sm:text-xs text-slate-500">
             <span className="font-medium text-green-600">Total bookings</span>
           </div>
         </div>
@@ -125,12 +125,12 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-3 sm:mt-4">
-            <h3 className="text-[10px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">Packages</h3>
+            <h3 className="text-[11px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">Packages</h3>
             <div className="mt-0.5 sm:mt-1">
               {loading ? <div className="h-7 w-10 sm:h-9 sm:w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats?.packages ?? "0"}</p>}
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 flex items-center text-[9px] sm:text-xs text-slate-500">
+          <div className="mt-3 sm:mt-4 flex items-center text-[12px] sm:text-xs text-slate-500">
             <span className="font-medium text-slate-600">Active tours</span>
           </div>
         </div>
@@ -142,13 +142,13 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-3 sm:mt-4">
-            <h3 className="text-[10px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">Enquiries</h3>
+            <h3 className="text-[11px] sm:text-sm font-medium text-slate-500 uppercase tracking-wider sm:normal-case sm:tracking-normal">Enquiries</h3>
             <div className="mt-0.5 sm:mt-1">
               {loading ? <div className="h-7 w-10 sm:h-9 sm:w-12 bg-slate-200 rounded-md animate-pulse"></div> : <p className="text-xl sm:text-3xl font-bold text-slate-900">{stats?.enquiries ?? "0"}</p>}
             </div>
           </div>
-          <div className="mt-3 sm:mt-4 flex items-center text-[9px] sm:text-xs text-slate-500">
-            <span className="font-medium text-yellow-600">{stats?.replied ?? 0} replied</span>
+          <div className="mt-3 sm:mt-4 flex items-center text-[12px] sm:text-xs text-slate-500">
+            <span className="font-medium text-yellow-600">{stats?.replied ?? 0} Replied</span>
           </div>
         </div>
       </div>

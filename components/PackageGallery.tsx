@@ -49,6 +49,8 @@ export default function PackageGallery({ items, type, title }: PackageGalleryPro
                         delay: 3000,
                         disableOnInteraction: false,
                     }}
+                    noSwiping={true}
+                    noSwipingSelector="video"
                     breakpoints={{
                         640: { slidesPerView: 2, spaceBetween: 16 },
                         1024: { slidesPerView: 2, spaceBetween: 16 },
@@ -78,6 +80,9 @@ export default function PackageGallery({ items, type, title }: PackageGalleryPro
                                         controls
                                         playsInline
                                         className="w-full h-full object-contain"
+                                        onPlay={() => swiper?.autoplay.stop()}
+                                        onPause={() => swiper?.autoplay.start()}
+                                        onEnded={() => swiper?.autoplay.start()}
                                     />
                                 )}
                             </div>

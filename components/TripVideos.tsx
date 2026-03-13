@@ -70,6 +70,8 @@ export default function TripVideos({ packages }: { packages: PackageData[] }) {
                                 disableOnInteraction: false,
                             }}
                             onSwiper={setSwiper}
+                            noSwiping={true}
+                            noSwipingSelector="video"
                             breakpoints={{
                                 640: { slidesPerView: 2 },
                                 1024: { slidesPerView: 3 },
@@ -78,12 +80,16 @@ export default function TripVideos({ packages }: { packages: PackageData[] }) {
                         >
                             {allVideos.map((video, idx) => (
                                 <SwiperSlide key={idx} className="h-auto">
-                                    <div className="relative aspect-video w-full rounded-[2rem] bg-black shadow-lg ring-1 ring-slate-200 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden group">
+                                    <div className="relative aspect-video w-full rounded-[2rem] bg-black shadow-lg ring-1 ring-slate-200 transition-all duration-300 sm:hover:-translate-y-2 sm:hover:shadow-2xl overflow-hidden group">
                                         <video
                                             src={video.url}
                                             controls
+                                            playsInline
                                             preload="metadata"
                                             className="h-full w-full object-cover"
+                                            onPlay={() => swiper?.autoplay.stop()}
+                                            onPause={() => swiper?.autoplay.start()}
+                                            onEnded={() => swiper?.autoplay.start()}
                                         />
                                     </div>
                                 </SwiperSlide>

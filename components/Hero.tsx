@@ -5,7 +5,7 @@ import { smoothScroll } from "@/lib/utils";
 
 export default function Hero({ homepageData }: { homepageData: Record<string, string> }) {
   return (
-    <section className="relative min-h-[700px] w-full overflow-hidden flex flex-col pt-28 lg:pt-32 xl:pt-36 pb-24 lg:pb-48">
+    <section className="relative min-h-[700px] w-full overflow-hidden flex flex-col pt-32 lg:pt-32 xl:pt-36 pb-24 lg:pb-48">
       {/* Background Image with Zoom Effect */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-[var(--navy)]/70 via-[var(--navy)]/40 to-[var(--navy)]/90 z-10" />

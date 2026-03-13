@@ -1,19 +1,41 @@
-"use client";
 import React from "react";
+import dbConnect from "@/lib/db";
+import Homepage from "@/lib/models/Homepage";
+import Package from "@/lib/models/Package";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ChevronRight, Clock, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
 
-export default function TermsAndConditions() {
+export const dynamic = "force-dynamic";
+
+export default async function TermsAndConditions() {
+    await dbConnect();
+
+    const [settingsRecords, packages] = await Promise.all([
+        Homepage.find().lean(),
+        Package.find({ isActive: true }).sort({ createdAt: 1 }).lean(),
+    ]);
+
+    const homepageData: Record<string, string> = {};
+    settingsRecords.forEach((s: any) => { homepageData[s.key] = s.value; });
+
+    const packagesData = packages.map((p: any) => ({
+        id: String(p._id),
+        name: p.name,
+        slug: p.slug,
+    }));
+
+    const safeHomepageData = JSON.parse(JSON.stringify(homepageData));
+
     return (
         <div className="min-h-screen bg-[#f7f9fc] text-[#1a1a2e]">
-            <Navbar />
+            <Navbar homepageData={safeHomepageData} />
 
             <main className="pt-[72px]">
                 {/* TOP BAR / BREADCRUMB */}
                 <div className="bg-[#0f2a4a] py-3 border-b border-white/5">
-                    <div className="container mx-auto px-6 lg:px-[90px] flex items-center gap-3 text-[13px]">
+                    <div className="container mx-auto px-6 lg:px-[100px] flex items-center gap-3 text-[13px]">
                         <Link href="/" className="text-white/50 hover:text-white transition-colors">
                             Silent Peak Trail
                         </Link>
@@ -221,7 +243,7 @@ export default function TermsAndConditions() {
                 </div>
             </main>
 
-            <Footer />
+            <Footer homepageData={safeHomepageData} packages={packagesData} />
         </div>
     );
 }

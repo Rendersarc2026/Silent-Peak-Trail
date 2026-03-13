@@ -53,14 +53,19 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     const [pkg, settingsRecords, allPackages] = await Promise.all([
         Package.findOne({ slug, isActive: true }).lean(),
         Homepage.find().lean(),
-        Package.find({ isActive: true }).select('_id name').lean(),
+        Package.find({ isActive: true }).select('_id name slug').lean(),
     ]);
 
     if (!pkg) notFound();
 
     const homepageData: Record<string, string> = {};
     settingsRecords.forEach((s: { key: string; value: string }) => { homepageData[s.key] = s.value; });
-    const packageList = allPackages.map((p: any) => ({ id: String(p._id), name: p.name }));
+    const packageListForFooter = allPackages.map((p: any) => ({
+        id: String(p._id),
+        name: p.name,
+        slug: p.slug
+    }));
+    const packageListForBooking = allPackages.map((p: any) => ({ id: String(p._id), name: p.name }));
 
     const itinerary = Array.isArray(pkg.itinerary) ? (pkg.itinerary as { day: string; title: string; activities?: string }[]) : [];
     const inclusions = Array.isArray(pkg.inclusions) ? (pkg.inclusions as string[]) : [];
@@ -183,10 +188,10 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                             {slug === 'stargazing-expedition' && highlights.length > 0 && (
                                 <section className="animate-fade-in-up">
                                     <div className="mb-10 flex items-center gap-4">
-                                        <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[var(--gold)] text-white">
-                                            <Sparkles size={20} />
+                                        <div className="h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full bg-[var(--gold)] text-white">
+                                            <Sparkles size={16} className="sm:w-5" />
                                         </div>
-                                        <h2 className="text-3xl font-black tracking-tight text-[var(--navy)]">Expedition Highlights</h2>
+                                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--navy)]">Expedition Highlights</h2>
                                     </div>
                                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                                         {highlights.map((item, i) => {
@@ -194,7 +199,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                             return (
                                                 <div
                                                     key={i}
-                                                    className="group relative overflow-hidden rounded-[2.5rem] bg-[var(--navy)] p-6 sm:p-10 shadow-2xl transition-all hover:-translate-y-1"
+                                                    className="group relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-[var(--navy)] p-5 sm:p-10 shadow-2xl transition-all hover:-translate-y-1"
                                                 >
                                                     {/* Background Image with Zoom */}
                                                     <div className="absolute inset-0 z-0">
@@ -208,13 +213,13 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                                     </div>
 
                                                     <div className="relative z-10">
-                                                        <div className="mb-4 sm:mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20 transition-transform group-hover:scale-110">
-                                                            <IconComp size={22} className="text-[var(--gold)]" />
+                                                        <div className="mb-4 sm:mb-6 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20 transition-transform group-hover:scale-110">
+                                                            <IconComp size={18} className="text-[var(--gold)] sm:w-[22px]" />
                                                         </div>
-                                                        <h3 className="mb-2 text-xl font-bold text-white tracking-tight">
+                                                        <h3 className="mb-1 text-base sm:text-xl font-bold text-white tracking-tight">
                                                             {item.title}
                                                         </h3>
-                                                        <p className="text-sm font-medium leading-relaxed text-white/70">
+                                                        <p className="text-[13px] sm:text-sm font-medium leading-relaxed text-white/70">
                                                             {item.desc}
                                                         </p>
                                                     </div>
@@ -234,7 +239,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                         <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[var(--blue)] text-white">
                                             <Calendar size={20} />
                                         </div>
-                                        <h2 className="text-3xl font-black tracking-tight text-[var(--navy)]">Package Itinerary</h2>
+                                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--navy)]">Package Itinerary</h2>
                                     </div>
 
                                     <div className="relative space-y-8 before:absolute before:left-[19px] before:top-4 before:h-[calc(100%-32px)] before:w-[2px] before:bg-slate-100">
@@ -243,9 +248,9 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                                 <div className="absolute left-0 top-1 h-10 w-10 flex items-center justify-center rounded-full bg-white ring-2 ring-[var(--blue)] text-[var(--blue)] font-black text-xs z-10 shadow-sm">
                                                     {idx + 1}
                                                 </div>
-                                                <div className="rounded-3xl bg-[var(--bg-subtle)] p-6 transition-all hover:shadow-md ring-1 ring-slate-100">
-                                                    <div className="mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--blue)]">{item.day}</div>
-                                                    <h3 className="text-xl font-bold text-[var(--navy)]">{item.title}</h3>
+                                                <div className="rounded-3xl bg-[var(--bg-subtle)] p-5 transition-all hover:shadow-md ring-1 ring-slate-100">
+                                                    <div className="mb-1 text-[9px] font-black uppercase tracking-[0.2em] text-[var(--blue)]">{item.day}</div>
+                                                    <h3 className="text-base sm:text-xl font-bold text-[var(--navy)]">{item.title}</h3>
                                                     {item.activities && (
                                                         <p className="mt-3 text-sm leading-relaxed text-[var(--text-mid)]">
                                                             {item.activities}
@@ -264,7 +269,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                 <div className="rounded-[2.5rem] bg-green-50/30 p-8 ring-1 ring-green-100">
                                     <div className="mb-6 flex items-center gap-3 text-green-700">
                                         <CheckCircle2 size={24} />
-                                        <h3 className="text-xl font-black tracking-tight">Inclusions</h3>
+                                        <h3 className="text-base sm:text-xl font-black tracking-tight">Inclusions</h3>
                                     </div>
                                     <ul className="space-y-4">
                                         {inclusions.map((inc: string, i: number) => (
@@ -280,7 +285,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                 <div className="rounded-[2.5rem] bg-red-50/30 p-8 ring-1 ring-red-100">
                                     <div className="mb-6 flex items-center gap-3 text-red-700">
                                         <XCircle size={24} />
-                                        <h3 className="text-xl font-black tracking-tight">Exclusions</h3>
+                                        <h3 className="text-base sm:text-xl font-black tracking-tight">Exclusions</h3>
                                     </div>
                                     <ul className="space-y-4">
                                         {exclusions.map((exc: string, i: number) => (
@@ -314,7 +319,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                 {/* Key Features Card */}
                                 <div className="rounded-[2.5rem] bg-[var(--navy)] p-8 text-white shadow-2xl overflow-hidden relative">
                                     <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/5" />
-                                    <h3 className="mb-6 text-xl font-black tracking-tight flex items-center gap-3">
+                                    <h3 className="mb-6 text-base sm:text-xl font-black tracking-tight flex items-center gap-3">
                                         <Mountain size={20} className="text-[var(--gold)]" />
                                         Trip Highlights
                                     </h3>
@@ -328,7 +333,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                     </ul>
                                     <a
                                         href="#contact"
-                                        className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--gold)] py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+                                        className="mt-6 sm:mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--gold)] py-3 sm:py-4 text-center text-xs sm:text-sm font-black uppercase tracking-widest text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
                                     >
                                         Personalize & Book
                                     </a>
@@ -350,13 +355,13 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                 <div className="border-t border-slate-100">
                     <Booking
                         homepageData={homepageData}
-                        packages={packageList}
+                        packages={packageListForBooking}
                         selectedPackage={pkg.name}
                         variant="package"
                     />
                 </div>
             </main>
-            <Footer />
+            <Footer homepageData={homepageData} packages={packageListForFooter} />
         </>
     );
 }

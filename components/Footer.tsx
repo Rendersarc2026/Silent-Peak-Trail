@@ -63,9 +63,9 @@ export default function Footer({ className, homepageData, packages }: FooterProp
     ];
   }
 
-  // Dynamic package links (first 4 packages)
+  // Dynamic package links (first 10 packages)
   const packageLinks = (packages || [])
-    .slice(0, 4)
+    .slice(0, 10)
     .map(pkg => ({
       label: pkg.name,
       href: `/packages/${pkg.slug}`

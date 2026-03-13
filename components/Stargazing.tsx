@@ -37,7 +37,7 @@ export default function Stargazing({ packageData, homepageData }: StargazingProp
 
 
     return (
-        <section id="stargazing" className="relative min-h-[600px] md:min-h-screen w-full overflow-hidden bg-black pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 flex items-start">
+        <section id="stargazing" className="relative min-h-[650px] md:min-h-screen w-full overflow-hidden bg-black pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 flex items-start">
             {/* Video Background */}
             <video
                 autoPlay

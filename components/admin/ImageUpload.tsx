@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Trash2 } from "lucide-react";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 
 interface ImageUploadProps {
     value: string;         // current image URL
@@ -39,6 +40,8 @@ export default function ImageUpload({
 }: ImageUploadProps) {
     const [uploading, setUploading] = useState(false);
     const [localError, setLocalError] = useState("");
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [isMobileOverlayOpen, setIsMobileOverlayOpen] = useState(false);
 
     function emitError(msg: string) {
         setLocalError(msg);
@@ -98,32 +101,52 @@ export default function ImageUpload({
         }
     }
 
+    const handleRemove = () => {
+        onChange("");
+        setShowConfirm(false);
+        setIsMobileOverlayOpen(false);
+    };
+
     return (
         <div className="flex flex-col gap-4">
             {/* Preview */}
             {value && (
-                <div className="relative group aspect-video w-full overflow-hidden rounded-xl border bg-slate-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={value} alt="Preview" className="h-full w-full object-cover" />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        <button 
-                            type="button"
-                            onClick={() => onChange("")}
-                            className="hidden sm:block rounded-lg bg-red-600 px-3 py-1.5 text-[10px] font-bold text-white uppercase tracking-widest hover:bg-red-700 transition-colors shadow-lg"
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl border bg-slate-100">
+                    <div 
+                        className="group relative h-full w-full cursor-pointer"
+                        onClick={() => setIsMobileOverlayOpen(!isMobileOverlayOpen)}
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={value} alt="Preview" className="h-full w-full object-cover" />
+                        
+                        <div 
+                            className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-200 ${
+                                isMobileOverlayOpen 
+                                    ? "opacity-100 pointer-events-auto" 
+                                    : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+                            }`}
                         >
-                            Remove Photo
-                        </button>
+                            <button 
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowConfirm(true);
+                                }}
+                                className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-[10px] font-bold text-white uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg active:scale-95"
+                            >
+                                <Trash2 size={13} />
+                                Remove Photo
+                            </button>
+                        </div>
                     </div>
-                    {/* Persistent remove for mobile */}
-                    <div className="absolute inset-x-0 bottom-0 sm:hidden flex justify-center p-2 bg-black/20">
-                        <button 
-                            type="button"
-                            onClick={() => onChange("")}
-                            className="rounded-lg bg-red-600/90 px-3 py-1.5 text-[9px] font-bold text-white uppercase tracking-widest active:bg-red-700 shadow-lg backdrop-blur-sm"
-                        >
-                            Remove Photo
-                        </button>
-                    </div>
+
+                    <DeleteConfirmModal 
+                        isOpen={showConfirm}
+                        onClose={() => setShowConfirm(false)}
+                        onConfirm={handleRemove}
+                        title="Remove Photo?"
+                        message="Are you sure you want to remove this photo? You will need to upload it again if you change your mind."
+                    />
                 </div>
             )}
 

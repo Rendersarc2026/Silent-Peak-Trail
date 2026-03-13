@@ -1,14 +1,36 @@
-"use client";
 import React from "react";
+import dbConnect from "@/lib/db";
+import Homepage from "@/lib/models/Homepage";
+import Package from "@/lib/models/Package";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ChevronRight, Mail, Phone, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
 
-export default function PrivacyPolicy() {
+export const dynamic = "force-dynamic";
+
+export default async function PrivacyPolicy() {
+    await dbConnect();
+
+    const [settingsRecords, packages] = await Promise.all([
+        Homepage.find().lean(),
+        Package.find({ isActive: true }).sort({ createdAt: 1 }).lean(),
+    ]);
+
+    const homepageData: Record<string, string> = {};
+    settingsRecords.forEach((s: any) => { homepageData[s.key] = s.value; });
+
+    const packagesData = packages.map((p: any) => ({
+        id: String(p._id),
+        name: p.name,
+        slug: p.slug,
+    }));
+
+    const safeHomepageData = JSON.parse(JSON.stringify(homepageData));
+
     return (
         <div className="min-h-screen bg-[#f7f9fc] text-[#1a1a2e]">
-            <Navbar />
+            <Navbar homepageData={safeHomepageData} />
 
             <main className="pt-[72px]">
                 {/* TOP BAR / BREADCRUMB */}
@@ -209,7 +231,7 @@ export default function PrivacyPolicy() {
                 </div>
             </main>
 
-            <Footer />
+            <Footer homepageData={safeHomepageData} packages={packagesData} />
         </div>
     );
 }
