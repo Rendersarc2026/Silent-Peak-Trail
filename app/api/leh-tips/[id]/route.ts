@@ -21,6 +21,22 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         const existing = await LehTip.findById(id);
         if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+        // If order is being updated, check if it already exists in another tip
+        if (parsed.order !== undefined && parsed.order !== existing.order) {
+            const duplicateOrder = await LehTip.findOne({
+                order: parsed.order,
+                isActive: true,
+                _id: { $ne: id }
+            });
+
+            if (duplicateOrder) {
+                return NextResponse.json({
+                    error: "Validation failed",
+                    details: { order: ["This order number is already taken by another tip."] }
+                }, { status: 400 });
+            }
+        }
+
         const updated = await LehTip.findByIdAndUpdate(
             id,
             {

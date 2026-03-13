@@ -20,8 +20,13 @@ export default function InitialLoader() {
         <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white">
             <div className="relative flex flex-col items-center">
                 {/* Logo or Brand Name */}
-                <h1 className="mb-8 text-3xl font-black tracking-tighter text-[var(--navy)] animate-pulse">
-                    SILENT PEAK <span className="text-[var(--blue)] italic font-serif">TRAIL</span>
+                <h1
+                    style={{ fontFamily: "'Montserrat', sans-serif" }}
+                    className="mb-10 text-3xl tracking-tight uppercase animate-pulse"
+                >
+                    <span className="font-medium text-slate-500">Silent</span>
+                    <span className="font-medium text-[var(--navy)] mx-2">Peak</span>
+                    <span className="font-medium text-slate-500">Trail</span>
                 </h1>
 
                 {/* Aesthetic Spinner */}

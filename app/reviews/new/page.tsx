@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Star, Send, CheckCircle2 } from "lucide-react";
+import { Star, Send, CheckCircle2, Upload } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import { hasError, getErrorMessage } from "@/lib/utils";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 export default function NewReviewPage() {
     const [rating, setRating] = useState(5);
     const [name, setName] = useState("");
     const [place, setPlace] = useState("");
-    const [packageId, setPackageId] = useState<number>(0);
-    const [packages, setPackages] = useState<{ id: number, name: string }[]>([]);
+    const [packageId, setPackageId] = useState<string>("");
+    const [packages, setPackages] = useState<{ id: string, name: string }[]>([]);
     const [message, setMessage] = useState("");
+    const [image, setImage] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +35,10 @@ export default function NewReviewPage() {
         fetch("/api/packages?limit=100")
             .then(res => res.json())
             .then(data => {
-                const pkgs = data.data || data;
+                const pkgs = (data.data || data).map((p: any) => ({
+                    id: p._id || p.id,
+                    name: p.name
+                }));
                 if (Array.isArray(pkgs)) setPackages(pkgs);
             })
             .catch(err => console.error("Failed to fetch packages", err));
@@ -52,10 +57,14 @@ export default function NewReviewPage() {
         setFieldErrors({});
 
         try {
+            // Check if any required fields are empty
+            const requiredFields = { name, place, packageId, message };
+            const emptyFields = Object.values(requiredFields).some(val => !val || (typeof val === 'string' && val.trim() === ''));
+
             const res = await fetch("/api/reviews", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, place, packageId, rating, message }),
+                body: JSON.stringify({ name, place, packageId, rating, message, image }),
             });
 
             const data = await res.json();
@@ -65,7 +74,9 @@ export default function NewReviewPage() {
             } else {
                 if (data.details) {
                     setFieldErrors(data.details);
-                    setError("Please fill all required fields.");
+                    if (emptyFields) {
+                        setError("Please fill all required fields.");
+                    }
                 } else {
                     setError(data.error || "Something went wrong. Please try again.");
                 }
@@ -158,7 +169,11 @@ export default function NewReviewPage() {
                                         maxLength={50}
                                         type="text"
                                         value={name}
-                                        onChange={(e) => { setName(e.target.value); clearFieldError('name'); }}
+                                        onChange={(e) => {
+                                            setName(e.target.value);
+                                            clearFieldError('name');
+                                            if (error === "Please fill all required fields.") setError(null);
+                                        }}
                                         className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none ${hasError(fieldErrors, 'name') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                         placeholder="John Doe"
                                     />
@@ -175,7 +190,11 @@ export default function NewReviewPage() {
                                             maxLength={50}
                                             type="text"
                                             value={place}
-                                            onChange={(e) => { setPlace(e.target.value); clearFieldError('place'); }}
+                                            onChange={(e) => {
+                                                setPlace(e.target.value);
+                                                clearFieldError('place');
+                                                if (error === "Please fill all required fields.") setError(null);
+                                            }}
                                             className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none ${hasError(fieldErrors, 'place') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                             placeholder="e.g. Mumbai, India"
                                         />
@@ -189,10 +208,14 @@ export default function NewReviewPage() {
                                         </label>
                                         <select
                                             value={packageId}
-                                            onChange={(e) => { setPackageId(Number(e.target.value)); clearFieldError('packageId'); }}
+                                            onChange={(e) => {
+                                                setPackageId(e.target.value);
+                                                clearFieldError('packageId');
+                                                if (error === "Please fill all required fields.") setError(null);
+                                            }}
                                             className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none appearance-none ${hasError(fieldErrors, 'packageId') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                         >
-                                            <option value={0}>Select a package</option>
+                                            <option value="">Select a package</option>
                                             {packages.map(pkg => (
                                                 <option key={pkg.id} value={pkg.id}>
                                                     {pkg.name}
@@ -217,11 +240,28 @@ export default function NewReviewPage() {
                                         maxLength={1000}
                                         rows={5}
                                         value={message}
-                                        onChange={(e) => { setMessage(e.target.value); clearFieldError('message'); }}
+                                        onChange={(e) => {
+                                            setMessage(e.target.value);
+                                            clearFieldError('message');
+                                            if (error === "Please fill all required fields.") setError(null);
+                                        }}
                                         className={`w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--blue)] transition-all outline-none resize-none ${hasError(fieldErrors, 'message') ? 'ring-red-300 bg-red-50/30' : ''}`}
                                         placeholder="Tell us about your trip..."
                                     />
                                     {hasError(fieldErrors, 'message') && <p className="mt-1 text-xs text-red-500 font-medium">{getErrorMessage(fieldErrors, 'message')}</p>}
+                                </div>
+
+                                {/* Image Upload */}
+                                <div>
+                                    <label className="block text-sm font-bold text-[var(--navy)] uppercase tracking-wider mb-2">
+                                        Your Photo (Optional)
+                                    </label>
+                                    <ImageUpload 
+                                        value={image} 
+                                        onChange={(url) => setImage(url)}
+                                        minWidth={200}
+                                        minHeight={200}
+                                    />
                                 </div>
 
                                 <button

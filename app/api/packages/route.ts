@@ -15,10 +15,10 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   const where: any = { isActive: true };
   if (search) {
-    where.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { tagline: { $regex: search, $options: 'i' } },
-    ];
+    // Escape regex characters just to be safe
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Match the beginning of the string OR a whitespace followed by the search term
+    where.name = { $regex: new RegExp(`(^|\\s)${escapedSearch}`, 'i') };
   }
 
   await dbConnect();
@@ -61,24 +61,26 @@ export async function POST(req: NextRequest) {
     }
 
     const newPkg = await Package.create({
-        name: nameNormal,
-        slug: slugify(nameNormal),
-        tagline: sanitizeInput(parsed.tagline),
-        duration: sanitizeInput(parsed.duration),
-        price: parsed.price,
-        badge: sanitizeInput(parsed.badge),
-        badgeGold: parsed.badgeGold,
-        featured: parsed.featured,
-        img: parsed.img,
-        features: (parsed.features || []).map((f: string) => sanitizeInput(f)),
-        itinerary: (parsed.itinerary || []).map((item: any) => ({
-          ...item,
-          day: sanitizeInput(item.day),
-          title: sanitizeInput(item.title),
-          activities: item.activities ? sanitizeInput(item.activities) : undefined
-        })),
-        inclusions: (parsed.inclusions || []).map((i: string) => sanitizeInput(i)),
-        exclusions: (parsed.exclusions || []).map((e: string) => sanitizeInput(e)),
+      name: nameNormal,
+      slug: slugify(nameNormal),
+      tagline: sanitizeInput(parsed.tagline),
+      duration: sanitizeInput(parsed.duration),
+      price: parsed.price,
+      badge: sanitizeInput(parsed.badge),
+      badgeGold: parsed.badgeGold,
+      featured: parsed.featured,
+      img: parsed.img,
+      features: (parsed.features || []).map((f: string) => sanitizeInput(f)),
+      itinerary: (parsed.itinerary || []).map((item: any) => ({
+        ...item,
+        day: sanitizeInput(item.day),
+        title: sanitizeInput(item.title),
+        activities: item.activities ? sanitizeInput(item.activities) : undefined
+      })),
+      inclusions: (parsed.inclusions || []).map((i: string) => sanitizeInput(i)),
+      exclusions: (parsed.exclusions || []).map((e: string) => sanitizeInput(e)),
+      photos: Array.isArray(parsed.photos) ? parsed.photos : [],
+      videos: Array.isArray(parsed.videos) ? parsed.videos : [],
     });
 
     return NextResponse.json(newPkg, { status: 201 });

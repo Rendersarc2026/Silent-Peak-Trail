@@ -80,6 +80,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
                 packageId: parsed.packageId,
                 rating: parsed.rating,
                 message: cleanMessage,
+                image: parsed.image,
                 initial,
                 isApproved: true, // Admin edits auto-approve
             },

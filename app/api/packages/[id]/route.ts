@@ -44,30 +44,31 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const updated = await Package.findByIdAndUpdate(
       id,
       {
-        ...(parsed.name && {
-          name: sanitizeInput(parsed.name),
-          slug: slugify(sanitizeInput(parsed.name))
-        }),
-        ...(parsed.tagline && { tagline: sanitizeInput(parsed.tagline) }),
-        ...(parsed.duration && { duration: sanitizeInput(parsed.duration) }),
-        ...(parsed.price !== undefined && { price: parsed.price }),
-        ...(parsed.badge !== undefined && { badge: sanitizeInput(parsed.badge) }),
-        ...(parsed.badgeGold !== undefined && { badgeGold: parsed.badgeGold }),
-        ...(parsed.featured !== undefined && { featured: parsed.featured }),
-        ...(parsed.img && { img: parsed.img }),
-        ...(parsed.features && { features: parsed.features.map((f: string) => sanitizeInput(f)) }),
-        ...(parsed.itinerary && {
-          itinerary: parsed.itinerary.map((item: any) => ({
-            ...item,
-            ...(item.day && { day: sanitizeInput(item.day) }),
-            ...(item.title && { title: sanitizeInput(item.title) }),
-            ...(item.activities && { activities: sanitizeInput(item.activities) })
-          }))
-        }),
-        ...(parsed.inclusions && { inclusions: parsed.inclusions.map((i: string) => sanitizeInput(i)) }),
-        ...(parsed.exclusions && { exclusions: parsed.exclusions.map((e: string) => sanitizeInput(e)) }),
+        $set: {
+          ...(parsed.name && { name: sanitizeInput(parsed.name).trim(), slug: slugify(sanitizeInput(parsed.name).trim()) }),
+          ...(parsed.tagline !== undefined && { tagline: sanitizeInput(parsed.tagline) }),
+          ...(parsed.duration !== undefined && { duration: sanitizeInput(parsed.duration) }),
+          ...(parsed.price !== undefined && { price: parsed.price }),
+          ...(parsed.badge !== undefined && { badge: sanitizeInput(parsed.badge) }),
+          ...(parsed.badgeGold !== undefined && { badgeGold: parsed.badgeGold }),
+          ...(parsed.featured !== undefined && { featured: parsed.featured }),
+          ...(parsed.img !== undefined && { img: parsed.img }),
+          ...(parsed.features !== undefined && { features: (parsed.features || []).map((f: string) => sanitizeInput(f)) }),
+          ...(parsed.itinerary !== undefined && {
+            itinerary: (parsed.itinerary || []).map((item: any) => ({
+              ...item,
+              ...(item.day !== undefined && { day: sanitizeInput(item.day) }),
+              ...(item.title !== undefined && { title: sanitizeInput(item.title) }),
+              ...(item.activities !== undefined && { activities: sanitizeInput(item.activities) })
+            }))
+          }),
+          ...(parsed.inclusions !== undefined && { inclusions: (parsed.inclusions || []).map((i: string) => sanitizeInput(i)) }),
+          ...(parsed.exclusions !== undefined && { exclusions: (parsed.exclusions || []).map((e: string) => sanitizeInput(e)) }),
+          ...(parsed.photos !== undefined && { photos: Array.isArray(parsed.photos) ? parsed.photos : undefined }),
+          ...(parsed.videos !== undefined && { videos: Array.isArray(parsed.videos) ? parsed.videos : undefined }),
+        }
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     return NextResponse.json(updated);

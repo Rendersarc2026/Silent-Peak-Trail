@@ -13,6 +13,7 @@ import Destinations from "@/components/Destinations";
 import WhyUs from "@/components/WhyUs";
 import Gallery from "@/components/Gallery";
 import Testimonials from "@/components/Testimonials";
+import TripVideos from "@/components/TripVideos";
 import Stargazing from "@/components/Stargazing";
 import Booking from "@/components/Booking";
 import LehPrep from "@/components/LehPrep";
@@ -29,10 +30,11 @@ export default async function Home() {
     Homepage.find().lean(),
     Package.find({ isActive: true }).sort({ createdAt: 1 }).lean(),
     Destination.find({ isActive: true }).sort({ createdAt: 1 }).lean(),
-    GalleryItem.find({ isActive: true }).sort({ createdAt: 1 }).lean(),
+    GalleryItem.find({ isActive: true }).sort({ isHero: -1, createdAt: 1 }).lean(),
     Review.find({ isApproved: true, isActive: true })
       .populate({ path: 'packageId', select: 'name', model: Package })
       .sort({ createdAt: -1 })
+      .limit(10)
       .lean(),
     LehTip.find({ isActive: true })
       .sort({ order: 1 })
@@ -50,6 +52,7 @@ export default async function Home() {
     alt: g.alt,
     wide: g.wide,
     tall: g.tall,
+    isHero: g.isHero,
   }));
 
   // Map destinations to format expected by Destinations component
@@ -78,6 +81,7 @@ export default async function Home() {
     itinerary: (p.itinerary as { day: string; title: string }[]) || [],
     inclusions: (p.inclusions as string[]) || [],
     exclusions: (p.exclusions as string[]) || [],
+    videos: (p.videos as string[]) || [],
   }));
 
   // Map reviews to testimonials format
@@ -89,6 +93,7 @@ export default async function Home() {
     initial: r.initial,
     text: r.message,
     stars: r.rating,
+    image: r.image,
   }));
 
   // Separate Stargazing package from main list
@@ -135,7 +140,7 @@ export default async function Home() {
         <Destinations destinations={safeDestinationsData} />
         <WhyUs homepageData={safeHomepageData} />
         <Gallery images={safeGalleryImages} />
-
+        <TripVideos packages={packagesData} />
         <Testimonials testimonials={safeTestimonials} />
         <Booking homepageData={safeHomepageData} packages={safePackagesForBooking} />
         <LehPrep tips={safeLehTipsData} homepageData={safeHomepageData} />

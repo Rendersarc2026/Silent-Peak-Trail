@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ROWS_PER_PAGE_OPTIONS = [1, 10, 20, 30, 40, 50];
+const ROWS_PER_PAGE_OPTIONS = [10, 20, 30, 40, 50];
 
 interface PaginationProps {
     currentPage: number;
@@ -96,7 +96,7 @@ const Pagination: React.FC<PaginationProps> = ({
                         value={rowsPerPage}
                         onChange={(e) => onRowsPerPageChange(Number(e.target.value))}
                         disabled={isLoading}
-                        className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer hover:text-blue-600 transition-colors"
+                        className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer hover:bg-slate-100 transition-all outline-none"
                     >
                         {ROWS_PER_PAGE_OPTIONS.map((opt) => (
                             <option key={opt} value={opt}>{opt}</option>

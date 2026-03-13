@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
       initial: parsed.name?.[0]?.toUpperCase() ?? "?",
       rating: parsed.rating,
       message: sanitizeInput(parsed.message),
+      image: parsed.image,
       isApproved: body.isApproved ?? false,
     });
     return NextResponse.json(review, { status: 201 });

@@ -5,15 +5,14 @@ import {
   Plus,
   Trash2,
   X,
-  Maximize,
-  Square,
   Check,
   Loader2,
   Image as ImageIcon,
   Edit2,
   AlertCircle,
   Upload,
-  CheckCircle2
+  CheckCircle2,
+  Star
 } from "lucide-react";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -23,8 +22,8 @@ import SearchInput from "@/components/admin/SearchInput";
 import { validateWithYup, cn, hasError, getErrorMessage } from "@/lib/utils";
 import { gallerySchema } from "@/lib/validation";
 
-interface GalleryItem { id: string; src: string; alt: string; wide: boolean; tall: boolean; }
-const EMPTY = { src: "", alt: "", wide: false, tall: false };
+interface GalleryItem { id: string; src: string; alt: string; isHero: boolean; }
+const EMPTY = { src: "", alt: "" };
 
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -59,9 +58,7 @@ export default function GalleryPage() {
     if (editing) {
       return (
         form.src !== editing.src ||
-        form.alt !== editing.alt ||
-        form.wide !== editing.wide ||
-        form.tall !== editing.tall
+        form.alt !== editing.alt
       );
     }
     return JSON.stringify(form) !== JSON.stringify(EMPTY);
@@ -175,12 +172,16 @@ export default function GalleryPage() {
     }
   }
 
-  async function toggle(item: GalleryItem, field: "wide" | "tall") {
+
+  async function setHero(item: GalleryItem) {
+    const newHeroState = !item.isHero;
     await fetch(`/api/gallery/${item.id}`, {
-      method: "PUT", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...item, [field]: !item[field] })
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isHero: newHeroState })
     });
     await load();
+    showToast(newHeroState ? "Hero image updated!" : "Hero image removed.");
   }
 
   function openNew() {
@@ -195,9 +196,7 @@ export default function GalleryPage() {
     setEditing(item);
     setForm({
       src: item.src,
-      alt: item.alt,
-      wide: item.wide,
-      tall: item.tall
+      alt: item.alt
     });
     setModal(true);
     setError("");
@@ -259,6 +258,12 @@ export default function GalleryPage() {
         ) : (
           items.map(item => (
             <div key={item.id} className="group relative overflow-hidden rounded-2xl border bg-white shadow-sm ring-1 ring-slate-100 transition-all hover:shadow-md">
+              {/* Hero Badge */}
+              {item.isHero && (
+                <div className="absolute top-2 left-2 z-10 flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow">
+                  <Star size={8} className="fill-white" /> Hero
+                </div>
+              )}
               <div className="aspect-[4/3] overflow-hidden bg-slate-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -273,30 +278,19 @@ export default function GalleryPage() {
                   {item.alt || "No description provided"}
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <button
-                    onClick={() => toggle(item, "wide")}
-                    className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${item.wide
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                      }`}
-                    title="Wide layout"
-                  >
-                    <Maximize size={10} /> Wide
-                  </button>
-                  <button
-                    onClick={() => toggle(item, "tall")}
-                    className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${item.tall
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                      }`}
-                    title="Tall layout"
-                  >
-                    <Square size={10} /> Tall
-                  </button>
-                </div>
 
                 <div className="flex items-center border-t pt-4 gap-2">
+                  <button
+                    onClick={() => setHero(item)}
+                    title={item.isHero ? "Remove Hero" : "Set as Hero"}
+                    className={`inline-flex items-center justify-center gap-1 rounded-lg px-2 py-2 text-[10px] font-bold uppercase tracking-wider transition-all ${item.isHero
+                        ? "bg-amber-100 text-amber-600"
+                        : "bg-slate-50 text-slate-400 hover:bg-amber-50 hover:text-amber-500"
+                      }`}
+                  >
+                    <Star size={12} className={item.isHero ? "fill-amber-500" : ""} />
+                    {item.isHero ? "Hero" : "Set Hero"}
+                  </button>
                   <button
                     onClick={() => openEdit(item)}
                     className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-slate-50 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-blue-50 hover:text-blue-600"
@@ -391,35 +385,6 @@ export default function GalleryPage() {
                 {hasError(fieldErrors, 'alt') && <p className="mt-1 text-[10px] font-bold text-red-500 ml-1">{getErrorMessage(fieldErrors, 'alt')}</p>}
               </div>
 
-              <div className="flex flex-wrap gap-x-8 gap-y-3 pt-2">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={form.wide}
-                      onChange={e => { setForm(f => ({ ...f, wide: e.target.checked })); clearFieldError('wide'); }}
-                    />
-                    <div className="h-5 w-5 rounded-md border-2 border-slate-200 transition-all peer-checked:bg-blue-600 peer-checked:border-blue-600 group-hover:border-blue-400"></div>
-                    <Check size={14} className="absolute inset-0 m-auto text-white opacity-0 transition-opacity peer-checked:opacity-100" strokeWidth={3} />
-                  </div>
-                  <span className="text-sm font-medium text-slate-600 group-hover:text-blue-600 transition-colors">Wide (2 cols)</span>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={form.tall}
-                      onChange={e => { setForm(f => ({ ...f, tall: e.target.checked })); clearFieldError('tall'); }}
-                    />
-                    <div className="h-5 w-5 rounded-md border-2 border-slate-200 transition-all peer-checked:bg-indigo-600 peer-checked:border-indigo-600 group-hover:border-indigo-400"></div>
-                    <Check size={14} className="absolute inset-0 m-auto text-white opacity-0 transition-opacity peer-checked:opacity-100" strokeWidth={3} />
-                  </div>
-                  <span className="text-sm font-medium text-slate-600 group-hover:text-indigo-600 transition-colors">Tall (2 rows)</span>
-                </label>
-              </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t bg-slate-50/50 px-6 py-4">

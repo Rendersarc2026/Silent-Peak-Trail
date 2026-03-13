@@ -66,6 +66,7 @@ export default function Booking({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const clearFieldError = (field: string) => {
+    if (error === "Please fill all required fields.") setError("");
     if (fieldErrors[field]) {
       setFieldErrors(prev => {
         const next = { ...prev };
@@ -112,6 +113,14 @@ export default function Booking({
       const data = await res.json();
       if (data.details) {
         setFieldErrors(data.details);
+
+        // Smart global error: only show if any required field is empty
+        const requiredFields = ["firstName", "lastName", "email", "phone", "packageId", "travellers", "month", "budget"];
+        const anyEmpty = requiredFields.some(f => !rawBody[f] || String(rawBody[f]).trim() === "");
+
+        if (anyEmpty) {
+          setError("Please fill all required fields.");
+        }
       } else {
         setError(data.error || "Failed to submit enquiry.");
       }
@@ -141,8 +150,8 @@ export default function Booking({
     <section
       id="contact"
       className={cn(
-        "py-24 px-5 lg:px-[60px] transition-colors duration-500",
-        variant === "package" ? "bg-[var(--white)]" : "bg-[var(--bg-subtle)]"
+        "px-5 lg:px-[60px] transition-colors duration-500",
+        variant === "package" ? "bg-[var(--white)] pt-12 pb-24" : "bg-[var(--bg-subtle)] py-24"
       )}
     >
       <div className="container mx-auto">
@@ -152,8 +161,11 @@ export default function Booking({
               <Sparkles size={12} className="text-blue-600" />
               Ready to Go?
             </div>
-            <h2 className="mb-6 text-4xl font-black leading-tight tracking-tighter text-[var(--navy)] sm:text-5xl lg:text-6xl">
-              Start Planning Your <span className="text-[var(--blue)] italic font-serif">Dream Trip</span>
+            <h2 
+              className="mb-6 text-[35px] font-medium leading-tight tracking-tighter text-[var(--navy)] sm:text-5xl lg:text-6xl"
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+            >
+              Start Planning Your <span className="text-[var(--blue)] italic" style={{ fontFamily: "'Playfair Display', serif" }}>Dream Trip</span>
             </h2>
           </div>
         )}
@@ -196,8 +208,13 @@ export default function Booking({
                 : "bg-[var(--white)] shadow-[var(--shadow-xl)] ring-1 ring-slate-100"
             )}>
               <div className="mb-12 text-center">
-                <h3 className="mb-3 text-3xl font-black tracking-tight text-[var(--navy)]">Book Your Journey</h3>
-                <p className="mx-auto max-w-md text-sm leading-relaxed text-[var(--text-mid)]">
+                <h3 
+                  className="mb-3 text-3xl font-medium tracking-tight text-[var(--navy)]"
+                  style={{ fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  Book Your Journey
+                </h3>
+                <p className="mx-auto max-w-md text-sm leading-relaxed text-[var(--text-mid)]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                   Complete the form below and our Ladakh specialists will reach out with a personalized plan.
                 </p>
               </div>

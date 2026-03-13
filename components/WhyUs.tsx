@@ -40,9 +40,9 @@ export default function WhyUs({ homepageData }: WhyUsProps) {
   }
 
   return (
-    <section className="bg-[var(--blue-deep)] py-24 overflow-hidden" id="about">
+    <section className="bg-[var(--blue-deep)] py-16 sm:py-24 overflow-hidden" id="about">
       <div className="container mx-auto px-5 lg:px-[60px]">
-        <div className="flex flex-col gap-16 lg:flex-row lg:items-center">
+        <div className="flex flex-col gap-10 lg:flex-row lg:gap-16 lg:items-center">
 
           {/* Image Side */}
           <div className="relative lg:w-1/2">
@@ -72,21 +72,24 @@ export default function WhyUs({ homepageData }: WhyUsProps) {
 
           {/* Content Side */}
           <div className="lg:w-1/2">
-            <div className="mb-8">
+            <div className="mb-5 sm:mb-8">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-1 text-xs font-bold uppercase tracking-widest text-amber-700">
                 <CheckCircle2 size={12} className="fill-amber-600 text-amber-100" />
                 Why travel with us
               </div>
-              <h2 className="text-4xl font-black leading-tight tracking-tighter text-white sm:text-5xl lg:text-6xl">
+              <h2 
+                className="text-[32px] font-medium leading-tight tracking-tighter text-white sm:text-5xl lg:text-6xl"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
                 {title.split(' ').map((word, i) => (
                   word.toLowerCase() === 'transform' || word.toLowerCase() === 'transformed' ?
-                    <span key={i} className="text-[var(--sky)] italic font-serif"> {word} </span> :
+                    <span key={i} className="text-[var(--sky)] italic" style={{ fontFamily: "'Playfair Display', serif" }}> {word} </span> :
                     ` ${word} `
                 ))}
               </h2>
             </div>
-
-            <p className="mb-12 text-lg leading-relaxed text-blue-100/60">
+          
+            <p className="mb-6 text-sm font-normal leading-snug text-blue-100/60 sm:mb-12 sm:text-lg sm:leading-relaxed" style={{ fontFamily: "'DM Sans', sans-serif" }}>
               {subtitle}
             </p>
 
@@ -96,18 +99,16 @@ export default function WhyUs({ homepageData }: WhyUsProps) {
                 return (
                   <div
                     key={f.title + i}
-                    className="group flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-[var(--shadow-sm)] ring-1 ring-slate-100 transition-all hover:shadow-[var(--shadow-lg)] hover:ring-[var(--blue)]/20 animate-fade-in-up"
+                    className="group flex flex-col items-start rounded-[1.8rem] bg-white p-6 shadow-[var(--shadow-sm)] ring-1 ring-slate-100 transition-all hover:shadow-[var(--shadow-lg)] hover:ring-[var(--blue)]/20 animate-fade-in-up"
                     style={{ animationDelay: `${i * 100}ms` }}
                   >
-                    <div className={cn("w-fit rounded-xl p-2.5 transition-transform group-hover:scale-110 group-hover:rotate-3", f.bg, f.color)}>
+                    <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl p-2 transition-transform group-hover:scale-110 group-hover:rotate-3 mb-4", f.bg, f.color)}>
                       <Icon size={20} strokeWidth={2.5} />
                     </div>
-                    <div>
-                      <h4 className="mb-2 font-bold text-[var(--navy)] group-hover:text-[var(--blue)] transition-colors">{f.title}</h4>
-                      <p className="text-xs leading-relaxed text-[var(--text-light)]">
-                        {f.desc}
-                      </p>
-                    </div>
+                    <h4 className="mb-1.5 text-lg font-bold text-[var(--navy)] group-hover:text-[var(--blue)] transition-colors">{f.title}</h4>
+                    <p className="text-[12px] leading-relaxed text-[var(--text-light)]">
+                      {f.desc}
+                    </p>
                   </div>
                 );
               })}

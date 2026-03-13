@@ -6,11 +6,11 @@ import { smoothScroll, cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 
 const LINKS = [
-  { href: "#packages", label: "Packages" },
-  { href: "#destinations", label: "Destinations" },
-  { href: "#gallery", label: "Gallery" },
-  { href: "#about", label: "About" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#packages", label: "Packages" },
+  { href: "/#destinations", label: "Destinations" },
+  { href: "/#gallery", label: "Gallery" },
+  { href: "/about", label: "About" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 export default function Navbar({ homepageData }: { homepageData?: Record<string, string> }) {
@@ -34,13 +34,20 @@ export default function Navbar({ homepageData }: { homepageData?: Record<string,
   );
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (pathname !== "/") {
-      e.preventDefault();
-      router.push("/" + href);
-      setOpen(false);
+    e.preventDefault();
+    setOpen(false);
+    
+    const normalizedHref = href.startsWith("#") ? "/" + href : href;
+
+    if (normalizedHref.startsWith("/#")) {
+      const targetId = normalizedHref.substring(1);
+      if (pathname !== "/") {
+        router.push(normalizedHref);
+      } else {
+        smoothScroll(e, targetId);
+      }
     } else {
-      smoothScroll(e, href);
-      setOpen(false);
+      router.push(normalizedHref);
     }
   };
 

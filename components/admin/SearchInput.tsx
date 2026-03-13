@@ -28,7 +28,7 @@ export default function SearchInput({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="block w-full rounded-xl border-slate-200 bg-white pl-10 pr-10 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 shadow-sm"
+                className="block w-full rounded-2xl border-slate-900 border bg-white pl-10 pr-10 py-2.5 text-sm transition-all focus:border-blue-500 focus:ring-blue-500/10 shadow-sm"
             />
             {loading && (
                 <div className="absolute inset-y-0 right-3 flex items-center">

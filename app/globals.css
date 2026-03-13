@@ -49,6 +49,8 @@
     background: var(--white);
     color: var(--text-dark);
     font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
     overflow-x: hidden;
   }
 
@@ -137,6 +139,89 @@
 
     to {
       transform: scale(1.15);
+    }
+  }
+
+  /* Universal Carousel Arrows */
+  .carousel-arrow {
+    @apply flex items-center justify-center text-[var(--white)] transition-all duration-300 pointer-events-auto;
+    filter: drop-shadow(0 4px 6px rgb(246, 244, 244));
+  }
+
+  .carousel-arrow:hover {
+    @apply scale-110 text-[var(--blue)];
+  }
+
+  /* Global Swiper Theme Overrides */
+  .swiper-button-next,
+  .swiper-button-prev {
+    @apply !flex !items-center !justify-center !transition-all !duration-500 opacity-0;
+
+    .group:hover & {
+      opacity: 1;
+    }
+
+    color: transparent !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 40px !important;
+    width: 48px !important;
+    height: 48px !important;
+    margin-top: 0 !important;
+    transform: translateY(-50%);
+    filter: none !important;
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+  }
+
+  .swiper-button-next:after,
+  .swiper-button-prev:after {
+    display: none !important;
+  }
+
+  .swiper-button-next:hover,
+  .swiper-button-prev:hover {
+    @apply !scale-110;
+  }
+
+  .swiper-button-next {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23052060' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  }
+
+  .swiper-button-next:hover {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a6bc8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  }
+
+  .swiper-button-prev {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23052060' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 18 9 12 15 6'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  }
+
+  .swiper-button-prev:hover {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a6bc8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 18 9 12 15 6'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  }
+
+  .swiper-pagination-bullet {
+    width: 8px !important;
+    height: 8px !important;
+    background: #cbd5e1 !important;
+    opacity: 1 !important;
+  }
+
+  .swiper-pagination-bullet-active {
+    background: var(--blue) !important;
+    width: 24px !important;
+    border-radius: 4px !important;
+    transition: all 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+
+    .swiper-button-next,
+    .swiper-button-prev {
+      width: 40px !important;
+      height: 40px !important;
+      background-size: 24px !important;
     }
   }
 }

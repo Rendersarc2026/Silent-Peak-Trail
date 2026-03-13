@@ -7,5 +7,5 @@ export const lehTipSchema = yup.object({
     desc: safeText(5, 5000),
     color: yup.string().trim().required("Color is required").min(2).max(100),
     border: yup.string().trim().required("Border is required").min(2).max(100),
-    order: yup.number().integer().min(0).default(0),
+    order: yup.number().integer().min(1).default(1),
 });

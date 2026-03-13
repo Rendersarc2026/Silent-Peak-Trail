@@ -4,7 +4,7 @@ import { nameText, phoneText, emailText, safeText, safeOptionalText, noHtmlError
 
 export const enquirySchema = yup.object({
     firstName: nameText,
-    lastName: yup.string().trim().required("Last name is required").min(3, "Last name must be at least 3 characters").max(50).test("is-safe", noHtmlError, val => isSafe(val)).matches(/^[a-zA-Z\s]*$/, noHtmlError),
+    lastName: yup.string().trim().required("Last name is required").min(1, "Please enter your last name").max(50).test("is-safe", noHtmlError, val => isSafe(val)).matches(/^[a-zA-Z\s]*$/, noHtmlError),
 
     email: emailText,
 

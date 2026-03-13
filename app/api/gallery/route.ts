@@ -12,17 +12,18 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(searchParams.get("limit") || "12");
   const skip = (page - 1) * limit;
 
-  const session = await getSession();
   const where: any = { isActive: true };
   if (search) {
-    where.alt = { $regex: search, $options: 'i' };
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    where.alt = { $regex: new RegExp(`(^|\\s)${escapedSearch}`, 'i') };
   }
 
   await dbConnect();
 
   const [items, total] = await Promise.all([
     GalleryItem.find(where)
-      .sort({ createdAt: -1 })
+      // Hero image always comes first
+      .sort({ isHero: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit),
     GalleryItem.countDocuments(where),
@@ -55,10 +56,8 @@ export async function POST(req: NextRequest) {
     }
 
     const item = await GalleryItem.create({
-        src: parsed.src,
-        alt: parsed.alt ? sanitizeInput(parsed.alt) : "",
-        wide: parsed.wide,
-        tall: parsed.tall,
+      src: parsed.src,
+      alt: parsed.alt ? sanitizeInput(parsed.alt) : "",
     });
 
     return NextResponse.json(item, { status: 201 });
