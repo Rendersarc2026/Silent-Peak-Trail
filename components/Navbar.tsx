@@ -28,6 +28,18 @@ export default function Navbar({ homepageData, transparent = false }: { homepage
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
   const isTransparent = transparent && scrolled;
 
   const navClass = cn(
