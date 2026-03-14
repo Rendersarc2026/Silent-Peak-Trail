@@ -47,7 +47,7 @@ export default async function AboutPage() {
                                     <span className="sm:hidden">About Us</span>
                                 </div>
 
-                                <h1 className="font-['DM_Sans',_sans-serif] text-[32px] min-[375px]:text-[36px] sm:text-[42px] lg:text-[clamp(42px,5.5vw,68px)] font-normal leading-[1.05] tracking-tight text-white mb-2 md:mb-8">
+                                <h1 className="font-['DM_Sans',_sans-serif] text-[32px] min-[375px]:text-[32px] sm:text-[42px] lg:text-[clamp(42px,5.5vw,68px)] font-normal leading-[1.05] tracking-tight text-white mb-2 md:mb-8">
                                     Born from the<br />
                                     <em className="italic font-normal text-[#4a8fd4] not-italic">Mountains Themselves</em>
 
@@ -148,10 +148,10 @@ export default async function AboutPage() {
                                     <span className="w-1.5 h-1.5 rounded-full bg-[#e8913a]" />
                                     Our Story
                                 </div>
-                                <h2 className="font-['DM_Sans',_sans-serif] text-4xl md:text-5xl font-normal leading-tight text-white">
+                                <h2 className="font-['DM_Sans',_sans-serif] text-[32px] md:text-5xl font-normal leading-tight text-white">
                                     A Journey That<br />Started <em className="italic font-normal text-[#4a8fd4] not-italic">At Home</em>
                                 </h2>
-                                <div className="space-y-5 text-white/65 font-light leading-loose">
+                                <div className="space-y-5 text-white/65 text-[15px] lg:text-[17px] font-light leading-loose">
                                     <p>
                                         Silent Peak Trail was founded in 2009 by <strong className="font-bold text-white">Stanzin Norbu</strong>, a native of Leh who grew up herding yaks on the high plateau and watching foreign trekkers struggle to navigate a landscape he knew like the back of his hand. What began as guiding a few curious travellers through the Markha Valley quickly became something much larger — a mission to share Ladakh not as a tourist destination, but as a living, breathing world.
                                     </p>
@@ -178,10 +178,10 @@ export default async function AboutPage() {
                                     <span className="w-1.5 h-1.5 rounded-full bg-[#e8913a]" />
                                     Why Travel With Us
                                 </div>
-                                <h2 className="font-['DM_Sans',_sans-serif] text-4xl md:text-5xl font-normal leading-tight text-white mb-6">
+                                <h2 className="font-['DM_Sans',_sans-serif] text-[32px] md:text-5xl font-normal leading-tight text-white mb-6">
                                     Expertise That<br /><em className="italic font-normal text-[#4a8fd4] not-italic">Transforms</em> Your Trip
                                 </h2>
-                                <div className="space-y-5 text-white/65 font-light leading-loose text-lg">
+                                <div className="space-y-5 text-white/65  text-[15px] lg:text-[17px] font-light leading-loose text-lg">
                                     <p>
                                         We craft extraordinary journeys into the Himalayas — guided by people who call these mountains home. Authentic experiences, uncompromising safety, and a deep respect for the land and its people.
                                     </p>
@@ -220,14 +220,14 @@ export default async function AboutPage() {
                 {/* VALUES */}
                 <section className="py-24 px-6 bg-[#0a1f3a]">
                     <div className="max-w-6xl mx-auto text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-[11px] font-bold tracking-[0.12em] uppercase text-[#4a8fd4] bg-[#4a8fd4]/12 border border-[#4a8fd4]/30 rounded-full mx-auto">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-[9px]  lg:text-[11px] font-bold tracking-[0.12em] uppercase text-[#4a8fd4] bg-[#4a8fd4]/12 border border-[#4a8fd4]/30 rounded-full mx-auto">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#e8913a]" />
                             What We Stand For
                         </div>
-                        <h2 className="font-['DM_Sans',_sans-serif] text-4xl md:text-5xl font-normal text-white mb-6">
+                        <h2 className="font-['DM_Sans',_sans-serif] text-[32px] md:text-5xl font-normal text-white mb-6">
                             Our <em className="italic font-normal text-[#4a8fd4] not-italic">Values</em>
                         </h2>
-                        <p className="text-white/60 font-light max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-white/60 font-light  text-[15px] lg:text-[17px] max-w-2xl mx-auto leading-relaxed">
                             These are not words on a wall. They are the principles that guide every decision we make — from the routes we design to the partners we work with.
                         </p>
                     </div>
@@ -255,14 +255,14 @@ export default async function AboutPage() {
                 {/* TEAM */}
                 <section className="py-24 px-6 bg-gradient-to-b from-[#0f2a4a] to-[#1a4a8a]">
                     <div className="max-w-6xl mx-auto mb-14">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-[11px] font-bold tracking-[0.12em] uppercase text-[#4a8fd4] bg-[#4a8fd4]/12 border border-[#4a8fd4]/30 rounded-full">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-[9px]  lg:text-[11px] font-bold tracking-[0.12em] uppercase text-[#4a8fd4] bg-[#4a8fd4]/12 border border-[#4a8fd4]/30 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#e8913a]" />
                             The People Behind Your Journey
                         </div>
-                        <h2 className="font-['DM_Sans',_sans-serif] text-4xl md:text-5xl font-normal text-white mb-6">
+                        <h2 className="font-['DM_Sans',_sans-serif] text-[32px] md:text-5xl font-normal text-white mb-6">
                             Meet Our <em className="italic font-normal text-[#4a8fd4] not-italic">Core Team</em>
                         </h2>
-                        <p className="text-white/60 font-light max-w-xl leading-relaxed">
+                        <p className="text-white/60 font-light  text-[15px] lg:text-[17px] max-w-xl leading-relaxed">
                             Every person you encounter on a Ladakh Trails journey has grown up in these mountains. This is not a job for them — it is a calling.
                         </p>
                     </div>
@@ -294,14 +294,14 @@ export default async function AboutPage() {
                 {/* PROMISE */}
                 <section className="py-24 px-6 bg-gradient-to-br from-[#0a1f3a] to-[#1a4a8a]">
                     <div className="max-w-4xl mx-auto text-center">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-10 text-[11px] font-bold tracking-[0.12em] uppercase text-[#4a8fd4] bg-[#4a8fd4]/12 border border-[#4a8fd4]/30 rounded-full mx-auto">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-10 text-[9px]  lg:text-[11px] font-bold tracking-[0.12em] uppercase text-[#4a8fd4] bg-[#4a8fd4]/12 border border-[#4a8fd4]/30 rounded-full mx-auto">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#e8913a]" />
                             Our Promise to You
                         </div>
 
                         <figure className="mb-14 relative">
-                            <div className="absolute -top-10 -left-4 text-[120px] font-['DM_Sans',_sans-serif] text-[#4a8fd4]/15 opacity-50 select-none">"</div>
-                            <blockquote className="font-['DM_Sans',_sans-serif] text-2xl md:text-4xl italic font-normal text-white leading-relaxed mb-6 px-10">
+                            <div className="absolute -top-10 -left-4 text-[100px]  lg:text-[105px] font-['DM_Sans',_sans-serif] text-[#4a8fd4]/15 opacity-50 select-none">"</div>
+                            <blockquote className="font-['DM_Sans',_sans-serif] text-[22px] md:text-3xl italic font-normal text-white leading-relaxed mb-6 px-10">
                                 The mountains do not care about your itinerary. But we do — and we will make sure both the mountains and your plans work together beautifully.
                             </blockquote>
                             <figcaption className="text-[13px] font-bold tracking-widest uppercase text-[#6b8cae]">
@@ -309,7 +309,7 @@ export default async function AboutPage() {
                             </figcaption>
                         </figure>
 
-                        <div className="text-left space-y-6 text-white/65 font-light leading-loose text-lg">
+                        <div className="text-left space-y-6 text-white/65 font-light text-[15px] lg:text-[17px] leading-loose text-lg">
                             <p>
                                 When you book a journey with Ladakh Trails, you are not purchasing a product. You are entering into a relationship — one built on trust, transparency, and a shared love for one of the most extraordinary places on the planet. We take that seriously in every possible way.
                             </p>
@@ -330,19 +330,29 @@ export default async function AboutPage() {
                 </section>
 
                 {/* CTA */}
-                <section className="py-24 px-6 bg-[#0f2a4a] text-center">
-                    <h2 className="font-['DM_Sans',_sans-serif] text-3xl md:text-6xl font-normal text-white mb-6">
+                <section className="py-24 px-6 bg-[#041d57ff] text-center">
+                    <h2 className="font-['DM_Sans',_sans-serif] text-[32px] lg:text-[45px] font-normal text-white mb-6">
                         Ready to Begin Your<br />
                         <em className="italic font-normal text-[#4a8fd4] not-italic">Ladakh Story?</em>
                     </h2>
-                    <p className="text-white/60 font-light text-lg mb-10 max-w-xl mx-auto">
+                    <p className="text-white/60 font-light text-[15px] lg:text-[17px] mb-10 max-w-xl mx-auto">
                         Talk to our team about crafting a journey that fits exactly who you are and where you want to go.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/#packages" className="px-10 py-4 bg-[#e8913a] text-white rounded-full font-bold tracking-wider text-sm hover:brightness-110 transition-all">
+                        <Link
+                            href="/#packages"
+                            className="px-6 py-3 md:px-8 md:py-3.5 lg:px-10 lg:py-4 
+                            bg-[#e8913a] text-white rounded-full font-bold tracking-wider 
+                            text-xs md:text-sm lg:text-base 
+                            hover:brightness-110 transition-all">
                             Explore Packages →
                         </Link>
-                        <Link href="/#contact" className="px-10 py-4 border-2 border-white/25 text-white/80 rounded-full font-bold tracking-wider text-sm hover:bg-white hover:text-[#0f2a4a] transition-all">
+                        <Link
+                            href="/#contact"
+                            className="px-6 py-3 md:px-8 md:py-3.5 lg:px-10 lg:py-4 
+                            border-2 border-white/25 text-white/80 rounded-full font-bold tracking-wider 
+                            text-xs md:text-sm lg:text-base 
+                            hover:bg-white hover:text-[#0f2a4a] transition-all">
                             Contact Us
                         </Link>
                     </div>

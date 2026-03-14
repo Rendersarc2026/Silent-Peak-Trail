@@ -6,6 +6,7 @@ import Package from "@/lib/models/Package";
 import Homepage from "@/lib/models/Homepage";
 import { sanitizeInput, validateWithYup } from "@/lib/utils";
 import { enquirySchema } from "@/lib/validation";
+import { sendEnquiryConfirmationMail } from "@/lib/mailer";
 
 export async function GET(req: NextRequest) {
   if (!await getSession()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -132,6 +133,20 @@ export async function POST(req: NextRequest) {
       validPackageId = String(parsed.packageId);
     }
 
+
+    // 2.5 Check for duplicate submissions (Idempotency)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const existingEnquiry = await Enquiry.findOne({
+      email: sanitizeInput(parsed.email),
+      packageId: validPackageId,
+      createdAt: { $gte: fiveMinutesAgo }
+    }).lean();
+
+    if (existingEnquiry) {
+      console.log(`[Idempotency] Blocking duplicate enquiry from ${parsed.email} for package ${validPackageId}`);
+      return NextResponse.json(existingEnquiry, { status: 201 }); // Return existing instead of error to be idempotent
+    }
+
     const enquiry = await Enquiry.create({
       firstName: sanitizeInput(parsed.firstName),
       lastName: sanitizeInput(parsed.lastName),
@@ -145,35 +160,28 @@ export async function POST(req: NextRequest) {
       status: "new"
     });
 
-    // 3. Send automated confirmation email asynchronously
-    import("@/lib/mailer").then(async ({ sendEnquiryConfirmationMail }) => {
-      try {
-        const settingsRecords = await Homepage.find({
-          key: { $in: ['phone', 'address'] }
-        }).lean();
+    // 3. Send automated confirmation email
+    try {
+      const settingsRecords = await Homepage.find({
+        key: { $in: ['phone', 'address'] }
+      }).lean();
 
-        let agencyPhone = "our office";
-        let agencyWebsite = "our website";
+      let agencyPhone = "our office";
+      let agencyWebsite = "https://silentpeaktrail.com";
 
-        settingsRecords.forEach(record => {
-          if (record.key === 'phone') agencyPhone = record.value;
-        });
+      settingsRecords.forEach(record => {
+        if (record.key === 'phone') agencyPhone = record.value;
+      });
 
-        const origin = req.headers.get("origin") || req.nextUrl.origin;
-        if (origin && origin !== "null") {
-          agencyWebsite = origin;
-        }
-
-        await sendEnquiryConfirmationMail({
-          toEmail: enquiry.email,
-          firstName: enquiry.firstName,
-          agencyPhone: agencyPhone,
-          agencyWebsite: agencyWebsite,
-        });
-      } catch (mailError) {
-        console.error("Failed to send async confirmation email:", mailError);
-      }
-    });
+      await sendEnquiryConfirmationMail({
+        toEmail: enquiry.email,
+        firstName: enquiry.firstName,
+        agencyPhone: agencyPhone,
+        agencyWebsite: agencyWebsite,
+      });
+    } catch (mailError) {
+      console.error("Failed to send confirmation email:", mailError);
+    }
 
     return NextResponse.json(enquiry, { status: 201 });
   } catch (err) {
