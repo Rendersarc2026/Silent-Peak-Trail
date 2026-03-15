@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 export default function Packages({ packages }: { packages: Package[] }) {
   return (
     <section className="bg-[var(--bg-subtle)] py-16 sm:py-24" id="packages">
-      <div className="container mx-auto px-5 lg:px-[60px]">
+      <div className="container mx-auto px-5 md:px-10 lg:px-[60px]">
         {/* Header Section */}
         <div className="mb-8 flex flex-col items-start justify-between gap-6 sm:mb-16 lg:flex-row lg:items-end">
           <div className="max-w-3xl">
@@ -28,7 +28,7 @@ export default function Packages({ packages }: { packages: Package[] }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:grid-rows-none xl:grid-cols-3">
           {packages.map((p, i) => (
             <div
               key={p.id}

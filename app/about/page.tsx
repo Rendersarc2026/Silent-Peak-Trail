@@ -32,9 +32,9 @@ export default async function AboutPage() {
         <div className="bg-[#0f2a4a] text-white min-h-screen font-['Lato',_sans-serif]">
             <Navbar homepageData={safeHomepageData} transparent={true} />
 
-            <main className="pt-[80px]">
+            <main>
                 {/* HERO */}
-                <section className="relative min-h-[90vh] lg:min-h-screen flex items-center pt-20 lg:pt-24 pb-20 px-6 overflow-hidden bg-gradient-to-br from-[#0a1f3a] via-[#1a4a8a] to-[#0f2a4a]">
+                <section className="relative min-h-[700px] lg:min-h-screen flex items-center pt-[90px] lg:pt-40 pb-20 px-6 overflow-hidden bg-gradient-to-br from-[#0a1f3a] via-[#1a4a8a] to-[#0f2a4a]">
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,_rgba(74,143,212,0.15)_0%,_transparent_70%)]" />
 
                     <div className="container mx-auto relative z-10 max-w-6xl">

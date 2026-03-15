@@ -86,6 +86,7 @@ export default function Footer({ className, homepageData, packages }: FooterProp
       title: "Quick Links",
       links: [
         { label: "Tour Packages", href: "#packages" },
+        { label: "Premium Package", href: "/packages/stargazing-expedition" },
         { label: "Our Destinations", href: "#destinations" },
         { label: "Photo Gallery", href: "#gallery" },
         { label: "Contact Us", href: "#contact" }
@@ -115,9 +116,9 @@ export default function Footer({ className, homepageData, packages }: FooterProp
 
   return (
     <footer className={cn("bg-[var(--navy)] pt-12 pb-12 text-white overflow-hidden", className)} style={{ fontFamily: "'Montserrat', sans-serif" }}>
-      <div className="container mx-auto  px-5 lg:px-[60px]">
+      <div className="container mx-auto px-5 md:px-20 lg:px-[60px]">
 
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5 lg:gap-8">
 
           <div className="sm:col-span-2 lg:col-span-2 flex flex-col items-center text-center lg:items-start lg:text-left gap-8 mt-4">
             <div className="flex flex-col items-center lg:items-start gap-4 shrink-0">
@@ -159,10 +160,11 @@ export default function Footer({ className, homepageData, packages }: FooterProp
           </div>
 
           {/* Links Sections */}
-          <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-8 sm:col-span-2 lg:col-span-3 lg:grid-cols-3 ">
+          <div className="mt-10 flex w-full justify-center lg:justify-start md:col-span-2 lg:col-span-3">
+            <div className="grid grid-cols-2 gap-y-12 gap-x-10 sm:gap-x-16 md:grid-cols-3 md:gap-x-24 lg:gap-x-20 xl:gap-x-24 w-fit">
             {footerLinks.map((column) => (
               <div key={column.title} className="space-y-6">
-                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)] pl-5 lg:pl-0" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--gold)]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                   {column.title}
                 </h4>
                 <ul className="space-y-4">
@@ -171,9 +173,9 @@ export default function Footer({ className, homepageData, packages }: FooterProp
                       <a
                         href={link.href}
                         onClick={(e) => handleNavClick(e, link.href)}
-                        className="flex items-center text-sm font-medium text-blue-100/60 transition-colors hover:text-white group relative pl-5 lg:pl-0"
+                        className="flex items-center text-sm font-medium text-blue-100/60 transition-colors hover:text-white group relative"
                       >
-                        <ArrowRight size={12} className="absolute left-0 lg:-left-5 top-1/2 -translate-y-1/2 text-[var(--gold)] opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+                        <ArrowRight size={12} className="absolute left-0 lg:-left-5 top-1/2 -translate-y-1/2 text-[var(--gold)] opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 hidden sm:block" />
                         {link.label}
                       </a>
                     </li>
@@ -182,6 +184,7 @@ export default function Footer({ className, homepageData, packages }: FooterProp
               </div>
             ))}
           </div>
+        </div>
         </div>
 
         {/* Bottom Bar */}

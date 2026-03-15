@@ -239,7 +239,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                                         <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[var(--blue)] text-white">
                                             <Calendar size={20} />
                                         </div>
-                                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--navy)]">Package Itinerary</h2>
+                                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--navy)]">Package Itinerary</h2>
                                     </div>
 
                                     <div className="relative space-y-8 before:absolute before:left-[19px] before:top-4 before:h-[calc(100%-32px)] before:w-[2px] before:bg-slate-100">

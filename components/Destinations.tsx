@@ -17,7 +17,7 @@ export default function Destinations({ destinations }: { destinations: Destinati
 
   return (
     <section className="bg-[var(--white)] py-16 sm:py-24" id="destinations">
-      <div className="container mx-auto px-5 lg:px-[60px]">
+      <div className="container mx-auto px-5 md:px-10 lg:px-[60px]">
         {/* Header Section */}
         <div className="mb-8 flex flex-col items-start justify-between gap-6 sm:mb-16 lg:flex-row lg:items-end">
           <div className="max-w-3xl">
@@ -92,7 +92,7 @@ export default function Destinations({ destinations }: { destinations: Destinati
                       <div className="mb-2 inline-block w-fit rounded-lg bg-[var(--gold)] px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-white shadow-sm">
                         {d.type}
                       </div>
-                      <h3 className="mb-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                      <h3 className="mb-2 text-2xl font-medium tracking-tight text-white sm:text-3xl">
                         {d.name}
                       </h3>
                       <div className="flex items-center gap-2 text-xs font-bold text-blue-100/70">

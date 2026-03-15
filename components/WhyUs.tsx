@@ -41,8 +41,8 @@ export default function WhyUs({ homepageData }: WhyUsProps) {
 
   return (
     <section className="bg-[var(--blue-deep)] py-16 sm:py-24 overflow-hidden" id="about">
-      <div className="container mx-auto px-5 lg:px-[60px]">
-        <div className="flex flex-col gap-10 lg:flex-row lg:gap-16 lg:items-center">
+      <div className="container mx-auto px-5 md:px-10 lg:px-[60px]">
+        <div className="flex flex-col gap-14 md:gap-20 lg:flex-row lg:gap-16 lg:items-center">
 
           {/* Image Side */}
           <div className="relative lg:w-1/2">

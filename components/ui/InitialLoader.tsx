@@ -9,7 +9,7 @@ export default function InitialLoader() {
         // Hide loader after a short delay OR when everything is ready
         const timer = setTimeout(() => {
             setLoading(false);
-        }, 1500);
+        }, 950);
 
         return () => clearTimeout(timer);
     }, []);

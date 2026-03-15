@@ -94,13 +94,13 @@ export default function LehPrep({ tips, homepageData }: LehPrepProps) {
                                 Altitude Warning
                             </div>
                             <h3
-                                className="text-2xl sm:text-3xl font-medium mb-3"
+                                className="text-[19px] sm:text-2xl font-light mb-3"
                                 style={{ fontFamily: "'DM Sans', sans-serif" }}
                             >
                                 {amsTitle}
                             </h3>
                             <p
-                                className="text-blue-100/80 text-base sm:text-lg font-normal leading-relaxed"
+                                className="text-blue-100/80 text-sm sm:text-lg font-light leading-relaxed"
                                 style={{ fontFamily: "'DM Sans', sans-serif" }}
                             >
                                 {amsDesc}

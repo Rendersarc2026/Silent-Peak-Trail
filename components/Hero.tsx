@@ -17,7 +17,7 @@ export default function Hero({ homepageData }: { homepageData: Record<string, st
         />
       </div>
 
-      <div className="container relative z-20 mx-auto px-5 lg:px-[60px]">
+      <div className="container relative z-20 mx-auto px-5 md:px-10 lg:px-[60px]">
         <div className="max-w-3xl">
           {/* Animated Badge */}
           <div className="mb-6 inline-flex items-center gap-3 rounded-full bg-white/10 px-6 py-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white backdrop-blur-md ring-1 ring-white/20 animate-fade-in-up sm:mb-8 sm:text-xs">
@@ -31,7 +31,7 @@ export default function Hero({ homepageData }: { homepageData: Record<string, st
           {/* Main Title */}
           <h1
             style={{ fontFamily: "'Playfair Display', serif" }}
-            className="mb-6 font-serif text-[clamp(38px,8vw,88px)] font-bold leading-[1.05] tracking-tight text-white animate-fade-in-up [animation-delay:200ms] sm:mb-8"
+            className="mb-6 font-serif text-[clamp(38px,8vw,88px)] font-medium leading-[1.05] tracking-tight text-white animate-fade-in-up [animation-delay:200ms] sm:mb-8"
             dangerouslySetInnerHTML={{
               __html: homepageData.heroTitle?.replace(/Ladakh/g, `<span class="text-amber-500 italic">Ladakh</span>`) || ''
             }}

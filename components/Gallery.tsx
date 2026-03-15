@@ -20,7 +20,7 @@ export default function Gallery({ images }: { images: GalleryImage[] }) {
   }, [selectedImage]);
 
   return (
-    <section id="gallery" className="bg-[var(--bg-subtle)] py-16 sm:py-24 px-5 lg:px-[60px]">
+    <section id="gallery" className="bg-[var(--bg-subtle)] py-16 sm:py-24 px-5 md:px-10 lg:px-[60px]">
       <div className="container mx-auto">
         {/* Header Section */}
         <div className="mb-10 flex flex-col items-center text-center sm:mb-20">

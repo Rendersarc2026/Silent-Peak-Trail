@@ -52,7 +52,7 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
   if (!total) return null;
 
   return (
-    <section id="testimonials" className="bg-[var(--white)] py-16 sm:py-24 px-5 lg:px-[60px] overflow-hidden">
+    <section id="testimonials" className="bg-[var(--white)] py-16 sm:py-24 px-5 md:px-10 lg:px-[60px] overflow-hidden">
       <div className="container mx-auto">
         <div className="mb-8 flex flex-col items-center text-center sm:mb-16">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-1 text-xs font-bold uppercase tracking-widest text-[var(--navy)]">
@@ -71,7 +71,7 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
           <CarouselArrow direction="left" onClick={prev} className="absolute left-2 lg:left-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex" disabled={currentIndex === 0} />
           <CarouselArrow direction="right" onClick={next} className="absolute right-2 lg:right-0 top-1/2 z-10 -translate-y-1/2 hidden sm:flex" disabled={currentIndex === maxIndex} />
 
-          <div className="overflow-hidden py-10 px-4 sm:px-12 -my-10 -mx-4 sm:-mx-12 touch-pan-y" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+          <div className="overflow-hidden py-10 px-4 -my-10 -mx-4 touch-pan-y" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
             <div className="flex transition-transform duration-500 ease-out gap-8" style={{ transform: `translateX(calc(-${currentIndex} * (100% + 32px) / ${visibleItems}))` }}>
               {testimonials.map((t) => (
                 <div
